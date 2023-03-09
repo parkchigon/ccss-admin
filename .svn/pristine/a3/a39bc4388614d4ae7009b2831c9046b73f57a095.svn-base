@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Program">
+
+	<resultMap id="Program" 	type="com.lgu.ccss.admin.system.program.domain.ProgramVO">
+		<result property="programId"	column="PROGRAM_ID"         javaType="string"/>
+		<result property="programNm"	column="PROGRAM_NM"         javaType="string"/>
+		<result property="programUrl"	column="PROGRAM_URL"        javaType="string"/>
+		<result property="stProgramYn"	column="ST_PROGRAM_YN"      javaType="string"/>
+		<result property="regId"		column="REG_ID"     		javaType="string"/>
+		<result property="regDt"		column="REG_DT"   			javaType="string"/>
+		<result property="updId"		column="UPD_ID"    			javaType="string"/>
+		<result property="updDt"		column="UPD_DT"  			javaType="string"/>
+		<result property="menuId"   	column="MENU_ID"            javaType="string"/>
+		<result property="useYn"		column="USE_YN"				javaType="string"/>
+	</resultMap>
+
+
+	<select id="selectProgramList" parameterType="Program" resultMap="Program">
+		SELECT 
+			   PROGRAM_ID
+		     , PROGRAM_NM
+		     , PROGRAM_URL
+		     , ST_PROGRAM_YN
+		     , REG_ID
+		     , REG_DT
+		     , UPD_ID
+		     , UPD_DT
+		     , MENU_ID
+		     , USE_YN
+		  FROM TB_PROGRAM
+		 WHERE 1=1
+		<if test="menuId != '' and menuId != null">
+		   AND MENU_ID = #{menuId} 
+		</if>
+	</select>
+
+	<insert id="insertProgram" parameterType="Program">
+		INSERT INTO TB_PROGRAM (
+			  PROGRAM_ID
+			 , PROGRAM_NM
+			 , PROGRAM_URL
+			 , ST_PROGRAM_YN
+			 , REG_ID
+		     , REG_DT
+		     , UPD_ID
+		     , UPD_DT
+			 , MENU_ID
+			 , USE_YN
+			 , MNGR_GRP_ID
+		) VALUES (
+		       #{programId}
+	         , #{programNm}
+	         , #{programUrl}
+	         , #{stProgramYn}
+	         , #{regId}
+	         , SYSDATE 
+	         , #{updId}
+	         , SYSDATE
+	         , #{menuId}
+	         , #{useYn}
+	         ,'NOTUSED'
+		)
+	</insert>
+	
+	<update id="updateProgram" parameterType="Program">
+		UPDATE TB_PROGRAM
+		   SET PROGRAM_NM = #{programNm}		/* 프로그램 명 */
+		     , PROGRAM_URL = #{programUrl}		/* 프로그램 URL */
+		     , ST_PROGRAM_YN = #{stProgramYn}	/* 시작 프로그램 여부 */
+		     , UPD_ID = #{updId}			/* 수정 아이디 */
+		     , UPD_DT = SYSDATE			/* 수정 일시 */
+		     , MENU_ID = #{menuId}				/* 메뉴 아이디 */
+		     , USE_YN = #{useYn}				/* 사용 여부 */
+		 WHERE PROGRAM_ID = #{programId}
+	</update>
+
+	<delete id="deleteProgramMenu" parameterType="Program">
+		DELETE 
+		  FROM TB_PROGRAM
+		 WHERE PROGRAM_ID = #{programId}
+	</delete>
+
+</mapper>

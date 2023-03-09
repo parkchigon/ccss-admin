@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+	"-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+	"http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<!-- 팝업에 사용 -->
+	<definition name="/*.exclude" extends="excludeTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/{1}.jsp" />
+	</definition>
+
+	<definition name="/*/*.exclude" extends="excludeTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="/*/*/*.exclude" extends="excludeTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+	</definition>
+
+	<definition name="/login/loginView" extends="LoginTemplate"> <!-- 로그인화면 -->
+		<put-attribute name="content" value="/WEB-INF/views/login/loginView.jsp" />
+	</definition>
+	
+	<definition name="/login/findIdView" extends="LoginTemplate"> <!-- ID 찾기 화면 -->
+		<put-attribute name="content" value="/WEB-INF/views/login/findIdView.jsp" />
+	</definition>
+	
+	<definition name="/login/findPwdView" extends="LoginTemplate"> <!-- PWD 찾기화면 -->
+		<put-attribute name="content" value="/WEB-INF/views/login/findPwdView.jsp" />
+	</definition>
+	
+	
+	<definition name="/dashboard/dashboardView" extends="DashboardTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/dashboard/dashboardView.jsp"  />
+	</definition>
+	
+	<definition name="/*/*" extends="DefaultTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/{1}/{2}.jsp"  />
+	</definition>
+	
+	<definition name="/user/*/*" extends="DefaultTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/user/{1}/{2}.jsp"  />
+	</definition>
+
+	<definition name="/campaign/*/*" extends="DefaultTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/campaign/{1}/{2}.jsp"  />
+	</definition>
+
+	<definition name="/stats/*/*" extends="DefaultTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/stats/{1}/{2}.jsp"  />
+	</definition>
+
+	<definition name="/manage/*" extends="DefaultTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/manage/{1}.jsp"  />
+	</definition>
+
+</tiles-definitions>

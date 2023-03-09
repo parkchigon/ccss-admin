@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>devonframe</groupId>
+  <artifactId>devon-framework</artifactId>
+  <version>1.6.1</version>
+  <packaging>pom</packaging>
+  <name>devon-framework</name>
+  <description>devon framework</description>
+  
+  <!-- scm info -->
+  <scm>
+  <!-- 	<connection>scm:svn:http://www.dev-on.com/svn/devonframe/standard/trunk/devon-framework</connection> -->
+  </scm>
+
+  <modules>
+    <module>devon-batch-core</module>
+  	<module>devon-core</module>
+  	<module>devon-context</module>
+  	<module>devon-crypto</module>
+  	<module>devon-dataaccess</module>
+  	<module>devon-dynamicloading-controller</module>
+  	<module>devon-dynamicloading-agent</module>
+  	<module>devon-egovframe</module>
+  	<module>devon-excel</module>
+  	<module>devon-fileupload</module>
+  	<module>devon-iam</module>
+  	<module>devon-idgenerator</module>
+  	<module>devon-log</module>
+  	<module>devon-mail</module>
+  	<module>devon-paging</module>
+  	<module>devon-rui</module>
+  	<module>devon-scheduler</module>
+  	<module>devon-servicecontrol</module>
+    <module>devon-transaction</module>
+    <module>devon-validator</module>
+    <module>devon-web</module>
+    <module>devon-xplatform</module>
+  </modules>
+
+	<!-- Properties -->
+	<properties>
+		<java.version>1.7</java.version>
+		<encoding>UTF-8</encoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+
+		<!-- Dependency library version -->
+
+		<!-- devonframe -->
+		<devonframe.version>${project.version}</devonframe.version>
+
+		<!-- spring -->
+		<org.springframework.version>4.0.9.RELEASE</org.springframework.version>
+		<org.springframework.security.version>3.2.9.RELEASE</org.springframework.security.version>
+		<org.springframework.batch.version>3.0.5.RELEASE</org.springframework.batch.version>
+		<org.springframework.springloaded.version>1.2.6.RELEASE</org.springframework.springloaded.version>
+
+		<!-- eGovFrame -->
+		<egovframe.version>3.5.0</egovframe.version>
+
+		<!-- servlet -->
+		<servlet.api.version>3.0.1</servlet.api.version>
+		<jsp.api.version>2.0</jsp.api.version>
+		<jstl.version>1.2</jstl.version>
+
+		<!-- ibatis -->
+		<ibatis.version>2.3.4.726</ibatis.version>
+		<!-- mybatis -->
+		<mybatis.version>3.2.8</mybatis.version>
+		<mybatis.spring.version>1.2.2</mybatis.spring.version>
+
+		<!-- commons -->
+		<commons.beanutils.version>1.8.0</commons.beanutils.version>
+		<commons.dbcp.version>1.3</commons.dbcp.version>
+		<commons.codec.version>1.10</commons.codec.version>
+		<commons.fileupload.version>1.3.1</commons.fileupload.version>
+		<commons.io.version>2.2</commons.io.version>
+		<commons.configuration.version>1.10</commons.configuration.version>
+		<commons.collections.version>3.2.2</commons.collections.version>
+		<commons.compress.version>1.10</commons.compress.version>
+		<commons.lang.version>2.6</commons.lang.version>
+		<commons.validator.version>1.4.0</commons.validator.version>
+
+		<!-- validation -->
+		<validation.api.version>1.1.0.Final</validation.api.version>
+		<spring.modules.validation.version>0.8</spring.modules.validation.version>
+		<hibernate.validator.version>5.2.0.Final</hibernate.validator.version>
+
+		<!-- jackson -->
+		<org.codehaus.jackson.version>1.9.13</org.codehaus.jackson.version>
+
+		<!-- mail -->
+		<javax.mail.version>1.5.1</javax.mail.version>
+		<activation.version>1.1.1</activation.version>
+
+		<!-- poi -->
+		<org.apache.poi.version>3.13</org.apache.poi.version>
+
+		<cglib.nodep.version>3.1</cglib.nodep.version>
+		<jaxb.api.version>2.2.11</jaxb.api.version>
+		<jta.version>1.1</jta.version>
+		<quartz.version>1.6.2</quartz.version>
+		<stax.api.version>1.0</stax.api.version>
+		<stax.version>1.2.0</stax.version>
+		<xplatform.xapi.version>1.0</xplatform.xapi.version>
+		
+		<!-- cache -->
+		<ehcache.version>2.9.1</ehcache.version>
+
+		<!-- logging -->
+		<slf4j.version>1.7.13</slf4j.version>
+		<log4j2.version>2.8.2</log4j2.version>
+<!-- 		<log4j2.version>2.1</log4j2.version> -->
+		
+		<!-- test -->
+		<junit.version>4.11</junit.version>
+		<hsqldb.version>1.8.0.10</hsqldb.version>
+		<oracle.version>10.2.0.4.0</oracle.version>
+		<jetty.server.version>7.6.5.v20120716</jetty.server.version>
+		<mockito.version>1.9.5</mockito.version>
+
+	    <!-- jsr 250 api -->
+	    <jsr250.api.version>1.0</jsr250.api.version>
+	    
+        <!-- aspectj -->
+		<aspectj.version>1.8.4</aspectj.version>
+		
+	    <!-- database -->
+        <oracle.ojdbc14.version>10.2.0.4.0</oracle.ojdbc14.version>
+	</properties>
+
+	<!-- <repositories>
+		<repository>
+			<id>devon-repository</id>
+			<name>repository for DevOn</name>
+			<layout>default</layout>
+			<url>http://www.dev-on.com/devon_framework/nexus/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>devon-repository</id>
+			<name>repository for DevOn</name>
+			<layout>default</layout>
+			<url>http://www.dev-on.com/devon_framework/nexus/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<distributionManagement>
+		<repository>
+			<id>devon-repository</id>
+			<name>DevOn Framework Public Repository</name>
+			<url>http://www.dev-on.com/devon_framework/nexus/content/repositories/releases</url>
+		</repository>
+
+		<snapshotRepository>
+			<id>devon-repository</id>
+			<name>DevOn Framework Public Repository(snapshot)</name>
+			<url>http://www.dev-on.com/devon_framework/nexus/content/repositories/snapshots</url>
+			<uniqueVersion>true</uniqueVersion>
+		</snapshotRepository>
+	</distributionManagement> -->
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Spring -->
+ 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+
+			<!-- Commons -->
+		    <dependency>
+		      <groupId>commons-configuration</groupId>
+		      <artifactId>commons-configuration</artifactId>
+		      <version>${commons.configuration.version}</version>
+		    </dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>${commons.compress.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons.codec.version}</version>
+			</dependency> 
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Sample DB -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${hsqldb.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>jsr250-api</artifactId>
+			<version>${jsr250.api.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- Logging -->
+		<dependency>
+		  <groupId>org.slf4j</groupId>
+		  <artifactId>jcl-over-slf4j</artifactId>
+		  <version>${slf4j.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<defaultGoal>install</defaultGoal>
+		<directory>${basedir}/target</directory>
+		<finalName>${project.name}-${project.version}</finalName>
+
+		<plugins>
+
+			<!-- compiler -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<compilerVersion>${java.version}</compilerVersion>
+					<encoding>${encoding}</encoding>
+					<maxmem>512m</maxmem>
+				</configuration>
+			</plugin>
+			<!-- source.jar -->
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                	<attach>false</attach>
+                	<goal>jar</goal>
+                </configuration>
+               <!--  <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions> -->
+            </plugin>
+            <!-- testcase -->
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<!-- use 'mvn -DskipSurefireTests=true install' to skip testcase -->
+					<!-- default is 'false' -->
+					<!-- <skipTests>${skipSurefireTests}</skipTests> -->
+					<skipTests>${skipTests}</skipTests>
+				</configuration>
+			</plugin>
+			<!-- maven release plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+    					<artifactId>maven-scm-provider-svnjava</artifactId>
+    					<version>2.1.1</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<!-- <goals>deploy</goals>
+					<tagBase>http://www.dev-on.com/svn/devonframe/standard/tags</tagBase>
+					<tagNameFormat>@{project.version}_${currentDate}/${project.artifactId}</tagNameFormat>					
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<allowTimestampedSnapshots>true</allowTimestampedSnapshots> -->
+				</configuration>
+				<!-- <dependencies>
+		            <dependency>    
+		                <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+		                <artifactId>maven-scm-provider-svnjava</artifactId>
+		                <version>${java.version}</version>
+		            </dependency>
+		        </dependencies>
+				<configuration>
+					<providerImplementations>
+		                <svn>javasvn</svn>
+		            </providerImplementations>
+		            <goals>deploy</goals>
+					<tagBase>http://www.dev-on.com/svn/devonframe/standard/tags</tagBase>
+					<tagNameFormat>@{project.version}_${currentDate}/${project.artifactId}</tagNameFormat>					
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+				</configuration> -->
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

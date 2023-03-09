@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Login">
+
+	<resultMap type="adminVO" id="adminMap">
+		<result property="mngrId" 						column="MNGR_ID" />
+		<result property="passWd" 						column="PASSWD" />
+		<result property="mngrLevel" 					column="MNGR_LEVEL" />
+		<result property="mngrNm" 					column="MNGR_NM" />
+		<result property="clphNo"							column="CLPH_NO" />
+		<result property="regDt" 						column="REG_DT" />
+		<result property="loginFailCount" 				column="LOGIN_FAIL_CNT" />
+		<result property="pwChgDt" 						column="PW_CHG_DT" />
+		<result property="accountStatus" 				column="ACCOUNT_STATUS" />
+		<result property="emailAddr" 					column="EMAIL_ADDR" />
+		<result property="pwModDispYn" 					column="PW_MOD_DISP_YN" />
+		<result property="bfrPassWd" 					column="BFR_PASSWD" />
+		
+	</resultMap>
+	
+	
+	<!--어드민 아이디 찾기  -->
+	<select id="checkFindId" parameterType="adminVO" resultMap="adminMap">
+		SELECT 
+			   MNGR_ID,
+			   MNGR_NM
+		  FROM TB_MNGR
+		 WHERE EMAIL_ADDR= #{emailAddr} 
+		 AND  MNGR_NM = #{mngrNm}
+	</select>
+	
+	
+	
+	<!--어드민 비밀번호 찾기  -->
+	<select id="checkFindPwd" parameterType="adminVO" resultMap="adminMap">
+		SELECT 
+			   MNGR_ID,
+			   MNGR_NM,
+			   PASSWD,
+			   EMAIL_ADDR,
+			   ACCOUNT_STATUS,
+			   PW_MOD_DISP_YN,
+			   BFR_PASSWD
+		  FROM TB_MNGR
+		 WHERE  MNGR_ID = #{mngrId}
+		<!--  AND EMAIL_ADDR= #{emailAddr} 
+		 AND  MNGR_NM = #{mngrNm} -->
+	</select>
+	
+	<!-- 임시 비밀 번호 업데이트 -->
+	<update id="updatePwd" parameterType="adminVO">
+		UPDATE TB_MNGR
+		   SET PASSWD = #{passWd}
+		   ,PW_MOD_DISP_YN ='Y'
+		   ,BFR_PASSWD =#{bfrPassWd}
+		 WHERE MNGR_ID = #{mngrId}
+	</update>
+	
+	<!-- 어드민 비밀번호 확인 -->
+	<select id="checkAdminPwd" parameterType="adminVO" resultMap="adminMap">
+		SELECT 
+			   MNGR_ID
+			   , PASSWD
+			   , MNGR_LEVEL
+			   , MNGR_NM
+			   , CLPH_NO
+		  	   , REG_DT
+		  	   , LOGIN_FAIL_CNT
+		  	   , TO_CHAR(PW_CHG_DT, 'YYYY-MM-DD') AS PW_CHG_DT
+		  	   , ACCOUNT_STATUS
+		  	   , PW_MOD_DISP_YN
+		  	   , USE_YN
+		  FROM TB_MNGR
+		 WHERE MNGR_ID = #{mngrId}
+		 AND PASSWD = #{passWd}
+	</select>
+	
+	
+	<!-- 로그인 인증번호 갱싱 -->
+	<update id="updateAuthNo" parameterType="adminVO">
+		UPDATE TB_MNGR
+		   SET SMS_CERTI_NO = #{smsCertiNo}
+		      ,SMS_CERTI_EXPR_DT = SYSDATE + 3/(24*60)
+		 WHERE MNGR_ID = #{mngrId}
+	</update>
+	
+	<!-- 인증번호 문자 발송 -->
+	<insert id="insertSendAuthSms" parameterType="smsVO">
+	<!-- 	INSERT INTO TB_SMS_SEND_HISTORY (
+               SEQ_SMS
+             , SENDER_ID
+             , SENDER_NAME
+             , SEND_TYPE
+             , CONTENT
+             , INSERT_DATE
+             , BOOK_DATE
+             , RECEIVER_MOBILE_NUM
+             , SENDER_MOBILE_NUM
+		) VALUES (
+               #{smsSeq}
+             , #{senderId}
+             , #{senderName}
+             , #{sendType}
+             , #{content}
+             , SYSDATE
+             , SYSDATE
+             , #{receiverMobileNum}
+             , #{senderMobileNum}
+		) -->
+	</insert>
+	
+	<!-- 로그인 인증번호 확인 -->	
+	<select id="checkAuthNo" parameterType="adminVO" resultType="int">
+		SELECT COUNT(MNGR_ID)
+		  FROM TB_MNGR
+		 WHERE MNGR_ID = #{mngrId}
+		   AND PASSWD = #{passWd}
+		   AND SMS_CERTI_NO = #{smsCertiNo}
+		   AND SMS_CERTI_EXPR_DT >= SYSDATE
+	</select>
+	
+	<!-- 로그인 시도 횟수 업데이트 -->
+	<update id="updateLoginFailCount" parameterType="adminVO">
+		UPDATE TB_MNGR
+		   SET LOGIN_FAIL_CNT = #{loginFailCount}
+		  <if test="!@org.springframework.util.StringUtils@isEmpty(accountStatus)">
+			   ,ACCOUNT_STATUS = #{accountStatus}
+		 </if>
+		 WHERE MNGR_ID = #{mngrId}
+	</update>
+	
+	<!-- 계정 상태 변경 -->
+	<update id="updateAccountStatus" parameterType="adminVO">
+		UPDATE TB_MNGR
+		   SET ACCOUNT_STATUS = #{accountStatus}
+		 WHERE MNGR_ID = #{mngrId}
+	</update>
+	
+	<!-- 패스워드 변경 변경 -->
+	<update id="updateAdminPwd" parameterType="adminVO">
+		UPDATE TB_MNGR
+			SET PW_CHG_DT = SYSDATE
+			,PW_MOD_DISP_YN = 'N'
+			,PASSWD = #{newSecrNo}
+			,BFR_PASSWD =#{bfrPassWd}
+			,UPD_DT = SYSDATE
+			,UPD_ID = #{mngrId}
+		 WHERE MNGR_ID = #{mngrId}
+		 
+	</update>
+	
+	<!-- 로그인 이력 등록 -->
+	<insert id="regLoginHistory" parameterType="adminVO">
+		INSERT INTO TB_MNGR_LOGIN_HIS
+		(
+			 MNGR_LOGIN_HIS_SEQ
+			,MNGR_ID
+			,PROCESS_DT
+			,SESSION_ID
+			,LOGIN_DT
+			,LOGIN_IP
+			,REG_ID
+			,REG_DT
+			,UPD_ID
+			,UPD_DT
+			
+		) VALUES (
+			SEQ_MNGR_LOGIN_HIS_01.NEXTVAL
+			,#{mngrId}
+			,TO_CHAR(SYSDATE,'yyyymmdd')
+			,#{sessionId}
+			,SYSDATE
+			,#{loginIp}
+			,#{mngrId}
+			,SYSDATE
+			,#{mngrId}
+			,SYSDATE
+		)
+	</insert>
+	
+	
+	<!--checkLastLoginDt  -->
+	<select id="checkLastLoginDt" parameterType="adminVO" resultType="String">
+		SELECT A.*,ROWNUM AS RNUM
+			FROM (   
+				SELECT 
+					TO_CHAR(LOGIN_DT,'yyyymmdd')
+				FROM TB_MNGR_LOGIN_HIS
+				WHERE MNGR_ID = #{mngrId}
+			 	ORDER BY MNGR_LOGIN_HIS_SEQ DESC
+			) A WHERE ROWNUM <![CDATA[=]]> 1
+	</select>
+	
+	
+	<!-- 계정 상태 변경 변경 -->
+	<update id="updateAdminStatus" parameterType="adminVO">
+		UPDATE TB_MNGR
+			SET ACCOUNT_STATUS = #{accountStatus}
+			,UPD_ID = #{updId}
+			,UPD_DT =  SYSDATE
+		 WHERE MNGR_ID = #{mngrId}
+	</update>
+	
+	
+	<!--checkLastLoginDt  -->
+	<select id="selectLastLoginDt" parameterType="adminVO" resultType="String">
+		SELECT A.*,ROWNUM AS RNUM
+			FROM (   
+				SELECT 
+					TO_CHAR(LOGIN_DT,'yyyy-mm-dd hh24:mi:ss')
+				FROM TB_MNGR_LOGIN_HIS
+				WHERE MNGR_ID = #{mngrId}
+			 	ORDER BY TB_MNGR_LOGIN_HIS.REG_DT DESC,MNGR_LOGIN_HIS_SEQ DESC
+			) A WHERE ROWNUM <![CDATA[=]]> 1
+	</select>
+	
+</mapper>

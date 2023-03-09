@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Keyword">
+
+
+
+	<select id="selectKeywordList" parameterType="CateKeywordVO" resultType="CateKeywordVO" >
+		SELECT	*
+		  FROM (
+			SELECT	(@ROWNUM := @ROWNUM+1) RNUM,
+					SEQ_CATEGORY_KEYWORD,
+					CATEGORY_KEYWORD_NAME,
+					BUSINESS_CODE,
+					BUSINESS_NAME,
+					CATEGORY_CODE,
+					CATEGORY_NAME,
+					USE_YN,
+					INSERT_ID,
+					DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE,
+					UPDATE_ID,
+					DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+			  FROM	TB_CATEGORY_KEYWORD				
+			  	   ,(SELECT @ROWNUM := 0 FROM DUAL) TMP
+			 WHERE	1=1
+			<if test="!@org.springframework.util.StringUtils@isEmpty(startDate)">
+			   AND	DATE_FORMAT(INSERT_DATE, '%Y%m%d') >= #{startDate} 
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(endDate)">
+			   AND	DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate} 
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(useYn) and !@org.apache.commons.lang.StringUtils@equals(useYn, 'A')"> 
+			   AND	USE_YN = #{useYn}
+			</if>
+			<if test="searchKeywordType == 'KEYWORD_NAME' and !@org.springframework.util.StringUtils@isEmpty(categoryKeywordName)">
+			   AND	CATEGORY_KEYWORD_NAME LIKE '%${categoryKeywordName}%'
+			</if>
+			<if test="searchKeywordType == 'CATEGORY_NAME' and !@org.springframework.util.StringUtils@isEmpty(categoryKeywordName)">
+			   AND	CATEGORY_NAME LIKE '%${categoryKeywordName}%'
+			</if>
+		ORDER BY SEQ_CATEGORY_KEYWORD DESC, INSERT_DATE DESC
+		) AS A
+		<if test="pageType != 'ALL'">
+	  WHERE A.RNUM BETWEEN #{startCount} AND #{endCount}
+		</if>
+	</select>
+	
+	<select id="selectKeywordListCount" parameterType="CateKeywordVO" resultType="Int" >
+		SELECT	COUNT(SEQ_CATEGORY_KEYWORD)
+		  FROM	TB_CATEGORY_KEYWORD				
+		 WHERE	1=1
+		<if test="!@org.springframework.util.StringUtils@isEmpty(startDate)">
+		   AND	DATE_FORMAT(INSERT_DATE, '%Y%m%d') >= #{startDate} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(endDate)">
+		   AND	DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useYn) and !@org.apache.commons.lang.StringUtils@equals(useYn, 'A')"> 
+		   AND	USE_YN = #{useYn}
+		</if>
+		<if test="searchKeywordType == 'KEYWORD_NAME' and !@org.springframework.util.StringUtils@isEmpty(categoryKeywordName)">
+		   AND	CATEGORY_KEYWORD_NAME LIKE '%${categoryKeywordName}%'
+		</if>
+		<if test="searchKeywordType == 'CATEGORY_NAME' and !@org.springframework.util.StringUtils@isEmpty(categoryKeywordName)">
+		   AND	CATEGORY_NAME LIKE '%${categoryKeywordName}%'
+		</if>
+	</select>
+	
+	
+	<select id="selectAllKeywordGroupConcat" resultType="String">
+		SELECT 	GROUP_CONCAT(CATEGORY_KEYWORD_NAME)
+		  FROM	TB_CATEGORY_KEYWORD
+	</select>
+	
+	
+	<insert id="insertKeyword" parameterType="CateKeywordVO">
+		INSERT
+		INTO	TB_CATEGORY_KEYWORD (
+					SEQ_CATEGORY_KEYWORD,
+					CATEGORY_KEYWORD_NAME,
+					USE_YN,
+					INSERT_ID,
+					INSERT_DATE,
+					UPDATE_ID,
+					UPDATE_DATE
+				) VALUES (
+					#{seqCategoryKeyword},
+					#{categoryKeywordName},
+					#{useYn},
+					#{insertId},
+					NOW(),
+					#{updateId},
+					NOW()
+				)
+	</insert>
+	
+	<update id="updateKeyword" parameterType="CateKeywordVO">
+		UPDATE	TB_CATEGORY_KEYWORD
+		   SET	BUSINESS_CODE 	= #{businessCode},
+		   		BUSINESS_NAME	= (SELECT BUSINESS_CATEGORY_NAME FROM TB_BUSINESS_CATEGORY WHERE SEQ_BUSINESS_CATEGORY = #{businessCode}),
+		   		CATEGORY_CODE	= #{categoryCode},
+				CATEGORY_NAME	= (SELECT BUSINESS_CATEGORY_NAME FROM TB_BUSINESS_CATEGORY WHERE SEQ_BUSINESS_CATEGORY = #{categoryCode}),
+				USE_YN			= #{useYn},
+				UPDATE_ID		= #{updateId},
+				UPDATE_DATE		= NOW()
+		 WHERE	SEQ_CATEGORY_KEYWORD = #{seqCategoryKeyword}
+	</update>
+	
+	<delete id="deleteKeyword" parameterType="CateKeywordVO">
+		DELETE
+		  FROM	TB_CATEGORY_KEYWORD
+		 WHERE	SEQ_CATEGORY_KEYWORD IN
+		<foreach collection="seqCategoryKeywordArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="removeSetKeywords" parameterType="CateKeywordVO">
+		UPDATE	TB_CATEGORY_KEYWORD
+		   SET	BUSINESS_CODE 	= null,
+		   		BUSINESS_NAME	= null,
+		   		CATEGORY_CODE	= null,
+				CATEGORY_NAME	= null,
+				UPDATE_ID		= #{updateId},
+				UPDATE_DATE		= NOW()
+		 WHERE	CATEGORY_CODE	= #{categoryCode}
+	</update>
+	
+	<insert id="updateKeywordInCategory" parameterType="CateKeywordVO">
+		UPDATE	TB_CATEGORY_KEYWORD
+		   SET	BUSINESS_CODE 	= #{businessCode},
+		   		BUSINESS_NAME	= (SELECT BUSINESS_CATEGORY_NAME FROM TB_BUSINESS_CATEGORY WHERE SEQ_BUSINESS_CATEGORY = #{businessCode}),
+		   		CATEGORY_CODE	= #{categoryCode},
+				CATEGORY_NAME	= (SELECT BUSINESS_CATEGORY_NAME FROM TB_BUSINESS_CATEGORY WHERE SEQ_BUSINESS_CATEGORY = #{categoryCode}),
+				UPDATE_ID		= #{updateId},
+				UPDATE_DATE		= NOW()
+		 WHERE	1=1
+		   AND	SEQ_CATEGORY_KEYWORD IN
+		<foreach collection="seqCategoryKeywordArray" item="item" separator="," open="(" close=")">
+		    	#{item}
+		</foreach>
+	</insert>
+</mapper>

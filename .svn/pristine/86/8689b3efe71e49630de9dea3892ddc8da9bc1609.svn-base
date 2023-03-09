@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Code">
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<resultMap type="codeVO" id="codeMap">
+		<result property="grpCdId" 			column="GRP_CD_ID" />
+		<result property="useYn"            column="USE_YN" />
+		<result property="grpCdNm"          column="GRP_CD_NM" />
+		<result property="grpCdExplain"     column="GRP_CD_EXPLAIN" />
+		<result property="dtlCdId"          column="DTL_CD_ID" />
+		<result property="codeDesc"         column="CODE_DESC" />
+		<result property="sortSeq"          column="SORT_SEQ" />
+		<result property="dtlCdNm"          column="DTL_CD_NM" />
+		<result property="codeDesc"          column="CODE_DESC" />
+		<result property="cdVal"            column="CD_VAL" />
+		<result property="regId"            column="REG_ID" />
+		<result property="regDt"            column="REG_DT" />
+		<result property="updId"            column="UPD_ID" />
+		<result property="updDt"            column="UPD_DT" />
+	</resultMap>
+	
+	<resultMap type="serviceStatCodeVO" id="serviceStatCodeMap">
+		<result property="grpCdId" 			column="GRP_CD_ID" />
+		<result property="grpCdNm"          column="GRP_CD_NM" />
+		<result property="grpCdExplain"     column="GRP_CD_EXPLAIN" />
+		<result property="dtlCdId"          column="DTL_CD_ID" />
+		<result property="codeDesc"         column="CODE_DESC" />
+		<result property="dtlCdNm"          column="DTL_CD_NM" />
+		<result property="codeDesc"          column="CODE_DESC" />
+		<result property="cdVal"            column="CD_VAL" />
+	</resultMap>
+	
+	<sql id="dynamicWhereTbGroupCd">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(grpCdNm)">
+			AND GRP_CD_NM = #{grpCdNm}	
+		</if>
+	</sql>
+	
+	<sql id="dynamicWhereTbDtlCd">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(dtlCdNm)">
+			AND DTL_CD_NM = #{dtlCdNm}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(grpCdId)">
+			AND GRP_CD_ID = #{grpCdId}	
+		</if>
+		<!-- <if test="!@org.springframework.util.StringUtils@isEmpty(cdVal)">
+			AND CD_VAL = #{cdVal}	
+		</if> -->
+		<if test="!@org.springframework.util.StringUtils@isEmpty(dtlCdId)">
+			AND DTL_CD_ID = #{dtlCdId}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(codeDesc)">
+			AND CODE_DESC = #{codeDesc}	
+		</if>
+	</sql>
+	
+	
+	
+	<select id="selectGroupCodeList" parameterType="codeVO" resultType="codeVO">
+		<include refid="pagingHead"/>
+		SELECT 
+				GRP_CD_ID,
+				GRP_CD_NM,
+				GRP_CD_EXPLAIN,
+				USE_YN,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_GROUP_CD
+		WHERE 1=1
+		<include refid="dynamicWhereTbGroupCd"/> 
+		 ORDER BY GRP_CD_NM
+		<include refid="pagingBody"/>
+	</select>
+	
+	<select id="selectGroupCodeDetail" parameterType="codeVO" resultType="codeVO">
+		SELECT 
+				GRP_CD_ID,
+				GRP_CD_NM,
+				GRP_CD_EXPLAIN,
+				USE_YN,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+		FROM TB_GROUP_CD
+		WHERE 1=1
+		AND GRP_CD_ID =#{grpCdId}
+	</select>
+	
+	<select id="selectGroupCodeListCnt" parameterType="codeVO" resultType="int">
+		SELECT COUNT(GRP_CD_ID)
+		  FROM TB_GROUP_CD
+		  WHERE 1=1
+		  <include refid="dynamicWhereTbGroupCd"/> 
+	</select>
+	
+	<delete id="deleteGroupCode" parameterType="codeVO" >
+		DELETE
+		  FROM TB_GROUP_CD
+		 WHERE GRP_CD_ID IN
+		<foreach collection="groupCodeIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteDtlCodeByGrpCdArr" parameterType="codeVO" >
+		DELETE
+		  FROM TB_DTL_CD
+		 WHERE GRP_CD_ID IN
+		<foreach collection="groupCodeIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteDtlCode" parameterType="codeVO" >
+		DELETE
+		  FROM TB_DTL_CD
+		 WHERE DTL_CD_ID IN
+		<foreach collection="dtlCodeIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<select id="checkExistGroupCode" parameterType="codeVO" resultType="int">
+		SELECT COUNT(GRP_CD_ID)
+		  FROM TB_GROUP_CD
+		  WHERE GRP_CD_NM =#{grpCdNm}
+		  AND GRP_CD_ID NOT IN (#{grpCdId})
+	</select>
+	
+	<select id="checkExistDtlCodeNm" parameterType="codeVO" resultType="int">
+		SELECT COUNT(DTL_CD_ID)
+		  FROM TB_DTL_CD
+		 WHERE 1=1
+		 AND GRP_CD_ID = #{grpCdId}
+		 AND DTL_CD_NM = #{dtlCdNm}
+		 AND CD_VAL= #{cdVal}
+		 AND DTL_CD_ID NOT IN (#{dtlCdId})
+	</select>
+	
+	<select id="checkExistDtlCodeVal" parameterType="codeVO" resultType="int">
+		SELECT COUNT(DTL_CD_ID)
+		  FROM TB_DTL_CD
+		 WHERE 1=1
+		 AND GRP_CD_ID = #{grpCdId}
+		 AND CD_VAL= #{cdVal}
+		 AND DTL_CD_ID NOT IN (#{dtlCdId})
+	</select>
+	
+	
+	<insert id ="insertNewGroupCode" parameterType="codeVO" >
+		INSERT INTO TB_GROUP_CD 
+		(
+			GRP_CD_ID,
+			GRP_CD_NM,
+			GRP_CD_EXPLAIN,
+			USE_YN,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		) 
+		VALUES 
+		(
+			#{grpCdId},
+			#{grpCdNm},
+			#{grpCdExplain},
+			#{useYn},
+			#{regId},
+			SYSDATE,
+			#{regId},
+			SYSDATE
+		) 
+	</insert>
+	
+	<insert id ="insertNewDtlCode" parameterType="codeVO" >
+		INSERT INTO TB_DTL_CD 
+		(
+			GRP_CD_ID,
+			DTL_CD_ID,
+			CODE_DESC,
+			SORT_SEQ,
+			DTL_CD_NM,
+			CD_VAL,
+			USE_YN,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		) 
+		VALUES 
+		(
+			#{grpCdId},
+			#{dtlCdId},
+			#{codeDesc},
+			<!-- #{sortSeq}, -->
+			0,
+			#{dtlCdNm},
+			#{cdVal},
+			#{useYn},
+			#{regId},
+			SYSDATE,
+			#{regId},
+			SYSDATE
+		) 
+	</insert>
+	
+	
+	<update id="updateGroupCode" parameterType="codeVO" >
+	UPDATE TB_GROUP_CD
+		SET 
+			GRP_CD_NM 			=  #{grpCdNm},
+			GRP_CD_EXPLAIN 		=  #{grpCdExplain},
+			USE_YN				=  #{useYn},
+			UPD_ID 				=  #{updId},
+			UPD_DT 				=  SYSDATE
+		WHERE GRP_CD_ID = #{grpCdId}
+	</update>
+	
+	
+	<update id="updateDtlCode" parameterType="codeVO" >
+	UPDATE TB_DTL_CD
+		SET 
+			CODE_DESC 			=  #{codeDesc},
+			<!-- SORT_SEQ			=   #{sortSeq}, -->
+			DTL_CD_NM			=   #{dtlCdNm},
+			CD_VAL				=  #{cdVal},
+			USE_YN				=  #{useYn},
+			UPD_ID 				=  #{updId},
+			UPD_DT 				=  SYSDATE
+		WHERE DTL_CD_ID = #{dtlCdId}
+	</update>
+	
+	
+	<select id="selectGrpCdId" parameterType="String" resultType="String">
+		SELECT 
+				GRP_CD_ID
+		  FROM TB_GROUP_CD
+		 WHERE GRP_CD_NM= #{grpCdNm}
+	</select>
+	
+
+	<select id="selectDtlCodeList"   parameterType="codeVO" resultType="codeVO">
+			SELECT 
+					GRP_CD_ID,
+					DTL_CD_ID,
+					DTL_CD_NM,
+					CODE_DESC,
+					CD_VAL,
+					SORT_SEQ,
+					USE_YN,
+					REG_ID,
+					TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					UPD_ID,
+					TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+			FROM TB_DTL_CD
+			WHERE 1=1
+		<include refid="dynamicWhereTbDtlCd"/>
+		ORDER BY DTL_CD_NM ASC
+	</select>
+	
+	<select id="selectDtlCodeListPaging"   parameterType="codeVO" resultType="codeVO">
+		<include refid="pagingHead"/>
+			SELECT 
+					GRP_CD_ID,
+					DTL_CD_ID,
+					DTL_CD_NM,
+					CODE_DESC,
+					CD_VAL,
+					SORT_SEQ,
+					USE_YN,
+					REG_ID,
+					TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					UPD_ID,
+					TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+			FROM TB_DTL_CD
+			WHERE 1=1
+		<include refid="dynamicWhereTbDtlCd"/>
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectDtlCodeListCnt"   parameterType="codeVO" resultType="int">
+		SELECT 
+			COUNT(DTL_CD_ID)
+		FROM TB_DTL_CD
+		WHERE 1=1
+		<include refid="dynamicWhereTbDtlCd"/> 
+	</select>
+	
+	<select id="selectDtlCodeDetail" parameterType="codeVO" resultType="codeVO">
+		SELECT 
+					GRP_CD_ID,
+					DTL_CD_ID,
+					DTL_CD_NM,
+					CODE_DESC,
+					CD_VAL,
+					SORT_SEQ,
+					USE_YN,
+					REG_ID,
+					TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					UPD_ID,
+					TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+			FROM TB_DTL_CD
+			WHERE 1=1
+		<include refid="dynamicWhereTbDtlCd"/>
+	</select>
+	
+	<select id="selectDtlCodeListByGrpCodeNm" parameterType="codeVO" resultType="codeVO">
+		SELECT 
+					GRP_CD_ID,
+					DTL_CD_ID,
+					DTL_CD_NM,
+					CODE_DESC,
+					CD_VAL,
+					SORT_SEQ,
+					USE_YN,
+					REG_ID,
+					TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					UPD_ID,
+					TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+			FROM TB_DTL_CD
+			WHERE 1=1
+			AND GRP_CD_ID = (SELECT GRP_CD_ID FROM TB_GROUP_CD where GRP_CD_NM =#{grpCdNm})
+	</select>
+	
+	
+	<select id="selectServiceStatDtlCodeList"   parameterType="serviceStatCodeVO" resultType="serviceStatCodeVO">
+			SELECT 
+					GRP_CD_ID,
+					DTL_CD_ID,
+					DTL_CD_NM,
+					CODE_DESC,
+					CD_VAL,
+					USE_YN
+			FROM TB_DTL_CD
+			WHERE 1=1
+		<include refid="dynamicWhereTbDtlCd"/>
+		ORDER BY CD_VAL,DTL_CD_NM ASC
+	</select>
+	
+	<select id="selectServiceStatDtlCodeListCnt"  parameterType="serviceStatCodeVO"  resultType="int">
+		SELECT 
+				COUNT(DTL_CD_ID)
+			FROM TB_DTL_CD
+			WHERE 1=1
+			<include refid="dynamicWhereTbDtlCd"/> 
+	</select> 
+	
+	<!-- <select id="selectServiceStatDtlCodeList"   parameterType="java.util.HashMap" resultType="codeVO">
+		<foreach collection="statGrpCdList" item="item" separator=" UNION ALL " index="index">			
+			SELECT 
+					GRP_CD_ID,
+					DTL_CD_ID,
+					DTL_CD_NM,
+					CODE_DESC,
+					CD_VAL,
+					SORT_SEQ,
+					USE_YN
+			FROM TB_DTL_CD
+			WHERE 1=1
+			AND GRP_CD_ID = #{item.grpCdId}	
+			AND USE_YN ='Y'
+		</foreach>
+		ORDER BY DTL_CD_NM ASC
+	</select>
+	
+	<select id="selectServiceStatDtlCodeListCnt"  parameterType="java.util.HashMap"  resultType="int">
+	SELECT SUM(count) FROM
+ 	( 
+		<foreach collection="statGrpCdList" item="item" separator=" UNION ALL " index="index">	
+		SELECT 
+			COUNT(DTL_CD_ID) as count
+		FROM TB_DTL_CD
+		WHERE 1=1
+		AND GRP_CD_ID = #{item.grpCdId}
+		AND USE_YN ='Y'	
+		</foreach>
+	)
+	</select> -->
+</mapper>

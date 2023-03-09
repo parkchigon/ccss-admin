@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN"
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+
+   <global>
+
+      <validator name="required2"
+            classname="devonframe.validator.commons.FieldValidator"
+               method="validateRequired2"
+         methodParams="java.lang.Object,
+                       org.apache.commons.validator.ValidatorAction,
+                       org.apache.commons.validator.Field,
+                       org.springframework.validation.Errors"
+                  msg="errors.required2"/>
+                  
+	</global>
+
+    <formset>
+        <form name="employee">
+            <field property="num" depends="required,integer">
+                <arg key="사원번호" />
+			</field>
+        	<field property="name" depends="required">
+                <arg key="사원명" />
+			</field>
+		   <field property="name" depends="maxlength">
+		   		<arg key="사원명" />
+		   		<arg key="10" />
+		       <var>
+		           <var-name>maxlength</var-name>
+		           <var-value>10</var-value>
+		       </var>
+		   </field>
+        	<field property="joblevelCode" depends="required,integer">
+                <arg key="직급" />
+			</field>
+			<field property="skillCode" depends="required,integer">
+                <arg key="기술등급" />
+			</field>
+		   <field property="birthdate" depends="required,date">
+		   	   <arg key="생년월일" />
+		       <var>
+		           <var-name>datePattern</var-name>
+		           <var-value>yyyyMMdd</var-value>
+		       </var>
+		   </field>   		   			        
+			<field property="postal" depends="required,integer">
+                <arg key="우편번호" />
+			</field>			
+        	<field property="telephone" depends="required,integer">
+                <arg key="전화번호" />
+			</field>
+		</form>
+    </formset>
+
+</form-validation>

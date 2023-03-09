@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Admin">
+
+	<resultMap type="adminVO" id="adminMap">
+		<result property="mngrId" 				column="MNGR_ID" />
+		<result property="secrNo" 				column="SECR_NO" />
+		<result property="adminLevel" 			column="ADMIN_LEVEL" />
+		<result property="grpName" 				column="ADMIN_LEVEL_NM" />
+		<result property="mngrName" 			column="MNGR_NAME" />
+		<result property="ctn"					column="CTN" />
+		<result property="regDt" 				column="REG_DT" />
+		<result property="useYn"	 			column="USE_YN" />
+		<result property="brfSecrNo" 			column="BFR_SECR_NO" />
+		<result property="accountStatus" 		column="ACCOUNT_STATUS" />
+		<result property="emailAddr" 			column="EMAIL_ADDR" />
+	</resultMap>
+
+	<sql id="dynamicWhereAdmin">
+		<where>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(mngrName)">
+				AND ADMIN_NAME LIKE '%${mngrName}%'	
+			</if>
+		</where>
+	</sql>
+	
+	<!-- <select id="selectAdminList" parameterType="adminVO" resultType="com.lgu.ccss.admin.admin.domain.AdminVO"> -->
+	<select id="selectAdminList" resultType="adminVO">
+		SELECT 
+			     MNGR_ID 
+			   , SECR_NO 
+			   , ADMIN_LEVEL
+			   , (SELECT GRP_NAME FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = ADMIN_LEVEL) AS ADMIN_LEVEL_NM
+			   , MNGR_NAME 
+			   , CTN 
+		  	   , TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+		  	   , USE_YN
+		  	   , ACCOUNT_STATUS
+		  	   , EMAIL_ADDR
+		  FROM TB_MNGR
+		<include refid="dynamicWhereAdmin" />
+	</select> 
+	
+<!-- 	<select id="selectAdminList" parameterType="adminVO" resultType="flkMap">
+		/* com.lgu.ccss.admin.admin.mapper.AdminMapper.selectAdminList */
+		SELECT *
+		  FROM (
+			SELECT (@ROWNUM := @ROWNUM+1) RNUM
+				   , SEQ_ADMIN AS ADMIN_SEQ
+				   , ADMIN_ID
+				   , ADMIN_PW
+				   , ADMIN_LEVEL
+				   , (SELECT ROLE_NM FROM TB_ROLE WHERE SEQ_ROLE_ID = ADMIN_LEVEL) AS ADMIN_LEVEL_NM
+				   , ADMIN_NAME
+				   , ADMIN_MOBILE_NUM
+			  	   , DATE_FORMAT(JOIN_DATE, '%Y-%m-%d %H:%i:%s') AS JOIN_DATE
+			  	   , IFNULL(DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i:%s'),'-') AS UPDATE_DATE
+			  	   , USE_YN
+			  FROM TB_ADMIN
+			  	   , (SELECT @ROWNUM := 0 FROM DUAL) TMP
+			) AS A
+		WHERE A.RNUM BETWEEN #{startCount} AND #{endCount}
+		<include refid="dynamicWhereAdmin" />
+		 ORDER BY ADMIN_SEQ DESC
+	</select> -->
+
+	<select id="selectAdminListCnt" parameterType="adminVO" resultType="int">
+		/* com.lgu.ccss.admin.admin.mapper.AdminMapper.selectAdminListCnt */
+		SELECT COUNT(SEQ_ADMIN)
+		  FROM TB_ADMIN
+		<include refid="dynamicWhereAdmin" />
+	</select>
+
+	<insert id="insertAdmin" parameterType="adminVO" >
+		/* com.lgu.ccss.admin.admin.rmapper.AdminMapper.insertAdmin */
+		INSERT INTO TB_ADMIN (SEQ_ADMIN, ADMIN_ID, ADMIN_PW, ADMIN_LEVEL, ADMIN_NAME, ADMIN_MOBILE_NUM, USE_YN, JOIN_DATE, LATEST_PASSWORD_UPDATE_DATE)
+		VALUES (#{adminSeq}, #{adminId}, #{adminPw}, #{adminLevel}, #{adminName}, #{adminMobileNum}, #{useYn}, NOW(), NOW())
+	</insert>
+	
+	<update id="updateAdmin" parameterType="adminVO" >
+		/* com.lgu.ccss.admin.admin.mapper.AdminMapper.updateAdmin */
+		UPDATE TB_ADMIN
+		<set>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(adminPw)">
+				ADMIN_PW = #{adminPw},
+				LATEST_PASSWORD_UPDATE_DATE = NOW(),
+				LOGIN_FAIL_COUNT = 0,
+				ADMIN_PW_HIST = #{adminPwHist},
+			</if>
+			ADMIN_LEVEL = #{adminLevel}
+			, ADMIN_NAME = #{adminName}
+			, ADMIN_MOBILE_NUM = #{adminMobileNum}
+			, USE_YN = #{useYn}
+			, UPDATE_ID=#{updateId}
+			, UPDATE_DATE = NOW()
+		 </set>
+		 WHERE SEQ_ADMIN = ${adminSeq}
+	</update>
+	
+	<select id="selectAdminDetail" parameterType="adminVO" resultMap="adminMap">
+		/* com.lgu.ccss.admin.admin.mapper.AdminMapper.selectAdminDetail */
+		SELECT SEQ_ADMIN AS ADMIN_SEQ
+			   , ADMIN_ID
+			   , ADMIN_PW
+			   , ADMIN_LEVEL
+			   , ADMIN_NAME
+			   , ADMIN_MOBILE_NUM
+			   , DATE_FORMAT(JOIN_DATE, '%Y-%m-%d') AS JOIN_DATE
+		  	   , USE_YN
+		  	   , ADMIN_PW_HIST
+		  FROM TB_ADMIN
+		 WHERE SEQ_ADMIN = ${adminSeq}
+	</select>
+	
+	
+	<select id="checkAdminId" parameterType="adminVO" resultType="int" >
+		SELECT COUNT(SEQ_ADMIN)
+		  FROM TB_ADMIN
+		 WHERE ADMIN_ID = #{adminId}
+	</select>
+	
+	<delete id="deleteAdmin" parameterType="adminVO" >
+		DELETE
+		  FROM TB_ADMIN
+		 WHERE SEQ_ADMIN IN
+		<foreach collection="adminSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

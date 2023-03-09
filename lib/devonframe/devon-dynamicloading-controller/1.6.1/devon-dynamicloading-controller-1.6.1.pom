@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>devonframe</groupId>
+    <artifactId>devon-framework</artifactId>
+    <version>1.6.1</version>
+  </parent>
+  <artifactId>devon-dynamicloading-controller</artifactId>
+  <name>devon-dynamicloading-controller</name>
+  
+  <dependencies>
+  
+    <!-- DevonFrame -->
+	<dependency>
+		<groupId>devonframe</groupId>
+		<artifactId>devon-core</artifactId>
+		<version>${devonframe.version}</version>
+	</dependency>
+	
+  	<dependency>
+  		<groupId>devonframe</groupId>
+  		<artifactId>devon-dynamicloading-agent</artifactId>
+  		<version>${devonframe.version}</version>
+  	</dependency>
+  	
+  	<!-- Servlet 3.0 API - Apache Tomcat 7.0.57 -->
+  	<dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.0.1</version>
+        <scope>provided</scope>
+	</dependency>
+    <dependency>
+		<groupId>com.google.code.gson</groupId>
+		<artifactId>gson</artifactId>
+		<version>2.6.2</version>
+  	</dependency>
+	
+	<!-- Spring -->
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-webmvc</artifactId>
+		<optional>true</optional>
+	</dependency>
+	
+  </dependencies>
+</project>

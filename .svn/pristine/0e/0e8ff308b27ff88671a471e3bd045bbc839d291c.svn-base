@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!--S: devon Sample HSQL dataSource  -->
+	<!-- <bean id="sqlSessionFactory" class="devonframe.dataaccess.mybatis.factory.CommonDaoSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+	  	<property name="configLocation" value="classpath:/sql/ccss/configuration.xml"/>
+	  	<property name="mapperLocations" value= "classpath:/sql/ccss/oracle/**/sql-*.xml"/>
+	</bean>
+	
+	 <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="commonDao" class="devonframe.dataaccess.mybatis.MyBatisCommonDao">
+		<property name="useOriginalException" value = "true"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="pagingExecutor" ref="myBatisPagingExecutor" />
+		<property name="scrollPagingExecutor" ref="myBatisScrollPagingExecutor"/>
+	</bean> -->
+	
+	<!-- Map DTO 용 MyBatis 설정 -->
+	<!-- <bean id="sqlSessionFactoryForMap" class="devonframe.dataaccess.mybatis.factory.CommonDaoSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+	  	<property name="configLocation" value="classpath:/sql/ccss/configuration.xml"/>
+	  	<property name="mapperLocations" value= "classpath:/sql/ccss/oracle/**/sql-*.xml"/>
+	</bean>
+	
+	<bean id="commonDaoForMap" class="devonframe.dataaccess.mybatis.MyBatisCommonDao">
+		<property name="useOriginalException" value = "true"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactoryForMap" />
+		<property name="pagingExecutor" ref="myBatisPagingExecutor" />
+	</bean> -->
+	
+	
+	
+	<!--E: devon Sample HSQL dataSource  -->
+	
+	
+	
+	<!--S: ORACLE  -->
+	<bean id="sqlSessionFactory_oracle" class="devonframe.dataaccess.mybatis.factory.CommonDaoSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource-oracle-jndi" />
+	  		<property name="configLocation" value="classpath:/sql/ccss/configuration.xml"/>
+	  	<property name="mapperLocations" value= "classpath:/sql/ccss/oracle/**/sql-*.xml"/>
+	</bean>
+	
+	
+	<bean id="sqlSession_oracle" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory_oracle" />
+	</bean>
+	
+	<bean id="commonDao_oracle" class="devonframe.dataaccess.mybatis.MyBatisCommonDao">
+		<property name="useOriginalException" value = "true"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory_oracle" />
+		<property name="pagingExecutor" ref="myBatisPagingExecutor" />
+		<property name="scrollPagingExecutor" ref="myBatisScrollPagingExecutor"/>
+	</bean>
+	
+	<bean id="sqlSessionFactoryForMap_oracle" class="devonframe.dataaccess.mybatis.factory.CommonDaoSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource-oracle-jndi" />
+	  	<property name="configLocation" value="classpath:/sql/ccss/configuration.xml"/>
+	  	<property name="mapperLocations" value= "classpath:/sql/ccss/oracle/**/sql-*.xml"/>
+	</bean>
+	
+	<bean id="commonDaoForMap_oracle" class="devonframe.dataaccess.mybatis.MyBatisCommonDao">
+		<property name="useOriginalException" value = "true"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactoryForMap_oracle" />
+		<property name="pagingExecutor" ref="myBatisPagingExecutor" />
+	</bean>
+	
+	
+	<!--E: ORACLE  -->
+	
+	<!--S: Altibase -->
+ 	<bean id="sqlSessionFactory_altibase" class="devonframe.dataaccess.mybatis.factory.CommonDaoSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource-Altibase-jndi" />
+	  	<property name="configLocation" value="classpath:/sql/ccss/configuration.xml"/>
+	  	<property name="mapperLocations" value= "classpath:/sql/ccss/altibase/**/sql-*.xml"/>
+	</bean>
+	
+	
+	<bean id="sqlSession_altibase" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory_altibase" />
+	</bean>
+	
+	<bean id="commonDao_altibase" class="devonframe.dataaccess.mybatis.MyBatisCommonDao">
+		<property name="useOriginalException" value = "true"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory_altibase" />
+		<property name="pagingExecutor" ref="myBatisPagingExecutor" />
+		<property name="scrollPagingExecutor" ref="myBatisScrollPagingExecutor"/>
+	</bean>
+	
+	<bean id="sqlSessionFactoryForMap_altibase" class="devonframe.dataaccess.mybatis.factory.CommonDaoSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource-Altibase-jndi" />
+	  	<property name="configLocation" value="classpath:/sql/ccss/configuration.xml"/>
+	  	<property name="mapperLocations" value= "classpath:/sql/ccss/altibase/**/sql-*.xml"/>
+	</bean>
+	
+
+	<bean id="commonDaoForMap_altibase" class="devonframe.dataaccess.mybatis.MyBatisCommonDao">
+		<property name="useOriginalException" value = "true"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactoryForMap_altibase" />
+		<property name="pagingExecutor" ref="myBatisPagingExecutor" />
+	</bean>
+	
+	
+	<!--E: Altibase -->
+	
+	<bean id="myBatisPagingExecutor" class="devonframe.paging.executor.MyBatisPagingExecutor"/>
+	<bean id="myBatisScrollPagingExecutor" class="devonframe.scrollpaging.executor.MyBatisScrollPagingExecutor">
+		<property name="scrollPagingTransfer" ref="scrollPagingTransfer"/>
+	</bean>
+	
+	<bean id="scrollPagingTransfer" class="devonframe.scrollpaging.util.ScrollPagingTransfer">
+		<property name="conditionKeySeparator" value="|"/>
+		<property name="conditionKeyOrderbySeparator" value="@"/>
+		<property name="conditionKeyValueEquitySeparator" value="="/>
+	</bean>
+	
+
+
+</beans>

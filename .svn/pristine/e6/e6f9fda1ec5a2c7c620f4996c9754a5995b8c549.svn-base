@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Board">
+	
+	<resultMap id="retBoardMst" type="boardMstVO">
+        <result property="boardMstId" 			column="BOARD_MST_ID" 			 />
+		<result property="title" 				column="TITLE" 					 />
+		<result property="content" 				column="CONTENT" 				 />
+		<result property="cmtUseYn" 			column="CMT_USE_YN" 			 />
+		<result property="fileAttUseYn" 		column="FILE_ATT_USE_YN" 		 />
+		<result property="listUrl" 				column="LIST_URL" 				 />
+		<result property="viewUrl" 				column="VIEW_URL" 				 />
+		<result property="regUrl" 				column="REG_URL" 				 />
+		<result property="insertId" 			column="INSERT_ID" 				 />
+		<result property="insertDate" 			column="INSERT_DATE" 			 />
+		<result property="updateId" 			column="UPDATE_ID" 				 />
+		<result property="updateDate" 			column="UPDATE_DATE" 			 />		
+	</resultMap>
+	
+	<resultMap id="retBoard" type="boardVO">
+		<result property="rnum" 						column="RNUM"		 			 />
+        <result property="boardMstId" 					column="BOARD_MST_ID" 			 />
+        <result property="boardId" 						column="BOARD_ID"	 			 />
+		<result property="title" 						column="TITLE" 					 />
+		<result property="content" 						column="CONTENT" 				 />
+		<result property="useYn" 						column="USE_YN" 				 />
+		<result property="opt1" 						column="OPT1"	 				 />
+		<result property="opt2" 						column="OPT2"	 				 />
+		<result property="opt3" 						column="OPT3"	 				 />
+		<result property="opt4" 						column="OPT4"	 				 />
+		<result property="opt5" 						column="OPT5"	 				 />
+		<result property="opt6" 						column="OPT6"	 				 />
+		<result property="opt7" 						column="OPT7"	 				 />
+		<result property="insertId" 					column="INSERT_ID" 				 />
+		<result property="insertDate" 					column="INSERT_DATE" 			 />
+		<result property="updateId" 					column="UPDATE_ID" 				 />
+		<result property="updateDate" 					column="UPDATE_DATE" 			 />
+		<result property="postDate" 					column="POST_DATE" 				 />
+		<result property="postHour" 					column="POST_HOUR" 				 />
+		<result property="postMinute" 					column="POST_MINUTE" 			 />
+		<result property="bannerEndDate" 				column="BANNER_END_DATE" 			 />
+		<result property="bannerEndHour" 				column="BANNER_END_HOUR" 			 />
+		<result property="bannerEndMinute" 				column="BANNER_END_MINUTE" 			 />
+		<result property="fileInfoVO.originFileName" 	column="ORIGIN_FILE_NAME" 	 	 />
+		<result property="fileInfoVO.saveFileName" 		column="SAVE_FILE_NAME" 	 	 />
+	</resultMap>
+		
+	<sql id="dynamicWhereBoard">
+		<where>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(useYn)">
+				AND USE_YN = #{useYn}	
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(boardId)">
+				AND SEQ_BOARD_ID = #{boardId}	
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(searchType)">
+				<if test="searchType.equals('TITLE')">  
+					<if test="!@org.springframework.util.StringUtils@isEmpty(title)">
+						AND TITLE LIKE '%${title}%'	
+					</if>
+				</if>
+				<if test="searchType.equals('CONTENT')">  
+					<if test="!@org.springframework.util.StringUtils@isEmpty(title)">
+						AND CONTENT LIKE '%${title}%'	
+					</if>
+				</if>
+				<if test="searchType.equals('INSERTID')">  
+					<if test="!@org.springframework.util.StringUtils@isEmpty(title)">
+						AND INSERT_ID LIKE '%${title}%'	
+					</if>
+				</if>
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(searchDateDiv)"> 
+				<if test="searchDateDiv.equals('INSERTDATE')"> 
+					<if test="!@org.springframework.util.StringUtils@isEmpty(startDate)"> 
+					    AND DATE_FORMAT(INSERT_DATE, '%Y%m%d')  >= #{startDate}
+					</if>	 
+					<if test="!@org.springframework.util.StringUtils@isEmpty(endDate)"> 
+						AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+					</if>
+				</if>
+				<if test="searchDateDiv.equals('POSTDATE')"> 
+					<if test="!@org.springframework.util.StringUtils@isEmpty(startDate)"> 
+					    AND DATE_FORMAT(POST_DATE, '%Y%m%d')  >= #{startDate}
+					</if>	 
+					<if test="!@org.springframework.util.StringUtils@isEmpty(endDate)"> 
+						AND DATE_FORMAT(POST_DATE, '%Y%m%d')  <![CDATA[<=]]>  #{endDate}
+					</if>
+				</if>
+				<if test="searchDateDiv.equals('POSTDATEEND')"> 
+					<if test="!@org.springframework.util.StringUtils@isEmpty(startDate)"> 
+					    AND DATE_FORMAT(POST_DATE, '%Y%m%d') <![CDATA[<=]]>  #{startDate}
+					</if>	 
+					<if test="!@org.springframework.util.StringUtils@isEmpty(endDate)"> 
+						AND DATE_FORMAT(OPT6, '%Y%m%d')  >=   #{endDate}
+						<if test="!@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId == 'banner'"> 
+						OR (OPT6 IS NULL AND SEQ_BOARD_MST_ID ='banner' AND DELETE_YN = 'N' AND USE_YN = 'Y')
+						</if>
+					</if>
+				</if>
+				<if test="searchDateDiv.equals('REALPOSTBANNER')"> 
+					AND DATE_FORMAT(POST_DATE, '%Y%m%d%H%i') <![CDATA[<=]]>  DATE_FORMAT(now(), '%Y%m%d%H%i')
+					AND DATE_FORMAT(OPT6, '%Y%m%d%H%i')  >=   DATE_FORMAT(now(), '%Y%m%d%H%i')
+					OR (OPT6 IS NULL AND SEQ_BOARD_MST_ID ='banner' AND DELETE_YN = 'N' AND USE_YN = 'Y')
+				</if>
+		  	</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(opt7) and opt7 != '0'"> 
+						AND OPT7 =#{opt7}	
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(fixYn)">
+				AND OPT3 = #{fixYn}
+			</if>
+			AND DELETE_YN = 'N'
+			AND SEQ_BOARD_MST_ID = #{boardMstId}
+		</where>
+	</sql>
+	
+	<!-- 게시판 마스터 정보 조회  -->
+	<select id="selectBoardMstInfo" parameterType="boardMstVO" resultMap="retBoardMst">
+		SELECT SEQ_BOARD_MST_ID AS BOARD_MST_ID
+			   , TITLE
+			   , CONTENT
+			   , CMT_USE_YN
+			   , FILE_ATT_USE_YN
+			   , LIST_URL
+			   , VIEW_URL
+			   , REG_URL
+			   , INSERT_ID
+			   , INSERT_DATE
+			   , UPDATE_ID
+			   , UPDATE_DATE			  
+		  FROM TB_BOARD_MST
+		 WHERE SEQ_BOARD_MST_ID = #{boardMstId}
+	</select>
+
+	<!-- 게시판 리스트 조회 -->
+	<select id="selectBoardList" parameterType="boardVO" resultMap="retBoard">
+		SELECT *
+		  FROM (
+			SELECT (@ROWNUM := @ROWNUM+1) RNUM
+				   , SEQ_BOARD_MST_ID AS BOARD_MST_ID
+				   , SEQ_BOARD_ID AS BOARD_ID
+				   , TITLE
+				   , CONTENT
+				   , USE_YN
+				   , IFNULL(DATE_FORMAT(POST_DATE, '%Y-%m-%d %H:%i'), '-') AS POST_DATE
+				   , OPT1
+				   , OPT2
+				   , OPT3
+				   , OPT4
+				   , OPT5
+				   , IFNULL(DATE_FORMAT(OPT6, '%Y-%m-%d %H:%i'), '-') AS BANNER_END_DATE
+				   , OPT6
+				   , CASE OPT7 WHEN '1' THEN '대기'
+				    		   WHEN '2' THEN '성공'
+				    		   WHEN '3' THEN '취소'
+				  			END AS OPT7
+				   , INSERT_ID
+				   , CASE USE_YN WHEN 'Y' THEN '사용'
+                                 ELSE '미사용'
+                                 END AS STR_USE_YN
+                    <if test="!@org.springframework.util.StringUtils@isEmpty(startDate) or !@org.springframework.util.StringUtils@isEmpty(endDate) or !@org.springframework.util.StringUtils@isEmpty(title) or !@org.springframework.util.StringUtils@isEmpty(useYn)">              
+                  	, '' AS DND_COLOR
+                  	</if>
+                  	<if test="@org.springframework.util.StringUtils@isEmpty(startDate) and @org.springframework.util.StringUtils@isEmpty(endDate) and @org.springframework.util.StringUtils@isEmpty(title) and @org.springframework.util.StringUtils@isEmpty(useYn) and !@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId != 'banner'">              
+                  	, CASE WHEN USE_YN='Y' THEN 'imp'
+                                 ELSE ''
+                                 END AS DND_COLOR
+                    </if>   
+                    <if test="@org.springframework.util.StringUtils@isEmpty(startDate) and @org.springframework.util.StringUtils@isEmpty(endDate) and @org.springframework.util.StringUtils@isEmpty(title) and @org.springframework.util.StringUtils@isEmpty(useYn) and !@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId == 'banner'">              
+                  	, CASE  WHEN USE_YN='Y' AND NOW() >= POST_DATE AND OPT6 IS NULL  THEN 'imp'
+                  			WHEN USE_YN='Y' AND NOW() >= POST_DATE AND OPT6 >= NOW() THEN 'imp'
+                  			WHEN USE_YN='Y' AND NOW() <![CDATA[<=]]> POST_DATE THEN 'imp'
+                                 ELSE ''
+                                 END AS DND_COLOR
+                    </if>                      
+			  	   , IFNULL(DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i'),'-') AS INSERT_DATE
+			  	   , IFNULL(DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i'),'-') AS UPDATE_DATE
+	 		  	   , TFI.ORIGIN_FILE_NAME
+			  	   , TFI.SAVE_FILE_NAME
+				  FROM TB_BOARD TB
+				  LEFT JOIN TB_FILE_INFO TFI
+				    ON TB.OPT1 = TFI.SEQ_FILE
+				   AND TFI.BIZ_CLASSIFY_CODE = 'TB_BOARD'
+			  	   ,(SELECT @ROWNUM := 0 FROM DUAL) TMP
+			<include refid="dynamicWhereBoard" />
+			<if test="!@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId == 'notice'"> 
+				<if test="!@org.springframework.util.StringUtils@isEmpty(serachOrderBy) and serachOrderBy == 'POSTDATE'">  
+				ORDER BY POST_DATE DESC
+				</if>
+				<if test="@org.springframework.util.StringUtils@isEmpty(serachOrderBy)">
+				ORDER BY USE_YN DESC, OPT2 ASC, UPDATE_DATE DESC, INSERT_DATE DESC
+				</if>
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId == 'banner'"> 
+				ORDER BY USE_YN DESC, OPT2 ASC, UPDATE_DATE DESC,INSERT_DATE DESC
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId == 'push'"> 
+				ORDER BY RNUM DESC
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(boardMstId) and boardMstId == 'appversion'"> 
+				ORDER BY RNUM DESC
+			</if>
+			) AS A
+		<if test="@org.springframework.util.StringUtils@isEmpty(excelDownYn) and excelDownYn != 'Y'.toString()">
+			WHERE BOARD_MST_ID = #{boardMstId}
+			AND A.RNUM BETWEEN #{startCount} AND #{endCount}
+		</if>
+	</select>
+	
+	
+	<select id="selectBoardTopBannerList" parameterType="boardVO" resultMap="retBoard">
+		SELECT SEQ_BOARD_MST_ID AS BOARD_MST_ID
+			   , SEQ_BOARD_ID AS BOARD_ID
+			   , TITLE
+			   , CONTENT
+			   , USE_YN
+		       , DATE_FORMAT(POST_DATE, '%Y-%m-%d') AS POST_DATE
+		       , DATE_FORMAT(POST_DATE, '%H') AS POST_HOUR
+		       , DATE_FORMAT(POST_DATE, '%i') AS POST_MINUTE
+			   , OPT1
+			   , OPT2
+			   , OPT3 AS fixYn
+			   , OPT4 AS contentsType
+			   , OPT5
+			   , DATE_FORMAT(OPT6, '%Y-%m-%d') AS BANNER_END_DATE
+		       , DATE_FORMAT(OPT6, '%H') AS BANNER_END_HOUR
+		       , DATE_FORMAT(OPT6, '%i') AS BANNER_END_MINUTE
+			   , OPT6
+			   , INSERT_ID
+		  	   , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+		  	   , UPDATE_ID
+		  	   , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+		  	   , TFI.ORIGIN_FILE_NAME
+		  	   , TFI.SAVE_FILE_NAME
+		  FROM TB_BOARD TB LEFT JOIN TB_FILE_INFO TFI
+		 	ON TB.OPT1 = TFI.SEQ_FILE
+		 	AND TFI.BIZ_CLASSIFY_CODE = 'TB_BOARD'
+		  WHERE SEQ_BOARD_MST_ID = 'banner'
+		  AND USE_YN = 'Y'
+		  AND POST_DATE <![CDATA[<=]]>  now()
+		  AND OPT6  >=   now()
+		  OR (OPT6 IS NULL AND SEQ_BOARD_MST_ID ='banner' AND DELETE_YN = 'N' AND USE_YN = 'Y')
+	 	  ORDER BY USE_YN DESC, OPT2 ASC,UPDATE_DATE DESC,INSERT_DATE DESC
+		  LIMIT 5
+	</select>
+	
+	
+	
+	<!-- 게시판 리스트 조회 카운트 -->
+	<select id="selectBoardListCnt" parameterType="boardVO" resultType="int">
+		SELECT COUNT(SEQ_BOARD_ID)
+		  FROM TB_BOARD
+		<include refid="dynamicWhereBoard" />
+	</select>
+	
+	<!-- 게시판 등록 -->
+	<insert id="insertBoard" parameterType="boardVO">
+		INSERT INTO TB_BOARD (SEQ_BOARD_ID,SEQ_BOARD_MST_ID, TITLE, CONTENT, USE_YN, POST_DATE, DELETE_YN
+			, OPT1, OPT2, OPT3, OPT4, OPT5, OPT6, OPT7, INSERT_ID, INSERT_DATE,UPDATE_ID,UPDATE_DATE)
+		VALUES (#{boardId},#{boardMstId}, #{title}, #{content}, #{useYn}, STR_TO_DATE(REPLACE(#{postDate},'-',''),'%Y%m%d%H%i'), 'N'
+			, #{opt1, jdbcType=VARCHAR}, null, #{fixYn, jdbcType=VARCHAR}
+			, #{contentsType, jdbcType=VARCHAR}, #{opt5, jdbcType=VARCHAR}, STR_TO_DATE(REPLACE(#{opt6},'-',''),'%Y%m%d%H%i'), #{opt7, jdbcType=VARCHAR}, #{insertId}, NOW(), #{insertId}, NOW())
+	</insert>
+	
+	<!-- 게시판 상세 조회 -->
+	<select id="selectBoardDetail" parameterType="boardVO" resultMap="retBoard">
+		SELECT SEQ_BOARD_MST_ID AS BOARD_MST_ID
+			   , SEQ_BOARD_ID AS BOARD_ID
+			   , TITLE
+			   , CONTENT
+			   , USE_YN
+		       , DATE_FORMAT(POST_DATE, '%Y-%m-%d') AS POST_DATE
+		       , DATE_FORMAT(POST_DATE, '%H') AS POST_HOUR
+		       , DATE_FORMAT(POST_DATE, '%i') AS POST_MINUTE
+			   , OPT1
+			   , OPT2
+			   , OPT3 AS fixYn
+			   , OPT4 AS contentsType
+			   , OPT5
+			   , DATE_FORMAT(OPT6, '%Y-%m-%d') AS BANNER_END_DATE
+		       , DATE_FORMAT(OPT6, '%H') AS BANNER_END_HOUR
+		       , DATE_FORMAT(OPT6, '%i') AS BANNER_END_MINUTE
+			   , OPT6
+			   , OPT7
+			   , INSERT_ID
+		  	   , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+		  	   , UPDATE_ID
+		  	   , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+		  	   , TFI.ORIGIN_FILE_NAME
+		  	   , TFI.SAVE_FILE_NAME
+		  FROM TB_BOARD TB
+		  LEFT JOIN TB_FILE_INFO TFI
+		    ON TB.OPT1 = TFI.SEQ_FILE
+		   AND TFI.BIZ_CLASSIFY_CODE = 'TB_BOARD'
+		<include refid="dynamicWhereBoard" />
+	</select>
+	
+		
+	<!-- 업데이트 주기 조회 -->
+	<select id="selectPushUpdateTime" resultMap="retBoard">
+		SELECT UPDATETIME
+		FROM TB_PUSH
+	</select>
+	
+	<!-- 앱 버전체크 -->
+	<select id="appversionValidationCheck" parameterType="boardVO" resultType="int">
+		SELECT COUNT(TITLE)
+		FROM TB_BOARD
+		WHERE SEQ_BOARD_MST_ID = 'appversion'
+		  AND TITLE = #{title}
+	</select>
+	
+	<!-- 게시판 수정 -->
+	<update id="updatePushUpdateTime" parameterType="boardVO">
+		UPDATE TB_PUSH
+		SET UPDATETIME = #{updatetime}
+	</update>
+	
+	<!-- 게시판 수정 -->
+	<update id="updateBoard" parameterType="boardVO">
+		UPDATE TB_BOARD
+		   SET TITLE = #{title}
+		   	   , CONTENT = #{content}
+		   	   , USE_YN = #{useYn}
+		   	   , POST_DATE = STR_TO_DATE(REPLACE(#{postDate},'-',''),'%Y%m%d%H%i')
+		   	   , OPT1 = #{opt1, jdbcType=VARCHAR}
+		   	   , OPT2 = #{opt2, jdbcType=VARCHAR}
+		   	   , OPT3 = IFNULL(#{fixYn, jdbcType=VARCHAR},'N')
+		   	   , OPT4 = IFNULL(#{contentsType, jdbcType=VARCHAR},'none') 
+		   	   , OPT5 = #{opt5, jdbcType=VARCHAR}
+		   	   , OPT6 = STR_TO_DATE(REPLACE(#{opt6},'-',''),'%Y%m%d%H%i')
+		   	   , OPT7 = #{opt7, jdbcType=VARCHAR}
+		   	   , UPDATE_ID = #{updateId}
+		   	   , UPDATE_DATE = NOW()
+		 WHERE SEQ_BOARD_ID = #{boardId} 
+	</update>
+	
+	<update id="updateBoardOrderNo" parameterType="boardVO">
+		UPDATE TB_BOARD
+		   SET OPT2 = #{opt2, jdbcType=VARCHAR}
+		       , UPDATE_ID = #{updateId}
+		   	   , UPDATE_DATE = NOW()
+		 WHERE SEQ_BOARD_ID = #{boardId} 
+	</update>
+	
+	
+	<!-- 게시판 삭제 -->
+	<delete id="deleteBoard" parameterType="boardVO">
+		DELETE
+		  FROM TB_BOARD
+		 WHERE SEQ_BOARD_ID IN
+		<foreach collection="boardIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+     <!-- 자동으로 TopBanner 종료된 부분 미처리로 변경 -->
+	<update id="updateBoardTopBanner">
+		UPDATE TB_BOARD
+		SET USE_YN = 'N'
+		    ,UPDATE_ID = 'SYSTEM'
+		    ,UPDATE_DATE = NOW()
+		WHERE SEQ_BOARD_MST_ID = 'banner'
+		AND USE_YN = 'Y'
+		AND OPT6 <![CDATA[<=]]>  now()
+	</update>
+	
+	<!-- 게시판 BANNER STAT 상세 조회 -->
+	<select id="selectBannerBoardStatList" parameterType="List" resultType="flkMap">
+			  SELECT 	TB.SEQ_BOARD_ID  AS BOARD_ID
+			   ,TB.TITLE
+			   ,TB.POST_DATE
+			   ,TB.OPT6
+			   ,TB.OPT5
+			   ,TB.INSERT_DATE
+			   ,A.count
+		  FROM TB_BOARD TB ,
+		  			(
+		  				 <foreach collection="list" item="item" index="index" separator=" UNION ALL ">
+		  				 	select 	#{item.reqseq} as SEQ_BOARD_ID ,#{item.count} as count
+						  </foreach>
+		  			) A
+		  WHERE TB.SEQ_BOARD_MST_ID = 'banner'
+		  AND TB.SEQ_BOARD_ID = A.SEQ_BOARD_ID
+	</select>
+</mapper>

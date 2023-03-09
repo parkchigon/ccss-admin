@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppPushStat">
+	
+	<resultMap type="appPushStatVO" id="appPushStatMap">
+		<result property="msgStatus"	column="MSG_STATUS"  />	
+		<result property="code"         column="CODE"  />
+		<result property="msgTitle"     column="MSG_TITLE"  />
+		<result property="msgCont"      column="MSG_CONT"  />
+		<result property="msgType"      column="MSG_TYPE"  />
+		<result property="recvPhoneNo"  column="RECV_PHONE_NO"  />
+		<result property="sendType"     column="SEND_TYPE"  />
+		<result property="regDt"        column="REG_DT"  />
+		<result property="regId"        column="REG_ID"  />
+		<result property="updDt"        column="UPD_DT"  />
+		<result property="updId"        column="UPD_ID"  />
+		<result property="sendDt"       column="SEND_DT"  />
+		<result property="svrId"        column="SVR_ID"  />
+		<result property="orgNo"        column="ORG_NO"  />
+		<result property="callbackNo"   column="CALLBACK_NO"  />
+		<result property="msgId"        column="MSG_ID"  />
+		<result property="sendTryCnt"   column="SEND_TRY_CNT"  />
+		<result property="wasInfo"   	column="WAS_INFO"  />
+	</resultMap>
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	
+	<sql id="dynamicWhereTbAppPushQueueHis">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(recvPhoneNo) ">
+			AND A.RECV_PHONE_NO = #{recvPhoneNo}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(msgStatus) and msgStatus !='ALL' ">
+			AND A.MSG_STATUS = #{msgStatus}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(msgId) ">
+			AND A.MSG_ID = #{msgId}	
+		</if>
+	</sql>
+	
+
+	<select id="selectAppPushStatList" parameterType="appPushStatVO" resultType="appPushStatVO">
+		<include refid="pagingHead"/>
+		SELECT 
+			A.MSG_STATUS,
+			A.CODE,
+			A.MSG_TITLE,
+			A.MSG_CONT,
+			A.MSG_TYPE,
+			A.RECV_PHONE_NO,
+			A.SEND_TYPE,
+			<!-- 2018.11.04 REG_DT 컬럼 삭제 (CVT)-->
+			<!-- TO_CHAR(A.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT, -->
+			A.REG_ID,
+			TO_CHAR(A.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			A.UPD_ID,
+			TO_CHAR(A.SEND_DT,'YYYY-MM-DD HH24:MI:SS') AS SEND_DT,
+			A.SVR_ID,
+			(SELECT HOST_NM FROM TB_SVR_INFO where SVR_ID=A.SVR_ID) as WAS_INFO,
+			A.ORG_NO,
+			A.CALLBACK_NO,
+			A.MSG_ID,
+			A.SEND_TRY_CNT
+		FROM TB_APP_PUSH_QUEUE_HIS A
+		WHERE 1=1
+		<!-- AND A.REG_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.REG_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD') -->
+		AND A.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+		<include refid="dynamicWhereTbAppPushQueueHis"/> 
+		ORDER BY A.PROCESS_DT desc
+		<!-- ORDER BY A.REG_DT desc -->
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectAppPushStatListCnt" parameterType="appPushStatVO" resultType="int">
+		SELECT 
+			COUNT(*) 
+		FROM (
+				SELECT 
+					A.MSG_STATUS,
+					A.CODE,
+					A.MSG_TITLE,
+					A.MSG_CONT,
+					A.MSG_TYPE,
+					A.RECV_PHONE_NO,
+					A.SEND_TYPE,
+					<!-- 2018.11.04 REG_DT 컬럼 삭제 (CVT)-->
+					<!-- TO_CHAR(A.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT, -->
+					A.REG_ID,
+					TO_CHAR(A.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+					A.UPD_ID,
+					TO_CHAR(A.SEND_DT,'YYYY-MM-DD HH24:MI:SS') AS SEND_DT,
+					A.SVR_ID,
+					(SELECT HOST_NM FROM TB_SVR_INFO where SVR_ID=A.SVR_ID) as WAS_INFO,
+					A.ORG_NO,
+					A.CALLBACK_NO,
+					A.MSG_ID,
+					A.SEND_TRY_CNT
+				FROM TB_APP_PUSH_QUEUE_HIS A
+				WHERE 1=1
+				<!-- AND A.REG_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.REG_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD') -->
+				AND A.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+				<include refid="dynamicWhereTbAppPushQueueHis"/> 
+			)
+	</select>
+
+	
+	<select id="selectAppPushStatListExcel" parameterType="appPushStatVO" resultType="appPushStatVO">
+		SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			FROM (   
+					SELECT 
+						<!-- A.MSG_STATUS, -->
+						CASE A.MSG_STATUS WHEN '0000' THEN '대기' WHEN '0001' THEN '전송처리중' WHEN '0002' THEN '전송 성공' ELSE '전송 실패' END as MSG_STATUS,
+						A.CODE,
+						A.MSG_TITLE,
+						A.MSG_CONT,
+						A.MSG_TYPE,
+						A.RECV_PHONE_NO,
+						A.SEND_TYPE,
+						<!-- 2018.11.04 REG_DT 컬럼 삭제 (CVT)-->
+						<!-- TO_CHAR(A.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT, -->
+						A.REG_ID,
+						TO_CHAR(A.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+						A.UPD_ID,
+						TO_CHAR(A.SEND_DT,'YYYY-MM-DD HH24:MI:SS') AS SEND_DT,
+						A.SVR_ID,
+						(SELECT HOST_NM FROM TB_SVR_INFO where SVR_ID=A.SVR_ID) as WAS_INFO,
+						A.ORG_NO,
+						A.CALLBACK_NO,
+						A.MSG_ID,
+						A.SEND_TRY_CNT
+					FROM TB_APP_PUSH_QUEUE_HIS A
+					WHERE 1=1
+					AND A.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+					<include refid="dynamicWhereTbAppPushQueueHis"/> 
+					ORDER BY A.PROCESS_DT desc
+					<!-- ORDER BY A.REG_DT desc -->
+				) ORACLE_PAGING	
+	</select>
+	
+</mapper>

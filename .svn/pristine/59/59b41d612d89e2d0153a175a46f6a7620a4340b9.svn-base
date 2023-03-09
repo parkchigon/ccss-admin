@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>devonframe</groupId>
+		<artifactId>devon-framework</artifactId>
+		<version>1.6.1</version>
+	</parent>
+	<artifactId>devon-scheduler</artifactId>
+	<name>devon-scheduler</name>
+
+	<dependencies>
+		<!-- DevOnFrame -->
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-core</artifactId>
+			<version>${devonframe.version}</version>
+		</dependency>
+
+		<!-- Spring : JobDetailBean for quartz belongs to spring-context-support -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+
+		<!-- Quartz framework and dependencies -->
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>quartz</artifactId>
+			<version>${quartz.version}</version>
+		</dependency>
+
+		<!-- Quartz 1.6.0 requires JTA in non J2EE environments -->
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>${jta.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+	</dependencies>
+</project>

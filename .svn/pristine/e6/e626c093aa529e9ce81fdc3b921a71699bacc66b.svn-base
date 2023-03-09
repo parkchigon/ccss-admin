@@ -1,0 +1,70 @@
+#ReInit.menuMap.Cron  = 0 0/5 * * * *
+ReInit.menuMap.Cron  = 0 0 1 * * *
+ReInit.serviceStatCode.cron = 0 0 0/1 * * *
+
+properties-key1 = properties test1!
+properties-key2 = properties test2!
+
+serverIp=127.0.0.1
+serverPort=8080
+contextPath=ccss-admin
+
+
+#jndi
+Globals.oracle.jndiName=jdbc/oracle
+Globals.altibase.jndiName=jdbc/Altibase
+
+
+
+#
+## properties Location
+config.service.init = /init/serviceInit.xml
+environment.type=local
+
+## \uc774\ubbf8\uc9c0 \uae30\ubcf8 \uc5c5\ub85c\ub4dc \uacbd\ub85c
+upload.filePath=/data/images/
+
+upload.uploadFilePath=/data/upload/
+
+
+## \uacf5\ud1b5 properties
+common.domain=localhost
+common.port=80
+common.profile.image.url=/api/file/profile/
+common.notice.image.url=/file/notice/
+common.banner.image.url=/file/banner/
+common.community.image.url=/api/file/community/
+common.push.image.url=/file/push/
+common.app.apk.url=/file/appversion/
+common.email.image.url=/api/file/email/
+common.splash.image.url=/api/file/splash/
+common.event.image.url=/api/file/event/
+common.fnreqboard.image.url=/api/file/fnreqboard/
+common.category.image.url=/file/category/
+
+## \uc791\uc5c5/\uc7a5\uc560/FadeOut \uacf5\uc9c0 \uad00\ub828 \ud30c\uc77c \uacbd\ub85c
+web.manage.notice=/data/manage/web/
+
+
+##nonAutoBatch path
+non.auto.batch.path=112.172.130.175:8082
+
+common.hang.url=http://localhost:8080/admin/api/internal/hang/check
+app.hang.id=ccsp/admin
+
+
+## Event Card Area
+upload.eventCardImg.path=D:/dev/event_card/
+download.eventCardImg.url=http://112.172.129.68:8080/eventCard/eventCardFileDown/
+
+
+upload.noticeCardImg.path=D:/dev/event_card/
+download.noticeCardImg.url=http://112.172.129.68:8080/noticeCard/noticeCardFileDown/
+#download.noticeCardImg.url=http://112.172.129.68:8080/eventCard/eventCardFileDown/
+
+use.logStat.Yn=Y
+
+#EXCEL UPLOAD
+excel.upload.path=D:/dev/excelUpload/
+excel.form.download.path=/resources/excel/
+excel.form.download.file.name=commAgrRegForm.xlsx

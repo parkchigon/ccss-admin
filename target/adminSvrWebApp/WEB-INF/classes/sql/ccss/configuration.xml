@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<settings>
+		
+		<setting name="cacheEnabled" value="true" />
+		
+		<!-- 전통적인 데이터베이스 칼럼명 형태인 A_COLUMN을 CamelCase형태의 자바 프로퍼티명 형태인 aColumn으로 
+			자동으로 매핑하도록 함 -->
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+		
+		<!-- MyBatis 가 칼럼을 필드/프로퍼티에 자동으로 매핑할지와 방법에 대해 명시. PARTIAL 은 간단한 자동매핑만 할뿐, 
+			내포된 결과에 대해서는 처리하지 않는다. FULL 은 처리가능한 모든 자동매핑을 처리한다. -->
+		<setting name="autoMappingBehavior" value="FULL" />
+		
+		<!-- 한개의 구문에서 여러개의 ResultSet 을 허용할지의 여부 -->
+		<setting name="multipleResultSetsEnabled" value="true" />
+		
+		<setting name="lazyLoadingEnabled" value="true" />
+		<setting name="aggressiveLazyLoading" value="false" />
+		<setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
+		<setting name="jdbcTypeForNull" value="OTHER" />
+
+	</settings>
+	
+	<typeAliases>
+		<!-- objects -->
+		<typeAlias alias="flkMap" type="com.lgu.ccss.common.dataaccess.util.FlkMap" />
+		<typeAlias alias="adminVO" type="com.lgu.ccss.admin.admin.domain.AdminVO" />
+		<typeAlias alias="boardMstVO" type="com.lgu.ccss.admin.board.domain.BoardMstVO" />
+		<typeAlias alias="boardVO" type="com.lgu.ccss.admin.board.domain.BoardVO" />
+		<typeAlias alias="noticeVO" type="com.lgu.ccss.admin.notice.domain.NoticeVO" />
+		<typeAlias alias="fileInfoVO" type="com.lgu.ccss.admin.file.domain.FileInfoVO" />
+		<typeAlias alias="pushSendHistoryVO" type="com.lgu.ccss.common.domain.PushSendHistoryVO" />
+		
+		<typeAlias alias="smsVO" type="com.lgu.ccss.admin.admin.domain.SmsVO" />
+		
+		<typeAlias alias="termsVO" type="com.lgu.ccss.admin.term.domain.TermsVO" />
+		<typeAlias alias="voiceVO" type="com.lgu.ccss.admin.voice.domain.VoiceVO" />
+		
+		<typeAlias alias="userVO" type="com.lgu.ccss.admin.user.domain.UserVO" />
+		
+		<typeAlias alias="commAgrVO" type="com.lgu.ccss.admin.user.domain.CommAgrVO" />
+		
+		
+		<typeAlias alias="productVO" type="com.lgu.ccss.admin.product.domain.ProductVO" />
+		<typeAlias alias="appVO" type="com.lgu.ccss.admin.app.domain.AppVO" />
+		<typeAlias alias="codeVO" type="com.lgu.ccss.admin.system.code.domain.CodeVO" />
+		<typeAlias alias="serviceStatCodeVO" type="com.lgu.ccss.admin.system.code.domain.ServiceStatCodeVO" />
+
+
+		<!--S: Stat Domains  -->
+		<typeAlias alias="apiStatVO" 		type="com.lgu.ccss.admin.stat.api.domain.ApiStatVO" />
+		<typeAlias alias="smsStatVO" 		type="com.lgu.ccss.admin.stat.sms.domain.SmsStatVO" />
+		<typeAlias alias="carPushStatVO" 	type="com.lgu.ccss.admin.stat.carpush.domain.CarPushStatVO" />
+		<typeAlias alias="appPushStatVO" 	type="com.lgu.ccss.admin.stat.apppush.domain.AppPushStatVO" />
+		<typeAlias alias="send2CarStatVO"	type="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO" />
+		<typeAlias alias="serviceStatVO"	type="com.lgu.ccss.admin.stat.serviceStat.domain.ServiceStatVO" />
+		<!--E: Stat Domains  -->
+		
+		
+		<!--S: Menu Domains -->
+		<typeAlias alias="Role" 		type="com.lgu.ccss.admin.system.role.domain.RoleVO"/>
+		<typeAlias alias="RoleMenu" 	type="com.lgu.ccss.admin.system.role.domain.RoleMenuVO"/>
+		<typeAlias alias="RoleTree"	 	type="com.lgu.ccss.admin.system.role.domain.RoleTree"/>
+		<typeAlias alias="Menu" 		type="com.lgu.ccss.admin.system.menu.domain.MenuVO"/>
+		<typeAlias alias="Program"	 	type="com.lgu.ccss.admin.system.program.domain.ProgramVO"/>
+		
+		<!--E: Menu Domains -->
+		
+		<package name="com.lgu.ccss.admin.servicemng.domain" />
+		<package name="com.lgu.ccss.admin.usermng.domain" />
+		<package name="com.lgu.ccss.admin.stats.domain" />
+		
+	</typeAliases>
+	
+	
+	<typeHandlers>
+		<typeHandler handler="org.apache.ibatis.type.ClobTypeHandler" jdbcType="CLOB" javaType="java.lang.String" />
+	</typeHandlers>		
+	
+	
+	<plugins>
+		<plugin interceptor="devonframe.log.trace.interceptor.QueryLoggingInterceptor" />
+		<plugin interceptor="devonframe.paging.interceptor.MyBatisPagingInterceptor" />
+		<plugin interceptor="devonframe.scrollpaging.interceptor.MyBatisScrollPagingInterceptor" />
+	</plugins>	
+		
+</configuration>

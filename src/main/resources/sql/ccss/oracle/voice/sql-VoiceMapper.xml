@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Voice">
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+   	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	 <resultMap type="voiceVO" id="voiceMap">
+		<result property="voiceDomainNo" 					column="VOICE_DOMAIN_NO" />
+		<result property="exposureRatio" 					column="EXPOSURE_RATIO" />
+		<result property="domain" 							column="DOMAIN" />
+ 		<result property="command" 							column="COMMAND" />
+		<result property="voiceGuideNo" 					column="VOICE_GUIDE_NO" />
+		<result property="domainExplain" 					column="DOMAIN_EXPLAIN" />
+		<result property="prioYn" 							column="PRIO_YN" />
+		<result property="exposureYn"						column="EXPOSURE_YN" />
+		<result property="guideLevel" 						column="GUIDE_LEVEL" />
+		<result property="voiceVerNo"	 					column="VOICEVER_NO" /> 
+		<result property="useYn"	 						column="USE_YN" /> 
+		<result property="regId" 							column="REG_ID" />
+		<result property="regDt" 							column="REG_DT" />
+		<result property="updId" 							column="UPD_ID" />
+		<result property="updDt" 							column="UPD_DT" />
+		<result property="ver" 								column="VER" />
+	</resultMap>
+	
+	
+	
+	<sql id="dynamicWhereDomain">
+			<if test="!@org.springframework.util.StringUtils@isEmpty(voiceDomainNo)">
+				AND VOICE_DOMAIN_NO NOT IN #{voiceDomainNo}	
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(marketType) and marketType !='ALL'">
+				AND MARKET_TYPE = #{marketType}	
+			</if>
+	</sql>
+	
+	
+	<sql id="dynamicWhereTbVoiceGuide">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(command)">
+			AND A.COMMAND LIKE 	 '%'|| #{command} || '%'
+		</if>
+	</sql>
+	
+	
+	<sql id="dynamicWhereTbVoiceDomain">
+		 <if test="!@org.springframework.util.StringUtils@isEmpty(marketType) and marketType !='ALL'">
+			AND MARKET_TYPE = #{marketType}	
+		 </if>
+		 <if test="domainSearchList.length > 0  ">
+			AND A.VOICE_DOMAIN_NO IN 
+			<foreach collection="domainSearchList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>	
+		</if>
+	</sql>
+	
+			
+	<sql id="dynamicWhereCommand">
+			<if test="!@org.springframework.util.StringUtils@isEmpty(voiceVerNo)">
+				AND D.VOICE_VER_NO = (#{voiceVerNo})	
+			</if>
+	</sql>
+	
+	
+	
+	
+	<select id="selectDomainList" parameterType="voiceVO" resultType="voiceVO">
+		<include refid="pagingHead"/>
+		SELECT 
+			VOICE_DOMAIN_NO,
+			DOMAIN_EXPLAIN,
+			DOMAIN,
+			EXPOSURE_RATIO,
+			MARKET_TYPE,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_DOMAIN 
+		WHERE 1=1
+		<include refid="dynamicWhereDomain" />
+		ORDER BY REG_DT ASC
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectAllDomainList" parameterType="voiceVO" resultType="voiceVO">
+		SELECT 
+			VOICE_DOMAIN_NO,
+			DOMAIN_EXPLAIN,
+			DOMAIN,
+			EXPOSURE_RATIO,
+			MARKET_TYPE,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_DOMAIN 
+		WHERE 1=1
+		<include refid="dynamicWhereDomain" />
+		ORDER BY REG_DT ASC
+	</select>
+	
+	<select id="selectDomainListCnt" parameterType="voiceVO" resultType="int">
+		SELECT COUNT(VOICE_DOMAIN_NO)
+		  FROM TB_VOICE_DOMAIN
+		 WHERE 1=1
+		 <include refid="dynamicWhereDomain" />
+	</select>
+	
+	
+	<select id="checkDomain" parameterType="voiceVO" resultType="int">
+		SELECT COUNT(DOMAIN)
+		  FROM TB_VOICE_DOMAIN
+		  WHERE DOMAIN = #{domain}
+	</select>
+	
+	<select id="insertDomain" parameterType="voiceVO">
+		INSERT INTO TB_VOICE_DOMAIN
+		(
+			VOICE_DOMAIN_NO,
+			DOMAIN_EXPLAIN,
+			EXPOSURE_RATIO,
+			DOMAIN,
+			MARKET_TYPE,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		)
+		VALUES
+		(
+			#{voiceDomainNo},
+			#{domainExplain},
+			#{exposureRatio},
+			#{domain},
+			#{marketType},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE
+		)
+	</select>
+	
+	<select id="selectDomainAjax" parameterType="voiceVO" resultType="voiceVO">
+		SELECT 
+			VOICE_DOMAIN_NO,
+			DOMAIN_EXPLAIN,
+			DOMAIN,
+			EXPOSURE_RATIO,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_DOMAIN 
+		WHERE 1=1
+		AND VOICE_DOMAIN_NO =#{voiceDomainNo}
+	</select>
+	
+	<delete id="deleteDomainAjax" parameterType="voiceVO" >
+		DELETE
+		  FROM TB_VOICE_DOMAIN
+		 WHERE VOICE_DOMAIN_NO IN
+		<foreach collection="domainSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		<include refid="dynamicWhereDomain" />
+	</delete>
+	
+	<update id="updateDomain" parameterType="voiceVO" >
+		UPDATE TB_VOICE_DOMAIN
+		SET 	
+			EXPOSURE_RATIO = TO_NUMBER(#{exposureRatio}),
+			DOMAIN_EXPLAIN = #{domainExplain},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE
+		WHERE DOMAIN = #{domain} AND VOICE_DOMAIN_NO =  #{voiceDomainNo} 
+		
+	</update>
+	
+	
+	
+	<!--버전-->
+	<select id="selectVersionList" parameterType="voiceVO" resultType="voiceVO">
+		<include refid="pagingHead"/>
+		SELECT 
+			VOICE_VER_NO,
+			VER,
+			USE_YN,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_VER 
+		WHERE 1=1
+		AND MARKET_TYPE = #{marketType}	
+		ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	<select id="currentSelectVersion" parameterType="voiceVO" resultType="voiceVO">
+		<include refid="pagingHead"/>
+		SELECT 
+			VOICE_VER_NO,
+			VER,
+			USE_YN,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_VER 
+		WHERE 1=1
+		AND MARKET_TYPE = #{marketType}	
+		AND USE_YN ='Y'
+		ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	
+	<select id="selectAllVersionList" parameterType="voiceVO" resultType="voiceVO">
+		SELECT 
+			VOICE_VER_NO,
+			VER,
+			USE_YN,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_VER 
+		WHERE 1=1
+		AND MARKET_TYPE = #{marketType}	
+		ORDER BY REG_DT DESC
+	</select>
+	
+	
+	<select id="selectVersionListCnt" parameterType="voiceVO" resultType="int">
+		SELECT COUNT(VOICE_VER_NO)
+		  FROM TB_VOICE_VER
+		  WHERE MARKET_TYPE = #{marketType}	
+	</select>
+	
+	
+	<select id="checkVersion" parameterType="voiceVO" resultType="int">
+		SELECT COUNT(VER)
+		  FROM TB_VOICE_VER
+		  WHERE VER = #{ver}
+	</select>
+	
+	<select id="checkVersionUseYn" parameterType="voiceVO" resultType="int">
+		SELECT COUNT(USE_YN)
+		  FROM TB_VOICE_VER
+		  WHERE USE_YN='Y'
+		 AND VOICE_VER_NO NOT IN (#{voiceVerNo})
+		 AND MARKET_TYPE = #{marketType}	
+	</select>
+	
+	
+	
+	
+	<select id="insertVersion" parameterType="voiceVO">
+		INSERT INTO TB_VOICE_VER
+		(
+			VOICE_VER_NO,
+			VER,
+			USE_YN,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT,
+			MARKET_TYPE
+		)
+		VALUES
+		(
+			#{voiceVerNo},
+			#{ver},
+			#{useYn},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE,
+			#{marketType}
+		)
+	</select>
+	
+	<select id="selectVersionAjax" parameterType="voiceVO" resultType="voiceVO">
+		SELECT 
+			VOICE_VER_NO,
+			VER,
+			USE_YN,
+			REG_ID,
+			TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+			TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+			UPD_ID
+		FROM TB_VOICE_VER 
+		WHERE 1=1
+		AND VOICE_VER_NO =#{voiceVerNo}
+	</select>
+	
+	<delete id="deleteVersionAjax" parameterType="voiceVO" >
+		DELETE
+		  FROM TB_VOICE_VER
+		 WHERE VOICE_VER_NO IN
+		<foreach collection="versionSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateVersion" parameterType="voiceVO" >
+		UPDATE TB_VOICE_VER
+		SET 
+			USE_YN = #{useYn},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE
+		WHERE VER = #{ver} 
+		AND VOICE_VER_NO =  #{voiceVerNo}
+		AND MARKET_TYPE = #{marketType}	
+	</update>
+	
+	<select id="selectInsertCommandList" parameterType="voiceVO" resultType="voiceVO">
+				SELECT 
+					A.VOICE_VER_NO,
+					A.VOICE_DOMAIN_NO,
+					A.VOICE_GUIDE_NO,
+					A.COMMAND,
+					A.PRIO_YN,
+					A.EXPOSURE_YN,
+					A.GUIDE_LEVEL,
+					A.REG_ID,
+					TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					TO_CHAR(A.UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+					A.UPD_ID
+				FROM TB_VOICE_GUIDE A
+				WHERE 1=1
+				AND VOICE_VER_NO =#{copyVoiceVerNo}
+	</select>
+	
+	<select id="selectCommandList" parameterType="voiceVO" resultType="voiceVO">
+	 	<include refid="pagingHead"/> 
+			SELECT C.*,D.VER, D.USE_YN FROM (
+				SELECT 
+					A.VOICE_VER_NO,
+					A.VOICE_DOMAIN_NO,
+					A.VOICE_GUIDE_NO,
+					A.COMMAND,
+					A.PRIO_YN,
+					A.EXPOSURE_YN,
+					A.GUIDE_LEVEL,
+					NVL(B.DOMAIN,'-') as DOMAIN,
+					A.REG_ID,
+					TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					TO_CHAR(A.UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+					A.UPD_ID
+				FROM TB_VOICE_GUIDE A
+				LEFT OUTER JOIN TB_VOICE_DOMAIN B ON A.VOICE_DOMAIN_NO = B.VOICE_DOMAIN_NO
+				WHERE 1=1
+				<include refid="dynamicWhereTbVoiceGuide"/> 
+				<include refid="dynamicWhereTbVoiceDomain"/>
+				ORDER BY VOICE_VER_NO DESC, REG_DT DESC
+			) C LEFT OUTER JOIN TB_VOICE_VER D ON C.VOICE_VER_NO = D.VOICE_VER_NO
+			WHERE 1=1
+			<include refid="dynamicWhereCommand" />
+ 	<include refid="pagingBody"/>
+	</select>
+		
+	
+	<select id="selectCommandListCnt" parameterType="voiceVO" resultType="int">
+		SELECT 
+			COUNT(VOICE_GUIDE_NO)
+		FROM (
+			SELECT VOICE_GUIDE_NO FROM (
+				SELECT 
+					A.VOICE_VER_NO,
+					A.VOICE_DOMAIN_NO,
+					A.VOICE_GUIDE_NO,
+					A.COMMAND,
+					A.PRIO_YN,
+					A.EXPOSURE_YN,
+					A.GUIDE_LEVEL,
+					NVL(B.DOMAIN,'-') as DOMAIN,
+					A.REG_ID,
+					TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					TO_CHAR(A.UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+					A.UPD_ID
+				FROM TB_VOICE_GUIDE A
+				LEFT OUTER JOIN TB_VOICE_DOMAIN B ON A.VOICE_DOMAIN_NO = B.VOICE_DOMAIN_NO
+				WHERE 1=1
+				<include refid="dynamicWhereTbVoiceGuide"/> 
+				<include refid="dynamicWhereTbVoiceDomain"/>
+			) C LEFT OUTER JOIN TB_VOICE_VER D ON C.VOICE_VER_NO = D.VOICE_VER_NO
+			WHERE 1=1
+			<include refid="dynamicWhereCommand" />
+		)
+	</select>
+	
+	
+	<select id="insertCommand" parameterType="voiceVO">
+		INSERT INTO TB_VOICE_GUIDE
+		(
+			VOICE_GUIDE_NO,
+			VOICE_VER_NO,
+			VOICE_DOMAIN_NO,
+			COMMAND,
+			PRIO_YN,
+			EXPOSURE_YN,
+			GUIDE_LEVEL,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		)
+		VALUES
+		(
+			#{voiceGuideNo},
+			#{voiceVerNo},
+			#{voiceDomainNo},
+			#{command},
+			#{prioYn},
+			#{exposureYn},
+			#{guideLevel},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE
+		)
+	</select>
+	
+	
+		
+	<select id="selectCommand" parameterType="voiceVO" resultType="voiceVO">
+		SELECT C.*,D.VER, D.USE_YN FROM (
+				SELECT 
+					A.VOICE_VER_NO,
+					A.VOICE_DOMAIN_NO,
+					A.VOICE_GUIDE_NO,
+					A.COMMAND,
+					A.PRIO_YN,
+					A.EXPOSURE_YN,
+					A.GUIDE_LEVEL,
+					NVL(B.DOMAIN,'-') as DOMAIN,
+					A.REG_ID,
+					TO_CHAR(A.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					TO_CHAR(A.UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+					A.UPD_ID
+				FROM TB_VOICE_GUIDE A
+				LEFT OUTER JOIN TB_VOICE_DOMAIN B ON A.VOICE_DOMAIN_NO = B.VOICE_DOMAIN_NO
+				WHERE 1=1
+				AND A.VOICE_GUIDE_NO = #{voiceGuideNo}
+			) C LEFT OUTER JOIN TB_VOICE_VER D ON C.VOICE_VER_NO = D.VOICE_VER_NO
+			ORDER BY C.REG_DT DESC
+	</select>
+	
+	<select id="checkCommand" parameterType="voiceVO" resultType="int">
+			SELECT COUNT(*)
+				FROM TB_VOICE_GUIDE 
+				WHERE VOICE_DOMAIN_NO = #{voiceDomainNo}
+				AND VOICE_VER_NO = #{voiceVerNo}
+				AND COMMAND = #{command}
+				AND GUIDE_LEVEL =#{guideLevel}
+				AND PRIO_YN =#{prioYn}
+				AND EXPOSURE_YN =#{exposureYn}
+	</select>
+	
+	
+	
+	<update id="updateCommand" parameterType="voiceVO">
+			UPDATE TB_VOICE_GUIDE
+			SET 
+				COMMAND = #{command}
+				,PRIO_YN = #{prioYn}
+				,EXPOSURE_YN = #{exposureYn}
+				,GUIDE_LEVEL = #{guideLevel}
+				,VOICE_VER_NO = #{voiceVerNo}
+				,VOICE_DOMAIN_NO = #{voiceDomainNo}
+				,UPD_ID = #{updId}
+				,UPD_DT = SYSDATE
+			WHERE VOICE_GUIDE_NO =#{voiceGuideNo}
+	</update>
+	
+	
+	<delete id="deleteDomainByVersionNo" parameterType="voiceVO" >
+		DELETE
+		  FROM TB_VOICE_GUIDE
+		 WHERE VOICE_VER_NO IN
+		 <foreach collection="versionSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteCommand" parameterType="voiceVO" >
+		DELETE
+		  FROM TB_VOICE_GUIDE
+		 WHERE VOICE_GUIDE_NO IN
+		<foreach collection="commandSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="allUnCheck" parameterType="voiceVO" >
+		UPDATE TB_VOICE_GUIDE
+		SET 
+			PRIO_YN = 'N'
+			,EXPOSURE_YN = 'N'
+		 WHERE VOICE_GUIDE_NO IN
+		<foreach collection="voiceGuideNoArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	
+	<update id="updateCammanPrioY" parameterType="String" >
+		UPDATE TB_VOICE_GUIDE
+		SET 
+			PRIO_YN = 'Y'
+		 WHERE VOICE_GUIDE_NO = #{voiceGuideNo}
+		 
+		<!-- <foreach collection="voiceGuideNoArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach> -->
+	</update>
+	
+	
+	<update id="updateCammanPrioN" parameterType="String" >
+		UPDATE TB_VOICE_GUIDE
+		SET 
+			PRIO_YN = 'N'
+		 WHERE VOICE_GUIDE_NO = #{voiceGuideNo}
+	<!-- 	<foreach collection="voiceGuideNoArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach> -->
+	</update>
+	
+	
+	<update id="updateCammanExposureY" parameterType="String" >
+		UPDATE TB_VOICE_GUIDE
+		SET 
+			EXPOSURE_YN = 'Y'
+		 WHERE VOICE_GUIDE_NO = #{voiceGuideNo}
+	<!-- 	<foreach collection="voiceGuideNoArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach> -->
+	</update>
+	
+		<update id="updateCammanExposureN" parameterType="String" >
+		UPDATE TB_VOICE_GUIDE
+		SET 
+			EXPOSURE_YN = 'N'
+		 WHERE VOICE_GUIDE_NO = #{voiceGuideNo}
+		<!-- <foreach collection="voiceGuideNoArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach> -->
+	</update>
+	
+	
+	
+	
+	
+	
+	
+</mapper>

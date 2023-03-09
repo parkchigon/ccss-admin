@@ -1,0 +1,6 @@
+#NOTE: This is an Aether internal implementation file, its format can be changed without prior notice.
+#Tue Apr 25 11:42:17 KST 2017
+@default-devon-repository-http\://www.dev-on.com/devon_framework/nexus/content/groups/public/.lastUpdated=1493088136840
+https\://repo.maven.apache.org/maven2/.lastUpdated=1493088137803
+http\://www.dev-on.com/devon_framework/nexus/content/groups/public/.error=Could not transfer artifact devonframe\:devon-iam\:pom\:1.6.1 from/to devon-repository (http\://www.dev-on.com/devon_framework/nexus/content/groups/public)\: Access denied to http\://www.dev-on.com/devon_framework/nexus/content/groups/public/devonframe/devon-iam/1.6.1/devon-iam-1.6.1.pom. Error code 401, Unauthorized
+https\://repo.maven.apache.org/maven2/.error=

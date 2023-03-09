@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	 <bean id="txManager" class="devonframe.transaction.CompositeDataSourceTransactionManager">
+		<property name="dataSources" ref="dataSource" />
+	</bean>
+
+	<!-- XML based Transaction -->
+
+	<!-- <aop:config>
+		<aop:pointcut id="requiredTx" expression="execution(* com.lgu..*Service.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="requiredTx" />
+	</aop:config>
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="select*" read-only="true" />
+			<tx:method name="insert*" rollback-for="Exception" />
+			<tx:method name="update*" rollback-for="Exception" />
+			<tx:method name="delete*" rollback-for="Exception" />
+			<tx:method name="set*" rollback-for="Exception" />
+			<tx:method name="login*" rollback-for="Exception" />
+		</tx:attributes>
+	</tx:advice> -->
+
+
+	<!-- Annotation based Transaction -->
+	<!-- <tx:annotation-driven transaction-manager="txManager"/> -->
+	
+	<!--S: ORACLE  -->
+	 <bean id="txManager_oracle" class="devonframe.transaction.CompositeDataSourceTransactionManager">
+		<property name="dataSources" ref="dataSource-oracle-jndi" />
+	</bean>
+
+	<tx:annotation-driven transaction-manager="txManager_oracle" />
+	
+	<aop:config>
+		<aop:pointcut id="requiredTx_oracle" expression="execution(* com.lgu..*Service.*(..))" />
+		<aop:advisor advice-ref="txAdvice_oracle" pointcut-ref="requiredTx_oracle" />
+	</aop:config>
+	<tx:advice id="txAdvice_oracle" transaction-manager="txManager_oracle">
+		<tx:attributes>
+			<tx:method name="select*" read-only="true" />
+			<tx:method name="insert*" rollback-for="Exception" />
+			<tx:method name="update*" rollback-for="Exception" />
+			<tx:method name="delete*" rollback-for="Exception" />
+			<tx:method name="set*" rollback-for="Exception" />
+			<tx:method name="login*" rollback-for="Exception" />
+		</tx:attributes>
+	</tx:advice>
+	<!--E: ORACLE -->
+
+	<!--S: ALTIBASE -->
+	<!-- 
+	<bean id="txManager_altibase" class="devonframe.transaction.CompositeDataSourceTransactionManager"> 
+		<property name="dataSources" ref="dataSource-Altibase-jndi" /> </bean> <tx:annotation-driven 
+		transaction-manager="txManager_altibase" /> 
+		-->
+	<!--E: ALTIBASE -->
+</beans>

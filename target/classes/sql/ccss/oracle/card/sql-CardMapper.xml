@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Card">
+	
+	<resultMap id="cardVO" type="com.lgu.ccss.admin.card.domain.CardVO">
+			<result property="cardId"			column="CARD_ID" />
+			<result property="cardNm"			column="CARD_NM" />
+			<result property="cardSortNum"		column="CARD_SORT_NUM" />
+			<result property="exposureYn"		column="EXPOSURE_YN" />
+			<result property="fixYn"			column="FIX_YN" />
+			<result property="regId"			column="REG_ID" />
+			<result property="regDt"			column="REG_DT" />
+			<result property="updId"			column="UPD_ID" />
+			<result property="updDt"			column="UPD_DT" />
+			<result property="mngrId"			column="MNGR_ID" />
+			<result property="grpNm"			column="GRP_NM" />
+			<result property="serviceCategory"	column="SERVICE_CATEGORY" />
+			
+	
+	</resultMap>
+	
+	<resultMap id="eventCardVO" type="com.lgu.ccss.admin.card.domain.EventCardVO">
+			<result property="eventCardId"			column="EVENT_CARD_ID" />
+			<result property="eventCardUrl"			column="EVENT_CARD_URL" />
+			<result property="exposureStartDt"		column="EXPOSURE_START_DT" />
+			<result property="exposureEndDt"		column="EXPOSURE_END_DT" />
+			<result property="cardImgFileName"		column="CARD_IMG_FILE_NAME" />
+			<result property="regId"			column="REG_ID" />
+			<result property="regDt"			column="REG_DT" />
+			<result property="updId"			column="UPD_ID" />
+			<result property="updDt"			column="UPD_DT" />
+			<result property="serviceCategory"	column="SERVICE_CATEGORY" />
+			<result property="cardId"			column="CARD_ID" />
+			<result property="cardNm"			column="CARD_NM" />
+			<result property="eventCardType"	column="EVENT_CARD_TYPE" />
+	</resultMap>
+	
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<sql id="dynamicWhereTbCard">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(exposureYn) and exposureYn !='ALL'">
+			AND EXPOSURE_YN = #{exposureYn}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(fixYn) and fixYn !='ALL'">
+			AND FIX_YN = #{fixYn}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+		</if>
+		<!-- <if test="!@org.springframework.util.StringUtils@isEmpty(cardSortNum) !='0'">
+			AND CARD_SORT_NUM = #{cardSortNum}
+		</if> -->
+		<if test="!@org.springframework.util.StringUtils@isEmpty(cardNm)">
+			AND CARD_NM LIKE '%'|| #{cardNm} || '%'
+		</if>
+	</sql>
+	
+	
+	<select id="selectCardList" parameterType="com.lgu.ccss.admin.card.domain.CardVO" resultType="com.lgu.ccss.admin.card.domain.CardVO">
+		<include refid="pagingHead"/>
+			SELECT 
+				CARD_ID,
+				CARD_NM,
+				CARD_SORT_NUM,
+				EXPOSURE_YN,
+				FIX_YN,
+				SERVICE_CATEGORY,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT, 'YYYY-MM-DD') AS UPD_DT
+			FROM TB_CARD
+			WHERE 1=1
+			<include refid="dynamicWhereTbCard" />
+			ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectCardOrderList" parameterType="com.lgu.ccss.admin.card.domain.CardVO" resultType="com.lgu.ccss.admin.card.domain.CardVO">
+			SELECT 
+				CARD_ID,
+				CARD_NM,
+				CARD_SORT_NUM,
+				EXPOSURE_YN,
+				FIX_YN,
+				SERVICE_CATEGORY
+			FROM TB_CARD
+			WHERE 1=1
+			AND EXPOSURE_YN ='Y'
+			<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+			</if>
+			ORDER BY CARD_SORT_NUM  ASC
+	</select>
+	
+
+	
+	<select id="checkFixCardList" parameterType="com.lgu.ccss.admin.card.domain.CardVO" resultType="com.lgu.ccss.admin.card.domain.CardVO">
+			SELECT 
+				CARD_ID,
+				CARD_NM,
+				CARD_SORT_NUM,
+				EXPOSURE_YN,
+				FIX_YN,
+				SERVICE_CATEGORY,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT, 'YYYY-MM-DD') AS UPD_DT
+			FROM TB_CARD
+			WHERE CARD_ID IN
+			<foreach collection="cardIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+			</foreach>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+			</if>
+			ORDER BY REG_DT DESC,CARD_SORT_NUM ASC
+	</select>
+	
+	<!-- 게시판 리스트 조회 카운트 -->
+	<select id="selectCardListCnt" parameterType="com.lgu.ccss.admin.card.domain.CardVO" resultType="int">
+		SELECT COUNT(CARD_ID)
+		  FROM TB_CARD
+		  WHERE 1=1
+		 <include refid="dynamicWhereTbCard" />
+	</select>
+	
+	<select id="selectCardDetail" parameterType="com.lgu.ccss.admin.card.domain.CardVO"  resultType="com.lgu.ccss.admin.card.domain.CardVO">
+		SELECT 
+				CARD_ID,
+				CARD_NM,
+				CARD_SORT_NUM,
+				EXPOSURE_YN,
+				FIX_YN,
+				SERVICE_CATEGORY,
+				CARD_APP_ID,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT, 'YYYY-MM-DD') AS UPD_DT
+	  FROM TB_CARD 
+	   WHERE CARD_ID = #{cardId} 
+	</select>
+	
+	<insert id="insertCard" parameterType="com.lgu.ccss.admin.card.domain.CardVO" >
+		INSERT INTO TB_CARD
+		(
+			CARD_ID,
+			CARD_NM,
+			CARD_APP_ID,
+			CARD_SORT_NUM,
+			EXPOSURE_YN,
+			FIX_YN,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT,
+			SERVICE_CATEGORY
+		) 
+		VALUES 
+		(
+			#{cardId},
+			#{cardNm},
+			#{cardAppId},
+			#{cardSortNum},
+			#{exposureYn},
+			#{fixYn},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE,
+			#{serviceCategory}
+		 )
+	</insert>
+	
+	<update id="updateCard" parameterType="com.lgu.ccss.admin.card.domain.CardVO">
+		UPDATE TB_CARD
+			SET 
+				 EXPOSURE_YN = #{exposureYn}
+				,FIX_YN= #{fixYn}
+				,CARD_NM = #{cardNm}
+				,CARD_SORT_NUM  = #{cardSortNum}
+				,SERVICE_CATEGORY =#{serviceCategory}
+				,CARD_APP_ID = #{cardAppId}
+				,UPD_ID = #{updId}
+				,UPD_DT = SYSDATE
+		 WHERE CARD_ID = #{cardId} 
+	</update>
+	
+	<!--카드 삭제 -->
+	<delete id="deleteCard" parameterType="com.lgu.ccss.admin.card.domain.CardVO">
+		DELETE
+		  FROM TB_CARD
+		 WHERE CARD_ID IN
+		<foreach collection="cardIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	
+	<select id="checkCardName" parameterType="com.lgu.ccss.admin.card.domain.CardVO"  resultType="int">
+		SELECT 
+				COUNT(CARD_NM)
+		FROM TB_CARD 
+		WHERE CARD_NM = #{cardNm} 
+		<if test="!@org.springframework.util.StringUtils@isEmpty(cardId)">
+			AND CARD_ID != #{cardId} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+		</if>
+	</select>
+	
+	<select id="checkCardNumDuplication" parameterType="com.lgu.ccss.admin.card.domain.CardVO"  resultType="int">
+		SELECT 
+				COUNT(CARD_SORT_NUM)
+		FROM TB_CARD 
+		WHERE CARD_SORT_NUM = #{cardSortNum}
+		<if test="!@org.springframework.util.StringUtils@isEmpty(cardId)">
+			AND CARD_ID != #{cardId} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+		</if> 
+	</select>
+	
+	
+	<!--이벤트 카드 영역  -->
+	
+	<select id="selectEventCardList" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO" resultType="com.lgu.ccss.admin.card.domain.EventCardVO">
+		<include refid="pagingHead"/>
+			SELECT 
+				tec.EVENT_CARD_ID,
+				tec.SERVICE_CATEGORY,
+				tec.EVENT_CARD_URL,
+				TO_CHAR(tec.EXPOSURE_START_DT, 'YYYY-MM-DD') AS EXPOSURE_START_DT,
+				TO_CHAR(tec.EXPOSURE_END_DT, 'YYYY-MM-DD') AS EXPOSURE_END_DT,
+				tec.REG_ID,
+				TO_CHAR(tec.REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				tec.UPD_ID,
+				TO_CHAR(tec.UPD_DT, 'YYYY-MM-DD') AS UPD_DT,
+				tec.EVENT_CARD_TYPE,
+				NVL(tc.CARD_NM,'-') AS CARD_NM
+			FROM TB_EVENT_CARD tec
+			LEFT OUTER JOIN TB_CARD tc
+			ON tec.CARD_ID = tc.CARD_ID
+			WHERE 1=1
+			ORDER BY tec.REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	<select id="selectEventCardListCnt" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO" resultType="int">
+		SELECT COUNT(EVENT_CARD_ID)
+		  FROM (
+				SELECT 
+					tec.EVENT_CARD_ID,
+					tec.SERVICE_CATEGORY,
+					tec.EVENT_CARD_URL,
+					TO_CHAR(tec.EXPOSURE_START_DT, 'YYYY-MM-DD') AS EXPOSURE_START_DT,
+					TO_CHAR(tec.EXPOSURE_END_DT, 'YYYY-MM-DD') AS EXPOSURE_END_DT,
+					tec.REG_ID,
+					TO_CHAR(tec.REG_DT, 'YYYY-MM-DD') AS REG_DT,
+					tec.UPD_ID,
+					TO_CHAR(tec.UPD_DT, 'YYYY-MM-DD') AS UPD_DT,
+					tec.EVENT_CARD_TYPE,
+					tc.CARD_NM
+				FROM TB_EVENT_CARD tec
+				LEFT OUTER JOIN TB_CARD tc
+				ON tec.CARD_ID = tc.CARD_ID
+		  )
+		  WHERE 1=1
+		  <if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+		</if> 
+	</select>
+	
+	<select id="selectEventCardDetail" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO"  resultType="com.lgu.ccss.admin.card.domain.EventCardVO">
+		SELECT 
+				tec.EVENT_CARD_ID,
+				tec.EVENT_CARD_URL,
+				tec.SERVICE_CATEGORY,
+				TO_CHAR(tec.EXPOSURE_START_DT, 'YYYY-MM-DD') AS EXPOSURE_START_DT,
+				TO_CHAR(tec.EXPOSURE_END_DT, 'YYYY-MM-DD') AS EXPOSURE_END_DT,
+				tec.CARD_IMG_FILE_NAME,
+				tec.REG_ID,
+				TO_CHAR(tec.REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				tec.UPD_ID,
+				TO_CHAR(tec.UPD_DT, 'YYYY-MM-DD') AS UPD_DT,
+				tec.CARD_ID,
+				NVL(tc.CARD_NM,' ') AS CARD_NM,
+				tec.EVENT_CARD_TYPE
+	      FROM  TB_EVENT_CARD tec
+	LEFT OUTER JOIN  TB_CARD tc
+	        ON  tec.CARD_ID = tc.CARD_ID
+	     WHERE  tec.EVENT_CARD_ID = #{eventCardId} 
+	</select>
+	
+	<insert id="insertEventCard" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO" >
+		INSERT INTO TB_EVENT_CARD
+		(
+			EVENT_CARD_ID,
+			SERVICE_CATEGORY,
+			EVENT_CARD_URL,
+			EXPOSURE_START_DT,
+			EXPOSURE_END_DT,
+			CARD_IMG_FILE_NAME,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT,
+			CARD_ID,
+			EVENT_CARD_TYPE
+		) 
+		VALUES 
+		(
+			#{eventCardId},
+			#{serviceCategory},
+			#{eventCardUrl},
+			TO_DATE(#{exposureStartDt},'yyyymmdd'),
+			TO_DATE(#{exposureEndDt},'yyyymmdd'),
+			#{cardImgFileName},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE,
+			#{cardId},
+			#{eventCardType}
+		 )
+	</insert>
+	
+	<update id="updateEventCard" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO">
+		UPDATE TB_EVENT_CARD
+			SET 
+				 SERVICE_CATEGORY  = #{serviceCategory}
+				,EVENT_CARD_URL    = #{eventCardUrl}
+				,EXPOSURE_START_DT = TO_DATE(#{exposureStartDt},'yyyymmddhh24miss')
+				,EXPOSURE_END_DT   = TO_DATE(#{exposureEndDt},'yyyymmddhh24miss')
+				,UPD_ID = #{updId}
+				,UPD_DT = SYSDATE
+				,CARD_ID = #{cardId}
+				,EVENT_CARD_TYPE = #{eventCardType}
+		 WHERE EVENT_CARD_ID = #{eventCardId} 
+	</update>
+	
+	<!--이벤트 카드 삭제 -->
+	<delete id="deleteEventCard" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO">
+		DELETE
+		  FROM TB_EVENT_CARD
+		 WHERE EVENT_CARD_ID IN
+		<foreach collection="eventCardIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<select id="selectDeleteEventCardFileNm" parameterType="com.lgu.ccss.admin.card.domain.EventCardVO"  resultType="com.lgu.ccss.admin.card.domain.EventCardVO">
+		SELECT 
+				CARD_IMG_FILE_NAME
+	   FROM TB_EVENT_CARD 
+	   WHERE EVENT_CARD_ID IN
+		<foreach collection="eventCardIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<!--카드 배치 리셋 -->
+	<update id="cardOrderReset" parameterType="com.lgu.ccss.admin.card.domain.CardVO">
+		UPDATE 
+		   TB_CARD
+		 SET EXPOSURE_YN ='N'
+		 ,CARD_SORT_NUM = 0
+		 WHERE 	SERVICE_CATEGORY = #{serviceCategory}
+	</update>
+	
+	
+	<!--카드 배치 순서 -->
+	<update id="updateCardOrder" parameterType="com.lgu.ccss.admin.card.domain.CardVO">
+		UPDATE 
+		   TB_CARD
+		 SET EXPOSURE_YN ='Y'
+		 ,CARD_SORT_NUM = #{cardSortNum}
+		 ,UPD_DT = SYSDATE
+		 ,UPD_ID = #{updId}
+		 WHERE CARD_ID=#{cardId}
+	</update>
+	
+	
+	<select id="selectLastModiInfo" parameterType="com.lgu.ccss.admin.card.domain.CardVO"  resultType="com.lgu.ccss.admin.card.domain.CardVO">
+		SELECT ROWNUM_TABLE.* FROM(
+				SELECT 
+					TMUH.MNGR_ID,
+					TO_CHAR(TMUH.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+					TMG.GRP_NM
+				FROM 
+					TB_MNGR_USE_HIS TMUH, TB_MNGR TM, TB_MNGR_GROUP TMG
+				WHERE TMUH.REQ_URL =#{reqUrl}
+				AND  TM.MNGR_ID = TMUH.MNGR_ID 
+				AND  TM.MNGR_LEVEL     = TMG.MNGR_GRP_ID
+				ORDER BY REG_DT DESC
+				
+			) ROWNUM_TABLE
+			WHERE ROWNUM  <![CDATA[ = ]]> 1
+	</select>
+	
+	
+	
+</mapper>

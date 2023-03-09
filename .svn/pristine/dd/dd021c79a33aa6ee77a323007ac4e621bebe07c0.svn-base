@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE tiles-definitions PUBLIC  
+        "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"  
+        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<definition name="DefaultTemplate" template="/WEB-INF/tiles/layout.jsp">
+		<put-attribute name="title" 		value="사용자" />
+		<put-attribute name="script" 		value="/WEB-INF/tiles/script.jsp" />
+		<put-attribute name="css" 			value="/WEB-INF/tiles/css.jsp" />
+	</definition>
+	
+	<definition name="LoginTemplate" template="/WEB-INF/tiles/loginLayout.jsp">
+		<put-attribute name="title" 		value="사용자" />
+		<put-attribute name="script" 		value="/WEB-INF/tiles/script.jsp" />
+		<put-attribute name="css" 			value="/WEB-INF/tiles/css.jsp" />
+	</definition>
+	
+	<!-- 팝업에 사용할 tiles -->
+	<definition name="excludeTemplate" template="/WEB-INF/tiles/layout-exclude-tiles.jsp">
+		<put-attribute name="title" 		value="사용자" />
+		<put-attribute name="script" 		value="/WEB-INF/tiles/script.jsp" />
+		<put-attribute name="css" 			value="/WEB-INF/tiles/css.jsp" />
+	</definition>
+	
+	<!-- Dashboard -->
+	<definition name="DashboardTemplate" template="/WEB-INF/tiles/dashboardLayout.jsp">
+		<put-attribute name="title" 		value="관리자" />
+		<put-attribute name="script" 		value="/WEB-INF/tiles/script.jsp" />
+		<put-attribute name="css" 			value="/WEB-INF/tiles/css.jsp" />
+	</definition>
+	
+</tiles-definitions>

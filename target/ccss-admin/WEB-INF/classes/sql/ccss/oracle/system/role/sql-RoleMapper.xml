@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Role">
+
+	<resultMap id="Role" 		type="com.lgu.ccss.admin.system.role.domain.RoleVO">
+		<result property="mngrGrpId"		column="MNGR_GRP_ID"	javaType="string"/>
+		<result property="grpName"			column="GRP_NAME"    	javaType="string"/>
+		<result property="regId"			column="REG_ID"     	javaType="string"/>
+		<result property="regDt"			column="REG_DT"   		javaType="string"/>
+		<result property="updId"			column="UPD_ID"    		javaType="string"/>
+		<result property="updDt"			column="UPD_DT"  		javaType="string"/>
+		<result property="useYn"			column="USE_YN"     	javaType="string"/>
+		<result property="orderNo"			column="ORDER_NO"   	javaType="string"/>
+		<result property="grpExplan"		column="GRP_EXPLAN"		javaType="string"/>
+	</resultMap>
+	
+	<select id="roleList" parameterType="Role" resultType="flkMap">
+		SELECT B.*  FROM (      
+			   SELECT A.* , ROWNUM AS RNUM
+			   FROM (    
+			         SELECT 	  
+						  MNGR_GRP_ID
+					     , GRP_NAME
+					     , REG_ID
+					     , TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+					     , UPD_ID
+					     , TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+					     , USE_YN
+					     , GRP_EXPLAN
+					  FROM TB_MNGR_GROUP
+					 ORDER BY GRP_NAME	
+				   ) A WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+    		) B WHERE rnum <![CDATA[>=]]> #{startCount}
+	</select>
+
+	<!-- <select id="roleList" parameterType="Role" resultType="flkMap">
+		SELECT 
+			   ROW_NUMBER() OVER (ORDER BY GRP_NAME ASC) RNUM
+			 , MNGR_GRP_ID
+		     , GRP_NAME
+		     , REG_ID
+		     , TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+		     , UPD_ID
+		     , TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		     , USE_YN
+		     , GRP_EXPLAN
+		  FROM TB_MNGR_GROUP
+		 ORDER BY GRP_NAME	
+	    OFFSET #{startCount} ROWS FETCH NEXT #{endCount} ROWS ONLY
+	</select> -->
+	
+	<select id="roleListCount" resultType="int">
+		SELECT COUNT(MNGR_GRP_ID)
+		  FROM TB_MNGR_GROUP
+	</select>
+	
+	
+	<select id="selectRole" parameterType="Role" resultMap="Role">
+		SELECT 
+			   MNGR_GRP_ID 
+		     , GRP_NAME
+		     , REG_ID
+		     , REG_DT
+		     , UPD_ID
+		     , UPD_DT
+		     , USE_YN
+		     , GRP_EXPLAN
+		  FROM TB_MNGR_GROUP   
+		 WHERE MNGR_GRP_ID = #{mngrGrpId}
+	</select>
+	
+	
+	<select id="roleMenuListAll" parameterType="RoleMenu" resultType="flkMap">
+		<![CDATA[
+		SELECT
+			   A.MENU_ID  
+			 , A.MENU_NM
+			 , A.ORDER_NO
+			 , A.PARENTMENU_ID
+			 , B.MNGR_GRP_ID 
+			 , CASE WHEN B.MNGR_GRP_ID IS NULL THEN 'N' ELSE 'Y' END AS ROLE_YN
+			 , CASE WHEN (SELECT COUNT(MENU_ID) FROM TB_MENU AA WHERE AA.PARENTMENU_ID = A.MENU_ID) <= 0 THEN 'Y' ELSE 'N' END AS LEAF_YN 
+		 FROM
+			(
+				SELECT
+						MENU_ID 
+					  , MENU_NM
+					  , ORDER_NO
+					  , PARENTMENU_ID
+				FROM
+					TB_MENU
+				START WITH PARENTMENU_ID = #{parentmenuId}
+				CONNECT BY PRIOR MENU_ID = PARENTMENU_ID
+				ORDER SIBLINGS BY ORDER_NO
+			) A LEFT OUTER JOIN TB_ROLE_MENU B 
+				ON A.MENU_ID = B.MENU_ID AND B.MNGR_GRP_ID = #{mngrGrpId}
+		]]>
+	</select>
+	
+	
+	
+	
+	<delete id="deleteRoleMenu" parameterType="RoleTree">
+		DELETE
+		  FROM TB_ROLE_MENU
+		 WHERE 1=1
+		<if test="mngrGrpId != null and mngrGrpId != ''">
+		   AND MNGR_GRP_ID = #{mngrGrpId}
+		</if>
+		<if test="menuId != null and menuId != ''">
+		   AND MENU_ID = #{menuId}
+		</if>
+	</delete>
+
+
+	<delete id="deleteRoleProgramNotIn" parameterType="RoleTree">
+		DELETE
+		  FROM TB_ROLE_PROGRAM
+		 WHERE 1=1
+		   AND MNGR_GRP_ID = #{mngrGrpId}
+		   AND PROGRAM_ID IN
+		   		(
+		   			SELECT PROGRAM_ID
+		   			  FROM TB_PROGRAM
+		   			 WHERE MENU_ID NOT IN
+		   			 <foreach item="menuId" index="index" collection="menuIds" separator="," open="(" close=")">
+		   			 	#{menuId}
+		   			 </foreach>
+				)	
+	</delete>
+	
+	<insert id="insertRoleMenu" parameterType="RoleTree">
+		INSERT INTO TB_ROLE_MENU (
+				MNGR_GRP_ID
+			  , MENU_ID
+			) VALUES (	
+				#{mngrGrpId}
+			   ,#{menuId}
+			)
+	</insert>
+	
+	<delete id="deleteRoleProgram" parameterType="RoleTree">
+		DELETE
+		  FROM TB_ROLE_PROGRAM
+		 WHERE 1=1
+		<if test="mngrGrpId != null and mngrGrpId != ''">
+		   AND MNGR_GRP_ID = #{mngrGrpId}
+		</if>
+		<if test="menuId != null and menuId != ''">
+		   AND PROGRAM_ID IN (
+		   						SELECT PROGRAM_ID
+		   						  FROM TB_PROGRAM
+		   						 WHERE MENU_ID = #{menuId}
+		   					)
+		</if>
+	</delete>
+	
+	
+	<select id="roleMenuList" parameterType="RoleMenu" resultType="flkMap">
+		SELECT
+			   A.MENU_ID  
+			 , A.MENU_NM
+			 , A.PARENTMENU_ID
+			 , A.MENU_DEPTH
+			 , A.ORDER_NO
+			 , A.USE_YN
+			 , B.MNGR_GRP_ID
+		 FROM
+			(
+				SELECT
+						MENU_ID  
+					  , MENU_NM
+					  , PARENTMENU_ID
+                      , MENU_DEPTH
+                      , ORDER_NO
+                      , USE_YN
+				FROM
+					TB_MENU
+				START WITH PARENTMENU_ID = #{parentmenuId}
+				CONNECT BY PRIOR MENU_ID = PARENTMENU_ID
+				ORDER SIBLINGS BY ORDER_NO
+			) A , TB_ROLE_MENU B 
+				WHERE A.MENU_ID = B.MENU_ID AND B.MNGR_GRP_ID = #{mngrGrpId}
+	</select>
+	
+	
+	<select id="selectRoleProgramList" parameterType="RoleMenu" resultType="flkMap">
+		SELECT 
+			   TP_TEMP.PROGRAM_ID
+			 , TP_TEMP.PROGRAM_NM
+			 , TP_TEMP.PROGRAM_URL
+			 , TP_TEMP.ST_PROGRAM_YN
+			 , TP_TEMP.REG_ID
+			 , TP_TEMP.REG_DT
+			 , TP_TEMP.UPD_ID
+			 , TP_TEMP.UPD_DT
+			 , TP_TEMP.MENU_ID
+			 , TP_TEMP.USE_YN
+			 , DECODE(TPR_TEMP.MNGR_GRP_ID, NULL, 'N','Y') ROLE_PROGRAM_YN
+		  FROM 
+			(
+				SELECT 
+					  PROGRAM_ID
+					 , PROGRAM_NM
+					 , PROGRAM_URL
+					 , ST_PROGRAM_YN
+					 , REG_ID
+					 , REG_DT
+					 , UPD_ID
+					 , UPD_DT
+					 , MENU_ID
+					 , USE_YN
+		 		  FROM TB_PROGRAM
+		 		 WHERE 1=1
+		 		   AND MENU_ID = #{menuId}
+			) TP_TEMP 
+			LEFT OUTER JOIN 
+			(
+		 		SELECT 
+		 			   MNGR_GRP_ID
+					 , PROGRAM_ID
+				  FROM TB_ROLE_PROGRAM
+				 WHERE 1=1
+				   AND MNGR_GRP_ID = #{mngrGrpId}
+		 	) TPR_TEMP
+		 ON TP_TEMP.PROGRAM_ID = TPR_TEMP.PROGRAM_ID
+		 ORDER BY TP_TEMP.PROGRAM_ID
+	</select>
+	
+	<insert id="insertRoleProgram" parameterType="Role">
+		INSERT INTO TB_ROLE_PROGRAM (
+					MNGR_GRP_ID
+				  , PROGRAM_ID
+				) VALUES (
+					#{mngrGrpId}
+				  , #{programId}
+				)
+	</insert>
+	
+	<!-- 권한 그룹 등록 -->
+	<insert id="insertRole" parameterType="Role">
+		INSERT INTO TB_MNGR_GROUP ( 
+				MNGR_GRP_ID
+			  , GRP_NAME
+			  , REG_ID
+			  , REG_DT
+			  , UPD_ID
+			  , UPD_DT 
+			  , USE_YN
+			  , GRP_EXPLAN
+		) VALUES ( 
+				#{mngrGrpId}
+			  , #{grpName}
+			  , #{regId}
+			  , SYSDATE
+			  , #{updDt}
+			  , SYSDATE 
+			  , #{useYn}
+			  , #{grpExplan}
+		)
+	</insert>
+	
+	<!-- 권한 그룹 수정 -->
+	<update id="updateRole" parameterType="Role">
+		UPDATE TB_MNGR_GROUP
+		   SET MNGR_GRP_ID 		= #{mngrGrpId}
+			 , UPD_ID 			= #{updId}
+			 , UPD_DT 			= SYSDATE
+			 , USE_YN 			= #{useYn}
+			 , GRP_EXPLAN 		= #{grpExplan}
+		 WHERE MNGR_GRP_ID 		= #{mngrGrpId}
+	</update>
+	
+	
+	<!-- 권한 그룹 순서 업데이트(사용안함) -->
+	<update id="updateRoleOrderNo" parameterType="Role">
+		UPDATE TB_MNGR_GROUP
+		   SET ORDER_NO = (ORDER_NO + 1)
+		 WHERE ORDER_NO >= #{orderNo}
+		   AND 
+		   		(SELECT SUB.CNT
+		   		   FROM (
+		   		   			SELECT COUNT(ORDER_NO) AS CNT
+		   		   			  FROM TB_MNGR_GROUP
+		   		   			 WHERE ORDER_NO = #{orderNo}
+		   		   			   AND MNGR_GRP_ID != #{mngrGrpId}
+						) SUB
+				) > 0
+		   AND MNGR_GRP_ID != #{mngrGrpId}
+	</update>
+	
+	<!-- 권한 프로그램 삭제 -->	
+	<delete id="deleteRoleProgramOne" parameterType="Role">
+		DELETE
+		  FROM TB_ROLE_PROGRAM
+		 WHERE MNGR_GRP_ID = #{mngrGrpId}
+	</delete>
+	
+	<!-- 권한 메뉴 삭제 -->
+	<delete id="deleteRoleMenuOne" parameterType="Role">
+		DELETE
+		  FROM TB_ROLE_MENU
+		 WHERE MNGR_GRP_ID = #{mngrGrpId}
+	</delete>
+	
+	<!-- 권한 삭제 -->
+	<delete id="deleteRole" parameterType="Role">
+		DELETE
+		  FROM TB_ROLE
+		 WHERE MNGR_GRP_ID = #{mngrGrpId}
+	</delete>
+</mapper>

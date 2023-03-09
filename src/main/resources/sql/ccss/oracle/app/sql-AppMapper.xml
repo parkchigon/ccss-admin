@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="App">
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+   	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<resultMap type="appVO" id="appMap">
+			<result property="appId" 		 column="APP_ID" />
+			<result property="appNm"         column="APP_NM" />
+			<result property="appType"       column="APP_TYPE" />
+			<result property="appVer"        column="APP_VER" />
+			<result property="appFileNm"     column="APP_FILE_NM" />
+			<result property="appCont"       column="APP_CONT" />
+			<result property="appMarketUrl"  column="APP_MARKET_URL" />
+			<result property="forcedUpdYn"   column="FORCED_UPD_YN" />
+			<result property="useYn"         column="USE_YN" />
+			<!-- <result property="pushStartDt"   column="PUSH_START_DT" />
+			<result property="pushEndDt"     column="PUSH_END_DT" />
+			<result property="pushNotiYn"    column="PUSH_NOTI_YN" /> -->
+			<result property="regId"         column="REG_ID" />
+			<result property="regDt"         column="REG_DT" />
+			<result property="updId"         column="UPD_ID" />
+			<result property="updDt"         column="UPD_DT" />
+	</resultMap>
+
+	
+	<sql id="dynamicWhereApp">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useYn)">
+			AND USE_YN = #{useYn}	
+		</if>
+	</sql>
+	
+	
+	<select id="selectCurrentAppList" parameterType="appVO" resultType="appVO">
+		SELECT 
+				APP_ID
+				,APP_NM
+				,APP_VER
+				,APP_FILE_NM
+				,APP_MARKET_URL
+				,FORCED_UPD_YN
+				,APP_TYPE
+				,USE_YN
+				,APP_CONT
+				<!-- ,TO_CHAR(PUSH_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_START_DT
+				,TO_CHAR(PUSH_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_END_DT
+				,PUSH_NOTI_YN -->
+				,OS_TYPE
+				,REG_ID
+				,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+				,UPD_ID
+				,TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_APP 
+		WHERE 1=1
+			AND USE_YN ='Y'
+		 ORDER BY APP_VER DESC
+	</select>
+	
+	
+	
+	<select id="selectAppList" parameterType="appVO" resultType="appVO">
+		<include refid="pagingHead"/>
+		SELECT 
+				APP_ID
+				,APP_NM
+				,APP_VER
+				,APP_FILE_NM
+				,APP_MARKET_URL
+				,FORCED_UPD_YN
+				,APP_TYPE
+				,USE_YN
+				,APP_CONT
+				,OS_TYPE
+				<!-- ,TO_CHAR(PUSH_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_START_DT
+				,TO_CHAR(PUSH_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_END_DT
+				,PUSH_NOTI_YN -->
+				,REG_ID
+				,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+				,UPD_ID
+				,TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_APP 
+		WHERE 1=1
+		 ORDER BY APP_VER DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	<select id="selectAppDetail" parameterType="appVO" resultType="appVO">
+		SELECT 
+				APP_ID
+				,APP_NM
+				,APP_VER
+				,APP_FILE_NM
+				,APP_MARKET_URL
+				,FORCED_UPD_YN
+				,APP_TYPE
+				,USE_YN
+				,OS_TYPE
+				,APP_CONT
+				<!-- ,TO_CHAR(PUSH_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_START_DT
+				,TO_CHAR(PUSH_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_END_DT
+				,PUSH_NOTI_YN -->
+				,REG_ID
+				,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+				,UPD_ID
+				,TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_APP 
+		WHERE 1=1
+		AND APP_ID =#{appId}
+	</select>
+	
+	<select id="selectAppListCnt" parameterType="appVO" resultType="int">
+		SELECT COUNT(APP_ID)
+		  FROM TB_APP
+	</select>
+	
+	<delete id="deleteApp" parameterType="appVO" >
+		DELETE
+		  FROM TB_APP
+		 WHERE APP_ID IN
+		<foreach collection="appSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	
+	<select id="checkExistApp" parameterType="appVO" resultType="int">
+		SELECT COUNT(APP_ID)
+		  FROM TB_APP
+		  WHERE USE_YN='Y'
+		  AND APP_TYPE =#{appType}
+		  AND OS_TYPE =#{osType}
+		  AND APP_ID NOT IN (#{appId})
+	</select>
+	
+	
+	<insert id ="insertNewApp" parameterType="appVO" >
+		INSERT INTO TB_APP 
+		(
+			APP_ID,
+			APP_NM,
+			APP_VER,
+			APP_FILE_NM,
+			APP_MARKET_URL,
+			FORCED_UPD_YN,
+			APP_TYPE,
+			APP_CONT,
+			USE_YN,
+			OS_TYPE,
+			<!--
+			 <if test="!@org.springframework.util.StringUtils@isEmpty(spostDate) ">
+			 PUSH_START_DT,
+			 </if> 
+			<if test="!@org.springframework.util.StringUtils@isEmpty(epostDate)  ">
+			 PUSH_END_DT,
+			 </if>
+			PUSH_NOTI_YN, -->
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		) 
+		VALUES 
+		(
+			#{appId},
+			#{appNm},
+			#{appVer},
+			#{appFileNm},
+			#{appMarketUrl},
+			#{forcedUpdYn},
+			#{appType},
+			#{appCont},
+			#{useYn},
+			#{osType},
+			<!--
+			<if test="!@org.springframework.util.StringUtils@isEmpty(spostDate) ">
+			TO_DATE(#{pushStartDt},'yyyymmddhh24miss'),
+			</if>  
+			<if test="!@org.springframework.util.StringUtils@isEmpty(epostDate) ">
+			TO_DATE(#{pushEndDt},'yyyymmddhh24miss'),
+			</if>  
+			#{pushNotiYn}, -->
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE
+		) 
+	</insert>
+	
+	<update id="updateApp" parameterType="appVO" >
+	UPDATE TB_APP
+		SET 
+			APP_NM 				=  #{appNm},
+			APP_TYPE 			=  #{appType},
+			APP_VER				=  #{appVer},
+			APP_FILE_NM 		=  #{appFileNm},
+			APP_CONT 			=  #{appCont},
+			APP_MARKET_URL 		=  #{appMarketUrl},
+			FORCED_UPD_YN  		=  #{forcedUpdYn},
+			USE_YN 				=  #{useYn},
+			OS_TYPE 			=  #{osType},
+			<!--<if test="!@org.springframework.util.StringUtils@isEmpty(spostDate) ">
+			PUSH_START_DT 		=  TO_DATE(#{pushStartDt},'yyyymmddhh24miss'),
+			</if>  
+			<if test="!@org.springframework.util.StringUtils@isEmpty(epostDate) ">
+			PUSH_END_DT   		=  TO_DATE(#{pushEndDt},'yyyymmddhh24miss'),
+			</if> 
+			PUSH_NOTI_YN 		=  #{pushNotiYn}, -->
+			UPD_ID 				=  #{updId},
+			UPD_DT 				=  SYSDATE
+		WHERE APP_ID = #{appId}
+	</update>
+	
+</mapper>

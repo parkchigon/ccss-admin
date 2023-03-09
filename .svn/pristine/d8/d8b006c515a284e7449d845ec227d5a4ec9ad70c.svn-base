@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+
+	<resultMap type="userVO" id="userMap">
+		<result property="useYn"				column="USE_YN" />
+		<result property="loginFailCnt"			column="USE_YN" />
+		<result property="regDt"				column="USE_YN" />
+		<result property="regId"				column="USE_YN" />
+		<result property="updDt"				column="UPD_DT" />
+		<result property="updId"				column="UPD_DT" />
+		<result property="membId"				column="MEMB_ID" />
+		<result property="joinDt"				column="JOIN_DT" />
+		<result property="securityKey"			column="SECURITY_KEY" />
+		<result property="membNo"				column="MEMB_NO" />
+		<result property="latestLoginDt"		column="LATEST_LOGIN_DT" />
+		<result property="serverId"				column="SERVER_ID" />
+		<result property="deviceEsn"			column="DEVICE_ESN" />
+		<result property="usimModel"			column="DEVICE_ESN" />
+		<result property="usimSn"				column="USIM_SN" />
+		<result property="devicePushClientId"	column="DEVICE_PUSH_CLIENT_ID" />
+		<result property="deviceLoginDt"		column="DEVICE_LOGIN_DT" />
+		<result property="devicePushConnDt"		column="DEVICE_PUSH_CONN_DT" />
+		<result property="devicePushConStatus"	column="DEVICE_PUSH_CON_STATUS" />
+		<result property="vehicleModelId"		column="VEHICLE_MODEL_ID" />
+		<result property="connDeviceId"			column="CONN_DEVICE_ID" />
+		<result property="deviceModelId"		column="DEVICE_MODEL_ID" />
+		<result property="firmwareInfo"			column="FIRMWARE_INFO" />
+		<result property="jsonSetInfo"			column="JSON_SET_INFO" />
+		<result property="uiccid"				column="UICCID" />
+		<result property="deviceType"			column="DEVICE_TYPE" />
+		<result property="startDate"			column="START_DATE" />
+		<result property="endDate"				column="END_DATE" />
+		<result property="deviceCtn"			column="DEVICE_CTN" />
+		<result property="productNm"			column="PRODUCT_NM" />
+		<result property="productExplain"		column="PRODUCT_EXPLAIN" />
+		<result property="newRejoinYn"			column="NEW_REJOIN_YN" />
+		<result property="useStatus"			column="USE_STATUS" />
+		<result property="pushConnectionYn"		column="PUSH_CONNECTION_YN" />
+	</resultMap>
+	
+	
+	
+	<select id="checkUserpushConnect" parameterType="userVO" resultType="int">
+		SELECT COUNT(*)
+		  FROM TB_DEVICE_PUSH_SESS
+		 WHERE DEVICE_CTN= #{deviceCtn} and CONN_DEVICE_ID = #{connDeviceId}
+	</select>
+	
+
+</mapper>

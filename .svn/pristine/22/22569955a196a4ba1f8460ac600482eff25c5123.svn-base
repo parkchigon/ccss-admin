@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>devonframe</groupId>
+		<artifactId>devon-framework</artifactId>
+		<version>1.6.1</version>
+	</parent>
+	<artifactId>devon-paging</artifactId>
+	<name>devon-paging</name>
+	<description>devon-paging desc</description>
+
+	<dependencies>
+
+		<!-- DevOnFrame -->
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-web</artifactId>
+			<version>${devonframe.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-dataaccess</artifactId>
+			<version>${devonframe.version}</version>
+		</dependency>
+		
+		<!-- javax -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${servlet.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>${jsp.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--  JSTL -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>${jstl.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>jsr250-api</artifactId>
+			<version>${jsr250.api.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+
+	</dependencies>
+</project>

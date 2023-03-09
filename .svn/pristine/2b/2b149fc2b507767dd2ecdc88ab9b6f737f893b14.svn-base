@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+				        http://www.springframework.org/schema/beans/spring-beans.xsd
+				        http://www.springframework.org/schema/context
+				        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="mailSenderFactory" class="devonframe.mail.MailSenderFactory">
+		<property name="globalMailPolicy" ref="mailPolicy" />
+		<property name="optionalMailPolicyMap">
+			<map>
+				<entry key="mailPolicy1" value-ref="mailPolicy1" />
+			</map>
+		</property>
+
+		<property name="mailTemplateMap">
+			<map>
+				<entry key="mailTemplate1" value-ref="mailTemplate1" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="mailPolicy" class="devonframe.mail.policy.MailPolicy">
+		<property name="testMode" value="false" />
+		<property name="testReceivers" value="" />
+
+		<property name="mailHost" value="smtp.gmail.com" />
+		<property name="mailPort" value="465" />
+
+		<property name="authenticationEnabled" value="true" />
+		<property name="authenticationTlsEnabled" value="false" />
+		<property name="authenticationSslEnabled" value="true" />
+
+		<!-- TODO. 프로젝트별 계정으로 변경 필요 -->
+		<property name="authenticationId" value="devontestmail@gmail.com" />
+		<property name="authenticationPassword" value="devondevon" />
+		<property name="defaultSenderMailAddress" value="devontestmail@gmail.com" />
+		<property name="defaultSenderName" value="Admin" />
+
+		<property name="sessionDebugMessageFlag" value="false" />
+		<property name="defaultSessionLoad" value="true" />
+
+		<property name="contentType" value="7bit" />
+		<property name="plainContentType" value="text/plain" />
+		<property name="htmlContentType" value="text/html" />
+		<property name="charsetType" value="UTF-8" />
+		<property name="encodingType" value="Q" />
+	</bean>
+
+
+	<bean id="mailPolicy1" class="devonframe.mail.policy.MailPolicy">
+		<property name="testMode" value="false" />
+		<property name="testReceivers" value="" />
+
+		<property name="mailHost" value="smtp.daum.net" />
+		<property name="mailPort" value="465" />
+
+		<property name="authenticationEnabled" value="true" />
+		<property name="authenticationTlsEnabled" value="false" />
+		<property name="authenticationSslEnabled" value="true" />
+
+		<!-- TODO. 프로젝트별 계정으로 변경 필요 -->
+		<property name="authenticationId" value="id" />
+		<property name="authenticationPassword" value="password" />
+		<property name="defaultSenderMailAddress" value="admin@somecompany.com" />
+		<property name="defaultSenderName" value="Admin" />
+
+		<property name="sessionDebugMessageFlag" value="false" />
+		<property name="defaultSessionLoad" value="true" />
+
+		<property name="contentType" value="7bit" />
+		<property name="plainContentType" value="text/plain" />
+		<property name="htmlContentType" value="text/html" />
+		<property name="charsetType" value="EUC-KR" />
+		<property name="encodingType" value="Q" />
+	</bean>
+
+
+	<bean id="mailTemplate1" class="devonframe.mail.policy.MailTemplate">
+		<property name="directory" value="classpath:/mail" />
+		<property name="htmlName" value="template1.html" />
+		<property name="imgServerIp" value="${serverIp}" />
+		<property name="imgServerPort" value="${serverPort}" />
+		<property name="imgServerContext" value="${contextPath}" />
+		<property name="saveResolvedhtmlFlag" value="false" />
+		<property name="saveResolvedhtmlDir" value="" />
+	</bean>
+	
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<!-- <property name="host" value="smtp.feelingk.com" /> -->
+		<property name="host" value="smtp.naver.com" />
+		<property name="port" value="465" />
+		<property name="username" value="4ever_2u@naver.com" />
+		<property name="password" value="525srdog525!" />
+		<property name="javaMailProperties">
+			<props>
+				<!-- <prop key="mail.transport.protocol">smtp</prop> -->
+				<prop key="mail.transport.protocol">smtps</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.debug">true</prop>
+			</props>
+		</property>
+	</bean>
+	<!--Append  -->
+</beans>

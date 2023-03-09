@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Notice">
+	<select id="selectNoticeList" parameterType="noticeVO" resultType="noticeVO">
+		SELECT *
+		  FROM (
+			SELECT (@ROWNUM := @ROWNUM+1) RNUM
+				   ,SEQ_NOTICE_ID AS NOTICE_ID  
+					,TITLE
+					,CONTENT
+					,LINK_URL
+					,USE_YN
+					,INSERT_ID
+					,DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+					,UPDATE_ID
+		         	,IFNULL(DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i'), '-') AS UPDATE_DATE
+			  FROM TB_NOTICE
+			  	   ,(SELECT @ROWNUM := 0 FROM DUAL) TMP
+			<where>   	   
+				<if test="!@org.springframework.util.StringUtils@isEmpty(useYn)"> 
+					AND USE_YN = #{useYn}
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(content) and @org.apache.commons.lang.StringUtils@equals(searchType, 'TITLE')"> 
+					AND TITLE LIKE '%${content}%'
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(content) and @org.apache.commons.lang.StringUtils@equals(searchType, 'CONTENT')"> 
+					AND CONTENT LIKE '%${content}%'
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'INSERT_DATE')"> 
+				    AND DATE_FORMAT(INSERT_DATE, '%Y%m%d')  >= #{startDate}
+				</if>	 
+				<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'INSERT_DATE')"> 
+					AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'UPDATE_DATE')"> 
+				    AND DATE_FORMAT(UPDATE_DATE, '%Y%m%d')  >= #{startDate}
+				</if>	 
+				<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'UPDATE_DATE')"> 
+					AND DATE_FORMAT(UPDATE_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+				</if>
+			</where>
+			ORDER BY USE_YN DESC , NOTICE_ID DESC
+		) AS A
+		WHERE A.RNUM BETWEEN #{startCount} AND #{endCount}
+	</select>
+	
+	<!-- 게시판 리스트 조회 카운트 -->
+	<select id="selectNoticeListCnt" parameterType="noticeVO" resultType="int">
+		SELECT COUNT(SEQ_NOTICE_ID)
+		  FROM TB_NOTICE
+		  <where>   	   
+				<if test="!@org.springframework.util.StringUtils@isEmpty(useYn)"> 
+					AND USE_YN = #{useYn}
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(content) and @org.apache.commons.lang.StringUtils@equals(searchType, 'TITLE')"> 
+					AND TITLE LIKE '%${content}%'
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(content) and @org.apache.commons.lang.StringUtils@equals(searchType, 'CONTENT')"> 
+					AND CONTENT LIKE '%${content}%'
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'INSERT_DATE')"> 
+				    AND DATE_FORMAT(INSERT_DATE, '%Y%m%d')  >= #{startDate}
+				</if>	 
+				<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'INSERT_DATE')"> 
+					AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'UPDATE_DATE')"> 
+				    AND DATE_FORMAT(UPDATE_DATE, '%Y%m%d')  >= #{startDate}
+				</if>	 
+				<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and @org.apache.commons.lang.StringUtils@equals(searchDateDiv, 'UPDATE_DATE')"> 
+					AND DATE_FORMAT(UPDATE_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+				</if>
+			</where>
+	</select>
+	
+	<select id="selectNoticeDetail" parameterType="noticeVO"  resultType="noticeVO">
+		SELECT 
+	       SEQ_NOTICE_ID AS NOTICE_ID  
+			,TITLE
+			,CONTENT
+			,LINK_URL
+			,USE_YN
+			,INSERT_ID
+			,DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+			,UPDATE_ID
+         ,DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+	   FROM TB_NOTICE
+	   WHERE SEQ_NOTICE_ID = #{noticeId} 
+	</select>
+	
+	<insert id="insertNotice" parameterType="noticeVO" >
+		INSERT INTO TB_NOTICE 
+		(SEQ_NOTICE_ID,TITLE,CONTENT,LINK_URL,USE_YN,INSERT_ID,INSERT_DATE)
+		VALUES 
+		(#{noticeId, jdbcType=VARCHAR},#{title, jdbcType=VARCHAR},
+		 #{content, jdbcType=VARCHAR},#{linkUrl, jdbcType=VARCHAR},
+		 #{useYn, jdbcType=VARCHAR},#{insertId, jdbcType=VARCHAR},
+		  NOW())
+	</insert>
+	
+	<update id="updateNotice" parameterType="noticeVO">
+		UPDATE TB_NOTICE
+		   SET TITLE = #{title, jdbcType=VARCHAR}
+		   	   , CONTENT = #{content, jdbcType=VARCHAR}
+		   	   , LINK_URL = #{linkUrl, jdbcType=VARCHAR}
+		   	   , USE_YN = #{useYn, jdbcType=VARCHAR}
+		   	   , UPDATE_ID = #{updateId, jdbcType=VARCHAR}
+		   	   , UPDATE_DATE = NOW()
+		 WHERE SEQ_NOTICE_ID = #{noticeId} 
+	</update>
+	
+	<update id="updateNoticeUseYn" parameterType="noticeVO">
+		UPDATE TB_NOTICE
+		SET   USE_YN = 'N'
+		   	 , UPDATE_ID = #{updateId, jdbcType=VARCHAR}
+		   	 , UPDATE_DATE = NOW()
+		WHERE USE_YN = 'Y' 	 
+	</update>
+	
+	
+	<!-- 게시판 삭제 -->
+	<delete id="deleteNotice" parameterType="noticeVO">
+		DELETE
+		  FROM TB_NOTICE
+		 WHERE SEQ_NOTICE_ID IN
+		<foreach collection="noticeIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateNoticeShowYn" parameterType="noticeVO">
+		UPDATE	TB_BOARD
+		   SET	OPT1 = #{noticeShowYn}
+		 WHERE	SEQ_BOARD_MST_ID = 'notice_on_off'
+	</update>
+</mapper>

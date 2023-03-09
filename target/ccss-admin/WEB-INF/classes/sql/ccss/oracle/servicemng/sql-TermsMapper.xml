@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Terms">
+	
+	<resultMap id="termsMap" type="termsVO">
+        <result property="rnum"		 				column="RNUM" 					/>
+        <result property="seqTerms" 				column="SEQ_TERMS" 				/>
+        <result property="seqTermsHist"				column="SEQ_TERMS_HIST"			/>
+		<result property="termsId" 					column="TERMS_ID"			 	/>
+		<result property="termsTitle"				column="TERMS_TITLE" 			/>
+		<result property="termsContent" 			column="TERMS_CONTENT"	 		/>
+		<result property="requiredYn" 				column="REQUIRED_YN" 			/>
+		<result property="useYn" 					column="USE_YN" 				/>
+		<result property="orderNo" 					column="ORDER_NO"				/>
+		<result property="postDate" 				column="POST_DATE" 				/>
+		<result property="postHour" 				column="POST_HOUR" 				/>
+		<result property="postMinute" 				column="POST_MINUTE" 			/>
+		<result property="insertDate" 				column="INSERT_DATE" 			/>
+		<result property="updateDate" 				column="UPDATE_DATE" 			/>
+		<result property="insertId" 				column="INSERT_ID" 				/>
+		<result property="updateId" 				column="UPDATE_ID" 				/>
+		<result property="description" 				column="DESCRIPTION"			/>
+	</resultMap>
+
+	<!-- 약관 리스트 조회 -->
+	<select id="selectTermsList" parameterType="termsVO" resultType="flkMap">
+		SELECT *
+		  FROM (
+			SELECT (@ROWNUM := @ROWNUM+1) RNUM
+			       , SEQ_TERMS
+			       , TERMS_ID
+			       , TERMS_TITLE
+			       , REQUIRED_YN
+			       , CASE REQUIRED_YN WHEN 'Y' THEN '필수'
+			       					  ELSE '선택'
+			       					  END AS STR_REQUIRED_YN
+			       , IFNULL(DATE_FORMAT(POST_DATE, '%Y-%m-%d %H:%i'), '-') AS POST_DATE
+			       , INSERT_ID
+			       , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+			       , UPDATE_ID
+			       , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+			       , USE_YN
+			       , CASE USE_YN WHEN 'Y' THEN '사용'
+			       				 ELSE '미사용'
+			       				 END AS STR_USE_YN
+			       , CASE USE_YN WHEN 'Y' THEN 'TRUE'
+			       				 ELSE 'FALSE'
+			       				 END AS BOOLEAN_USE_YN
+			       , ORDER_NO
+			       , DESCRIPTION
+			<if test="@org.apache.commons.lang.StringUtils@equals(filterYn, 'Y')">
+                   , '' AS DND_COLOR
+			</if>
+			<if test="@org.apache.commons.lang.StringUtils@equals(filterYn, 'N')">
+				   , CASE USE_YN WHEN 'Y' THEN 'imp'
+                                 ELSE ''
+                                 END AS DND_COLOR
+	       </if>
+			  FROM TB_TERMS
+			  	   ,(SELECT @ROWNUM := 0 FROM DUAL) TMP
+			 WHERE 1=1
+			<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='INSERT_DATE'">
+				AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') >= #{startDate} 
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='INSERT_DATE'"> 
+				AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate} 
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='POST_DATE'"> 
+				AND DATE_FORMAT(POST_DATE, '%Y%m%d') >= #{startDate}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='POST_DATE'"> 
+				AND DATE_FORMAT(POST_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(requiredYn) and !@org.apache.commons.lang.StringUtils@equals(requiredYn, 'A')"> 
+				AND REQUIRED_YN = #{requiredYn}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(useYn) and !@org.apache.commons.lang.StringUtils@equals(useYn, 'A')"> 
+				AND USE_YN = #{useYn}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(searchText)"> 
+				AND TERMS_TITLE LIKE '%${searchText}%'
+			</if>
+			ORDER BY USE_YN DESC, ORDER_NO
+			) AS A
+		 WHERE A.RNUM BETWEEN #{startCount} AND #{endCount}
+	</select>
+	
+	<!-- 약관 리스트 조회 카운트 -->
+	<select id="selectTermsListCnt" parameterType="termsVO" resultType="int">
+		SELECT COUNT(*)
+		  FROM TB_TERMS
+		 WHERE 1=1
+		<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='INSERT_DATE'">
+			AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') >= #{startDate} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='INSERT_DATE'"> 
+			AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='POST_DATE'"> 
+			AND DATE_FORMAT(POST_DATE, '%Y%m%d') >= #{startDate}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='POST_DATE'"> 
+			AND DATE_FORMAT(POST_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(requiredYn) and !@org.apache.commons.lang.StringUtils@equals(requiredYn, 'A')"> 
+			AND REQUIRED_YN = #{requiredYn}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useYn) and !@org.apache.commons.lang.StringUtils@equals(useYn, 'A')"> 
+			AND USE_YN = #{useYn}
+		</if>
+	</select>
+	
+	
+	<!-- 신규 약관 등록 -->
+	<insert id="insertNewTerms" parameterType="termsVO">
+		<selectKey resultType="String" keyProperty="termsId" order="BEFORE">
+			SELECT MAX(TERMS_ID)+1 FROM TB_TERMS 
+		</selectKey>
+		INSERT
+		INTO	TB_TERMS (
+					SEQ_TERMS,
+					TERMS_ID,
+					TERMS_TITLE,
+					REQUIRED_YN,
+					INSERT_ID,
+					INSERT_DATE,
+					USE_YN,
+					ORDER_NO
+				) VALUES (
+					#{seqTerms},
+					(SELECT MAX(TMP.TERMS_ID)+1 FROM TB_TERMS AS TMP),
+					#{termsTitle},
+					#{requiredYn},
+					#{insertId},
+					NOW(),
+					#{useYn},
+					(SELECT MAX(TMP.ORDER_NO)+1 FROM TB_TERMS AS TMP)
+				)
+	</insert>
+	
+	<!-- 약관 이력 등록 -->
+	<insert id="insertTermsHist" parameterType="termsVO">
+		INSERT
+		INTO	TB_TERMS_HIST (
+					SEQ_TERMS_HIST,
+				<if test="termsId != null">
+					TERMS_ID,
+				</if>
+				<if test="postDate != null">
+					POST_DATE,
+				</if>
+					TERMS_TITLE,
+				<if test="termsContent != null">
+					TERMS_CONTENT,
+				</if>
+					REQUIRED_YN,
+				<if test="description != null">
+					DESCRIPTION,
+				</if>
+					INSERT_ID,
+					INSERT_DATE,
+					UPDATE_ID,
+					UPDATE_DATE,
+					USE_YN
+				) VALUES (
+					#{seqTermsHist},
+				<if test="termsId != null">
+					#{termsId},
+				</if>
+				<if test="postDate != null">
+					STR_TO_DATE(#{postDate}, '%Y%m%d%H%i'),
+				</if>
+					#{termsTitle},
+				<if test="termsContent != null">
+					#{termsContent},
+				</if>
+					#{requiredYn},
+				<if test="description != null">
+					#{description},
+				</if>
+					#{insertId},
+					NOW(),
+					#{updateId},
+					NOW(),
+					#{useYn}
+				)
+	</insert>
+	
+	<!-- 약관 상세 조회 -->
+	<select id="selectTermsDetail" parameterType="termsVO" resultMap="termsMap">
+		SELECT SEQ_TERMS
+		       , TERMS_ID
+		       , TERMS_TITLE
+		       , TERMS_CONTENT
+		       , REQUIRED_YN
+		       , USE_YN
+		       , DATE_FORMAT(POST_DATE, '%Y-%m-%d') AS POST_DATE
+		       , DATE_FORMAT(POST_DATE, '%H') AS POST_HOUR
+		       , DATE_FORMAT(POST_DATE, '%i') AS POST_MINUTE
+		       , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+		       , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+		       , INSERT_ID
+		       , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+		       , UPDATE_ID
+		       , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+		       , DESCRIPTION
+		  FROM TB_TERMS
+		 WHERE SEQ_TERMS = ${seqTerms}
+	</select>
+	
+	<!-- 약관 수정 -->
+	<update id="updateTerms" parameterType="termsVO">
+		<selectKey resultType="String" keyProperty="termsId" order="BEFORE">
+			SELECT TERMS_ID FROM TB_TERMS WHERE SEQ_TERMS = #{seqTerms}
+		</selectKey>
+		UPDATE TB_TERMS
+		   SET REQUIRED_YN = #{requiredYn}
+		     , USE_YN = #{useYn}
+		     , TERMS_CONTENT = #{termsContent}
+		     , DESCRIPTION = #{description}
+		     , POST_DATE = STR_TO_DATE(#{postDate}, '%Y%m%d%H%i')
+		   	 , UPDATE_ID = #{updateId}
+		   	 , UPDATE_DATE = NOW()
+		 WHERE SEQ_TERMS = #{seqTerms}
+	</update>
+	
+	<!-- 약관 순서 변경 -->
+	<update id="updateTermsOrder" parameterType="termsVO">
+		UPDATE TB_TERMS
+		   SET ORDER_NO = #{orderNo}
+		 WHERE SEQ_TERMS = #{seqTerms}	
+	</update>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- 약관 이력 리스트 조회 -->
+	<select id="selectTermsHistList" parameterType="termsVO" resultType="flkMap">
+		SELECT *
+		  FROM (
+			SELECT (@ROWNUM := @ROWNUM+1) RNUM
+			       , SEQ_TERMS_HIST
+			       , TERMS_ID
+			       , TERMS_TITLE
+			       , REQUIRED_YN
+			       , CASE REQUIRED_YN WHEN 'Y' THEN '필수'
+			       					  ELSE '선택'
+			       					  END AS STR_REQUIRED_YN
+			       , IFNULL(DATE_FORMAT(POST_DATE, '%Y-%m-%d %H:%i'), '-') AS POST_DATE
+			       , INSERT_ID
+			       , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+			       , UPDATE_ID
+			       , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+			       , USE_YN
+			       , CASE USE_YN WHEN 'Y' THEN '사용'
+			       				 ELSE '미사용'
+			       				 END AS STR_USE_YN
+				   , DESCRIPTION
+			  FROM TB_TERMS_HIST
+			  	   ,(SELECT @ROWNUM := 0 FROM DUAL) TMP
+			 WHERE 1=1
+			   AND TERMS_ID = #{termsId}
+			<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='INSERT_DATE'">
+			   AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') >= #{startDate} 
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='INSERT_DATE'"> 
+			   AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate} 
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='POST_DATE'"> 
+			   AND DATE_FORMAT(POST_DATE, '%Y%m%d') >= #{startDate}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='POST_DATE'"> 
+			   AND DATE_FORMAT(POST_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+			</if>
+			<choose>
+				<when test="(!@org.springframework.util.StringUtils@isEmpty(startDate) or !@org.springframework.util.StringUtils@isEmpty(endDate)) and searchDateDiv =='INSERT_DATE'">
+				ORDER BY INSERT_DATE DESC
+				</when>
+				<when test="(!@org.springframework.util.StringUtils@isEmpty(startDate) or !@org.springframework.util.StringUtils@isEmpty(endDate)) and searchDateDiv =='POST_DATE'">
+				ORDER BY POST_DATE DESC
+				</when>
+				<otherwise>
+				ORDER BY SEQ_TERMS_HIST DESC, INSERT_DATE DESC
+				</otherwise>
+			</choose>
+			) AS A
+		 WHERE A.RNUM BETWEEN #{startCount} AND #{endCount}
+	</select>
+	
+	<!-- 약관 이력 리스트 조회 카운트 -->
+	<select id="selectTermsHistListCnt" parameterType="termsVO" resultType="int">
+		SELECT COUNT(SEQ_TERMS_HIST)
+		  FROM TB_TERMS_HIST
+		 WHERE 1=1
+		   AND TERMS_ID = #{termsId}
+		<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='INSERT_DATE'">
+			AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') >= #{startDate} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='INSERT_DATE'"> 
+			AND DATE_FORMAT(INSERT_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate} 
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(startDate) and searchDateDiv =='POST_DATE'"> 
+			AND DATE_FORMAT(POST_DATE, '%Y%m%d') >= #{startDate}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(endDate) and searchDateDiv =='POST_DATE'"> 
+			AND DATE_FORMAT(POST_DATE, '%Y%m%d') <![CDATA[<=]]>  #{endDate}
+		</if>
+	</select>
+
+	
+	<!-- 약관 이력 상세 조회 -->
+	<select id="selectTermsHistDetail" parameterType="termsVO" resultMap="termsMap">
+		SELECT SEQ_TERMS_HIST
+		       , TERMS_ID
+		       , TERMS_TITLE
+		       , TERMS_CONTENT
+		       , REQUIRED_YN
+		       , USE_YN
+		       , DATE_FORMAT(POST_DATE, '%Y-%m-%d') AS POST_DATE
+		       , DATE_FORMAT(POST_DATE, '%H') AS POST_HOUR
+		       , DATE_FORMAT(POST_DATE, '%i') AS POST_MINUTE
+		       , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+		       , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+		       , INSERT_ID
+		       , DATE_FORMAT(INSERT_DATE, '%Y-%m-%d %H:%i') AS INSERT_DATE
+		       , UPDATE_ID
+		       , DATE_FORMAT(UPDATE_DATE, '%Y-%m-%d %H:%i') AS UPDATE_DATE
+		       , DESCRIPTION
+		  FROM TB_TERMS_HIST
+		 WHERE SEQ_TERMS_HIST = #{seqTermsHist}
+	</select>
+	
+</mapper>

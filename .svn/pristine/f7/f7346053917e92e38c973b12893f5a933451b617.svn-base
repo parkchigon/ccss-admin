@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FileInfo">
+	
+	<!-- 게시판 등록 -->
+	<insert id="insertFileInfo" parameterType="fileInfoVO">
+		INSERT INTO TB_FILE_INFO (SEQ_FILE,BIZ_CLASSIFY_CODE, UPLOAD_ID, UPLOAD_DTIME, ORIGIN_FILE_NAME, SAVE_FILE_NAME)
+		VALUES (#{fileSeq},#{bizClassifyCode}, #{uploadId}, NOW(), #{originFileName}, #{saveFileName})
+	</insert>
+</mapper>

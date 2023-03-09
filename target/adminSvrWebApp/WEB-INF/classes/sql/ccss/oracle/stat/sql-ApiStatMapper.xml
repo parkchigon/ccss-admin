@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ApiStat">
+	
+	<resultMap type="apiStatVO" id="apiStatMap">
+		<result property="apiHisSeq"  	column="API_HIS_SEQ" />
+		<result property="reqAppType" 	column="REQ_APP_TYPE" />
+		<result property="apiNm"		column="API_NM" />
+		<result property="apiDesc"		column="API_DESC" />
+		<result property="resultStatus"	column="RESULT_STATUS" />
+		<result property="processDt"	column="PROCESS_DT" />	
+		<result property="wasInfo"		column="WAS_INFO" />
+		<result property="sessionId"	column="SESSION_ID" />	
+		<result property="regDt"		column="REG_DT" />
+		<result property="regId"		column="REG_ID" />
+		<result property="memb_id"		column="MEMB_ID" />
+		<result property="reqCtn"		column="REQ_CTN" />
+		<result property="deviceType"		column="DEVICE_TYPE" />
+		<result property="deviceModelId"	column="DEVICE_MODEL_ID" />
+		<result property="deviceModelNm"	column="DEVICE_MODEL_NM" />
+	</resultMap>
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	
+	<sql id="dynamicWhereTbApuCallHis">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(membId) ">
+			AND A.MEMB_ID = #{membId}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(membNo) ">
+			AND A.MEMB_NO = #{membNo}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(reqCtn) ">
+			AND A.REQ_CTN = #{reqCtn}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(apiNm) and apiNm !='ALL' ">
+			AND A.API_NM = #{apiNm}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(resultStatus) and resultStatus =='suc' ">
+			AND A.RESULT_STATUS IN ('2S000000')	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(resultStatus) and resultStatus =='fail' ">
+			AND A.RESULT_STATUS NOT IN ('2S000000')	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(deviceType) and deviceType !='ALL' ">
+			AND A.DEVICE_TYPE = #{deviceType}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(deviceType) and deviceType =='ALL' ">
+			AND A.DEVICE_TYPE IS NOT NULL
+		</if>			
+		<if test="!@org.springframework.util.StringUtils@isEmpty(reqAppType) and reqAppType !='ALL' ">
+			AND A.REQ_APP_TYPE = #{reqAppType}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(deviceModelNm) and deviceModelNm !='ALL' ">
+			AND A.DEVICE_MODEL_NM = #{deviceModelNm}
+		</if>					
+	</sql>
+	
+	<select id="selectDeviceModelList"   parameterType="apiStatVO" resultType="apiStatVO">
+			SELECT 
+					DEVICE_MODEL_ID,
+					DEVICE_MODEL_NM
+			FROM TB_DEVICE_MODEL
+			WHERE 1=1
+		ORDER BY DEVICE_MODEL_NM ASC
+	</select>		
+
+	<select id="selectApiStatList" parameterType="apiStatVO" resultType="apiStatVO">
+		<include refid="pagingHead"/>
+				SELECT /*+ index(a PK_API_CALL_HIS) */
+					A.MEMB_ID,
+					A.MEMB_NO,
+					A.REQ_APP_TYPE,
+					A.DEVICE_TYPE,
+					<!-- CASE WHEN DEVICE_TYPE = 'AVN' AND REGEXP_LIKE(REQ_APP_TYPE, 'SE|WE|MU|HO|NA') THEN 'AVN' WHEN DEVICE_TYPE = 'PND' AND REGEXP_LIKE(REQ_APP_TYPE, 'SE|WE|MU|HO|NA') THEN 'PND' WHEN DEVICE_TYPE IS NULL AND REGEXP_LIKE(REQ_APP_TYPE, 'MGR|MANA|AM|BM') THEN 'NONE' WHEN DEVICE_TYPE IS NULL AND REGEXP_LIKE(REQ_APP_TYPE, 'SE|WE|MU|HO|NA') THEN 'NONE' ELSE 'NONE' END DEVICE_TYPE, -->				
+					A.REQ_CTN,
+					NVL((Select DTL_CD_NM from  TB_DTL_CD where CD_VAL = A.API_NM and GRP_CD_ID = (select GRP_CD_ID from TB_GROUP_CD  WHERE GRP_CD_NM='API_NM' )),A.API_NM) as API_NM,
+					NVL((Select CODE_DESC from  TB_DTL_CD where CD_VAL = A.API_NM and GRP_CD_ID = (select GRP_CD_ID from TB_GROUP_CD  WHERE GRP_CD_NM='API_NM' )),'코드값 없음') as API_DESC,
+					A.RESULT_STATUS,
+					ELAPSED_TIME,
+					<!-- 2018.11.04 REG_DT 컬럼 삭제 (CVT)-->
+					<!-- TO_CHAR(A.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT, --> 
+					TO_CHAR(A.PROCESS_DT,'YYYY-MM-DD HH24:MI:SS') AS PROCESS_DT,
+					(SELECT HOST_NM from TB_SVR_INFO WHERE SVR_ID = A.WAS_INFO) as WAS_INFO,
+					A.SESSION_ID,
+					A.DEVICE_MODEL_NM
+				FROM TB_API_CALL_HIS A 
+				WHERE 1=1												
+				<!-- AND A.REG_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.REG_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')  -->
+				AND (A.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD'))
+			<include refid="dynamicWhereTbApuCallHis"/> 
+			<!-- ORDER BY A.REG_DT desc -->
+			ORDER BY A.PROCESS_DT desc
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectApiStatListCnt" parameterType="apiStatVO" resultType="int">
+		SELECT 
+			COUNT(*) 
+		FROM (
+				SELECT /*+ index(a PK_API_CALL_HIS) */
+					A.MEMB_ID,
+					A.MEMB_NO,
+					A.REQ_APP_TYPE,
+					A.DEVICE_TYPE,
+					A.REQ_CTN,
+					A.API_NM,
+					B.CODE_DESC,
+					A.RESULT_STATUS,
+					<!-- PROCESS_DT, -->
+					ELAPSED_TIME,
+					<!-- 2018.11.04 REG_DT 컬럼 삭제 (CVT)-->
+					<!-- TO_CHAR(A.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT, -->
+					(SELECT HOST_NM from TB_SVR_INFO WHERE SVR_ID = A.WAS_INFO) as WAS_INFO,
+					A.SESSION_ID,
+					A.DEVICE_MODEL_NM
+					FROM TB_API_CALL_HIS A  LEFT OUTER JOIN TB_DTL_CD B ON A.API_NM = B.DTL_CD_NM
+					WHERE 1=1								
+					<!-- AND A.REG_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.REG_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')  -->
+					AND (A.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD'))
+				<include refid="dynamicWhereTbApuCallHis"/> 
+				<!-- ORDER BY A.REG_DT desc -->
+				ORDER BY A.PROCESS_DT desc
+			)
+	</select>
+
+	
+	<select id="selectApiStatListExcel" parameterType="apiStatVO" resultType="apiStatVO">
+			SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			FROM (  
+					SELECT /*+ index(a PK_API_CALL_HIS) */
+					A.MEMB_ID,
+					A.MEMB_NO,
+					A.REQ_APP_TYPE,
+					A.DEVICE_TYPE,
+					A.REQ_CTN,
+					NVL((Select DTL_CD_NM from  TB_DTL_CD where CD_VAL = A.API_NM and GRP_CD_ID = (select GRP_CD_ID from TB_GROUP_CD  WHERE GRP_CD_NM='API_NM' )),A.API_NM) as API_NM,
+					NVL((Select CODE_DESC from  TB_DTL_CD where CD_VAL = A.API_NM and GRP_CD_ID = (select GRP_CD_ID from TB_GROUP_CD  WHERE GRP_CD_NM='API_NM' )),'코드값 없음') as API_DESC,
+					A.RESULT_STATUS,
+					ELAPSED_TIME,
+					<!-- 2018.11.04 REG_DT 컬럼 삭제 (CVT)-->
+					<!-- TO_CHAR(A.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT, -->
+					TO_CHAR(A.PROCESS_DT,'YYYY-MM-DD HH24:MI:SS') AS PROCESS_DT,
+					(SELECT HOST_NM from TB_SVR_INFO WHERE SVR_ID = A.WAS_INFO) as WAS_INFO,
+					A.SESSION_ID,
+					A.DEVICE_MODEL_NM
+					FROM TB_API_CALL_HIS A 
+					WHERE 1=1
+					<!-- AND A.REG_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.REG_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD') -->
+					AND A.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+				<include refid="dynamicWhereTbApuCallHis"/> 
+				<!-- ORDER BY A.REG_DT desc -->
+				ORDER BY A.PROCESS_DT desc
+			) ORACLE_PAGING			
+	</select>
+	
+</mapper>

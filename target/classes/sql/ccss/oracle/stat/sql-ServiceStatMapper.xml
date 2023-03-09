@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ServiceStat"> 
+	
+	<resultMap type="serviceStatVO" id="serviceStatMap">
+		<result property="svcStatSeq"  	column="SVC_STAT_SEQ" />
+		<result property="processDt"  	column="PROCESS_DT" />
+		<result property="statDt"  		column="STAT_DT" />
+		<result property="svcType"  	column="SVC_TYPE" />
+		<result property="product"  	column="PRODUCT" />
+		<result property="joinStatus"  	column="JOIN_STATUS" />
+		<result property="gender"  		column="GENDER" />
+		<result property="age"  		column="AGE" />
+		<result property="statSvc"  	column="STAT_SVC" />
+		<result property="statApp"  	column="STAT_APP" />
+		<result property="statCat1"  	column="STAT_CAT1" />
+		<result property="statCat2"  	column="STAT_CAT2" />
+		<result property="statCat3"  	column="STAT_CAT3" />
+		<result property="statItem"  	column="STAT_ITEM" />
+		<result property="statVal"  	column="STAT_VAL" />
+		<result property="regId"  		column="REG_ID" />
+		<result property="regDt"  		column="REG_DT" />
+		<result property="updId"  		column="UPD_ID" />
+		<result property="updDt"  		column="UPD_DT" />
+	</resultMap>
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		   ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{serviceStatVO.endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{serviceStatVO.startCount} 
+	</sql>
+	
+	
+	<sql id="dynamicWhereTbSvrStat">
+		
+	</sql>
+	
+	
+	<select id="selectServiceStatList" parameterType="java.util.HashMap" resultType="serviceStatVO">
+		<include refid="pagingHead"/>
+		 <if test="serviceStatVOList != null and serviceStatVOList != ''">
+			<foreach collection="serviceStatVOList" item="item" separator=" UNION ALL ">
+				SELECT 
+					<!-- SVC_STAT_SEQ, -->
+					<if test="item.searchType != null and item.searchType =='time'.toString() ">
+						TO_CHAR(STAT_DT,'YYYY-MM-DD HH24') AS STAT_DT,
+					</if>
+					 <if test="item.searchType != null and item.searchType =='day'.toString() ">
+						TO_CHAR(STAT_DT,'YYYY-MM-DD') AS STAT_DT,
+					</if>
+					SVC_TYPE,
+					PRODUCT,
+					JOIN_STATUS,
+					GENDER,
+					AGE,
+					STAT_SVC,
+					STAT_APP,
+					STAT_CAT1,
+					<!-- STAT_CAT2,
+					STAT_CAT3, -->
+					STAT_ITEM,
+					SUM(STAT_VAL) as STAT_VAL
+					
+				FROM TB_SVC_STAT
+				WHERE
+				<if test="item.searchType != null and item.searchType =='time'.toString() ">
+					STAT_DT <![CDATA[>=]]> TO_DATE(#{item.startDateHour},'YYYYMMDDHH24')   
+					AND STAT_DT  <![CDATA[<]]> TO_DATE(#{item.endDateHour},'YYYYMMDDHH24')
+				</if>
+				 <if test="item.searchType != null and item.searchType =='day'.toString() ">
+					STAT_DT <![CDATA[>=]]> TO_DATE(#{item.startDate},'YYYYMMDDHH')   
+					AND STAT_DT  <![CDATA[<]]> TO_DATE(#{item.endDate},'YYYYMMDDHH')
+				</if>
+				
+				<if test="item.svcType != null and item.svcType !='ALL'.toString() ">
+							AND SVC_TYPE = #{item.svcType}
+					</if>
+					<if test="item.product != null and item.product !='ALL'.toString() ">
+								AND PRODUCT = #{item.product}
+					</if>
+					<if test="item.joinStatus != null and item.joinStatus !='ALL'.toString() ">
+								AND JOIN_STATUS = #{item.joinStatus}
+					</if>
+					<if test="item.gender != null and item.gender !='ALL'.toString() ">
+								AND GENDER = #{item.gender}
+					</if>
+					
+					<if test="item.age != null and item.age !='ALL'.toString() and  item.age !='60'.toString()">
+								AND AGE = #{item.age}
+					</if>
+					<if test="item.age != null and item.age !='ALL'.toString() and  item.age =='60'.toString()">
+								AND AGE <![CDATA[>=]]> #{item.age}
+					</if>
+					
+					<if test="item.statSvc != null and item.statSvc !='ALL'.toString() ">
+								AND STAT_SVC = #{item.statSvc}
+					</if>
+					<if test="item.statApp != null and item.statApp !='ALL'.toString() ">
+								AND STAT_APP = #{item.statApp}
+					</if>
+					
+					AND STAT_CAT1 = #{item.statCat1}
+					<!-- <if test="item.statCat2 != null and item.statCat2 !='ALL' ">
+								AND STAT_CAT2 = #{item.statCat2}
+					</if>
+					<if test="item.statCat3 != null and item.statCat3 !='ALL' ">
+								AND STAT_CAT3 = #{item.statCat3}
+					</if> -->
+					AND STAT_ITEM = #{item.statItem}
+					GROUP BY STAT_DT, SVC_TYPE, PRODUCT ,JOIN_STATUS ,GENDER ,AGE,STAT_SVC,STAT_APP,STAT_CAT1,STAT_ITEM
+			</foreach>
+			ORDER BY STAT_DT, SVC_TYPE, PRODUCT,	JOIN_STATUS,	GENDER,	AGE,	STAT_SVC,	 STAT_APP desc
+		</if>
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+
+	
+	<select id="selectServiceStatListCnt"  parameterType="java.util.HashMap" resultType="int">
+		 <if test="serviceStatVOList != null and serviceStatVOList != ''">
+			SELECT 
+				COUNT(*) 
+			FROM (
+				<foreach collection="serviceStatVOList" item="item" separator=" UNION ALL " index="index">		
+					SELECT 
+						<!-- SVC_STAT_SEQ, -->
+						<if test="item.searchType != null and item.searchType =='time'.toString() ">
+							TO_CHAR(STAT_DT,'YYYY-MM-DD HH24') AS STAT_DT,
+						</if>
+						<if test="item.searchType != null and item.searchType =='day'.toString() ">
+							TO_CHAR(STAT_DT,'YYYY-MM-DD') AS STAT_DT,
+						</if>
+						SVC_TYPE,
+						PRODUCT,
+						JOIN_STATUS,
+						GENDER,
+						AGE,
+						STAT_SVC,
+						STAT_APP,
+						STAT_CAT1,
+						<!-- STAT_CAT2, 
+						STAT_CAT3, -->
+						STAT_ITEM,
+						SUM(STAT_VAL) as STAT_VAL
+					FROM TB_SVC_STAT 
+					WHERE 
+					<if test="item.searchType != null and item.searchType =='time'.toString() ">
+						STAT_DT <![CDATA[>=]]> TO_DATE(#{item.startDateHour},'YYYYMMDDHH24')   
+						AND STAT_DT  <![CDATA[<]]> TO_DATE(#{item.endDateHour},'YYYYMMDDHH24')
+					</if>
+					<if test="item.searchType != null and item.searchType =='day'.toString() ">
+						STAT_DT <![CDATA[>=]]> TO_DATE(#{item.startDate},'YYYYMMDDHH')   
+						AND STAT_DT  <![CDATA[<]]> TO_DATE(#{item.endDate},'YYYYMMDDHH')
+					</if>
+					
+					<if test="item.svcType != null and item.svcType !='ALL'.toString() ">
+							AND SVC_TYPE = #{item.svcType}
+					</if>
+					<if test="item.product != null and item.product !='ALL'.toString() ">
+								AND PRODUCT = #{item.product}
+					</if>
+					<if test="item.joinStatus != null and item.joinStatus !='ALL'.toString() ">
+								AND JOIN_STATUS = #{item.joinStatus}
+					</if>
+					<if test="item.gender != null and item.gender !='ALL'.toString() ">
+								AND GENDER = #{item.gender}
+					</if>
+					
+					<if test="item.age != null and item.age !='ALL'.toString() and  item.age !='60'.toString()">
+								AND AGE = #{item.age}
+					</if>
+					<if test="item.age != null and item.age !='ALL'.toString() and  item.age =='60'.toString()">
+								AND AGE <![CDATA[>=]]> #{item.age}
+					</if>
+					
+					<if test="item.statSvc != null and item.statSvc !='ALL'.toString() ">
+								AND STAT_SVC = #{item.statSvc}
+					</if>
+					<if test="item.statApp != null and item.statApp !='ALL'.toString() ">
+								AND STAT_APP = #{item.statApp}
+					</if>
+					
+					AND STAT_CAT1 = #{item.statCat1}
+					<!-- <if test="item.statCat2 != null and item.statCat2 !='ALL' ">
+								AND STAT_CAT2 = #{item.statCat2}
+					</if>
+					<if test="item.statCat3 != null and item.statCat3 !='ALL' ">
+								AND STAT_CAT3 = #{item.statCat3}
+					</if> -->
+					AND STAT_ITEM = #{item.statItem}
+					GROUP BY STAT_DT, SVC_TYPE, PRODUCT ,JOIN_STATUS ,GENDER ,AGE,STAT_SVC,STAT_APP,STAT_CAT1,STAT_ITEM
+				</foreach>
+				ORDER BY STAT_DT, SVC_TYPE, PRODUCT,	JOIN_STATUS,	GENDER,	AGE,	STAT_SVC,	 STAT_APP desc
+				)
+				</if>
+	</select>
+
+	
+	<select id="selectServiceStatListExcel" parameterType="java.util.HashMap" resultType="serviceStatVO">
+		<if test="serviceStatVOList != null and serviceStatVOList != ''">
+		SELECT ORDER_NUM.* , ROWNUM AS RNUM
+		FROM ( 
+			<foreach collection="serviceStatVOList" item="item" separator=" UNION ALL " index="index">
+				SELECT 
+					<!-- SVC_STAT_SEQ, -->
+					<if test="item.searchType != null and item.searchType =='time'.toString() ">
+						TO_CHAR(STAT_DT,'YYYY-MM-DD HH24') AS STAT_DT,
+					</if>
+					 <if test="item.searchType != null and item.searchType =='day'.toString() ">
+						TO_CHAR(STAT_DT,'YYYY-MM-DD') AS STAT_DT,
+					</if>
+					SVC_TYPE,
+					PRODUCT,
+					JOIN_STATUS,
+					GENDER,
+					AGE,
+					STAT_SVC,
+					STAT_APP,
+					STAT_CAT1,
+					<!-- STAT_CAT2,
+					STAT_CAT3, -->
+					STAT_ITEM,
+					SUM(STAT_VAL) as STAT_VAL
+				FROM TB_SVC_STAT
+				WHERE
+				<if test="item.searchType != null and item.searchType =='time'.toString() ">
+					STAT_DT <![CDATA[>=]]> TO_DATE(#{item.startDateHour},'YYYYMMDDHH24')   
+					AND STAT_DT  <![CDATA[<]]> TO_DATE(#{item.endDateHour},'YYYYMMDDHH24')
+				</if>
+				 <if test="item.searchType != null and item.searchType =='day'.toString() ">
+					STAT_DT <![CDATA[>=]]> TO_DATE(#{item.startDate},'YYYYMMDDHH')   
+					AND STAT_DT  <![CDATA[<]]> TO_DATE(#{item.endDate},'YYYYMMDDHH')
+				</if>
+				
+				<if test="item.svcType != null and item.svcType !='ALL'.toString() ">
+							AND SVC_TYPE = #{item.svcType}
+					</if>
+					<if test="item.product != null and item.product !='ALL'.toString() ">
+								AND PRODUCT = #{item.product}
+					</if>
+					<if test="item.joinStatus != null and item.joinStatus !='ALL'.toString() ">
+								AND JOIN_STATUS = #{item.joinStatus}
+					</if>
+					<if test="item.gender != null and item.gender !='ALL'.toString() ">
+								AND GENDER = #{item.gender}
+					</if>
+					
+					<if test="item.age != null and item.age !='ALL'.toString() and  item.age !='60'.toString()">
+								AND AGE = #{item.age}
+					</if>
+					<if test="item.age != null and item.age !='ALL'.toString() and  item.age =='60'.toString()">
+								AND AGE <![CDATA[>=]]> #{item.age}
+					</if>
+					
+					<if test="item.statSvc != null and item.statSvc !='ALL'.toString() ">
+								AND STAT_SVC = #{item.statSvc}
+					</if>
+					<if test="item.statApp != null and item.statApp !='ALL'.toString() ">
+								AND STAT_APP = #{item.statApp}
+					</if>
+					AND STAT_CAT1 = #{item.statCat1}
+					<!-- <if test="item.statCat2 != null and item.statCat2 !='ALL' ">
+								AND STAT_CAT2 = #{item.statCat2}
+					</if>
+					<if test="item.statCat3 != null and item.statCat3 !='ALL' ">
+								AND STAT_CAT3 = #{item.statCat3}
+					</if> -->
+					AND STAT_ITEM = #{item.statItem}
+					GROUP BY STAT_DT, SVC_TYPE, PRODUCT ,JOIN_STATUS ,GENDER ,AGE,STAT_SVC,STAT_APP,STAT_CAT1,STAT_ITEM
+			</foreach>
+			ORDER BY STAT_DT, SVC_TYPE, PRODUCT,	JOIN_STATUS,	GENDER,	AGE,	STAT_SVC,	 STAT_APP desc
+		) ORDER_NUM	
+		</if>
+	</select>
+	
+</mapper>

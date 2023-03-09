@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="propertiesService" class="devonframe.configuration.properties.PropertiesConfigService">
+		<property name="locations">
+			<list>
+			    <!-- <value>classpath:/config/configuration/test.properties</value> -->
+			    <value>classpath*:config/configuration/${spring.profiles.active}/*.properties</value>
+			</list>
+		</property>
+		<property name="propertiesMap">
+			<map>
+				<entry key="properties1" value="properties-Map1" />
+				<entry key="properties2" value="properties-Map2" />
+			</map>
+		</property>
+		<property name="cacheSeconds" value="1" />
+	</bean>
+
+	<bean id="xmlService" class="devonframe.configuration.xml.XmlConfigService">
+		<property name="locations">
+			<list>
+				 <value>classpath:config/configuration/${spring.profiles.active}/*.xml</value>
+			</list>
+		</property>
+		<property name="propertiesMap">
+			<map>
+				<entry key="xml1" value="Xml-Map1" />
+				<entry key="xml2" value="Xml-Map2" />
+			</map>
+		</property>
+		<property name="cacheSeconds" value="1" />
+	</bean>
+
+
+	<bean id="configurationService" class="devonframe.configuration.composite.CompositeConfigService">
+		<property name="locations">
+			<list>
+				<!-- <value>classpath:/config/configuration/test.properties</value>
+				<value>classpath:/config/configuration/test.xml</value> -->
+				 <value>classpath:config/configuration/${spring.profiles.active}/*.properties</value>
+				 <value>classpath:config/configuration/${spring.profiles.active}/*.xml</value>
+				
+			</list>
+		</property>
+		<property name="propertiesMap">
+			<map>
+				<entry key="properties1" value="properties-Map1" />
+				<entry key="properties2" value="properties-Map2" />
+				<entry key="xml1" value="Xml-Map1" />
+				<entry key="xml2" value="Xml-Map2" />
+			</map>
+		</property>
+		<property name="cacheSeconds" value="1" />
+	</bean>
+</beans>

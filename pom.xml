@@ -1,0 +1,802 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>com.lgu</groupId>
+	<artifactId>adminSvrWebApp</artifactId>
+	
+	<packaging>war</packaging>
+	<name>${project.artifactId}</name>
+	
+	<url>http://maven.apache.org</url>
+	<description>CCSS Admin Portal</description>
+
+	<!-- Properties -->
+	<properties>
+
+		<!-- Generic properties -->
+		<!-- java -->
+		<java.version>1.7</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- maven test -->
+		<maven.test.skip>false</maven.test.skip>
+		<maven.javadoc.skip>false</maven.javadoc.skip>
+
+		<!-- Dependency library version -->
+
+		<!-- Devon Frame -->
+		<devonframe.version>1.6.1</devonframe.version>
+
+		<!-- Web -->
+		<jstl.version>1.2</jstl.version>
+		<servlet.api.version>3.0.1</servlet.api.version>
+		<taglibs.version>1.1.2</taglibs.version>
+		<jsr250.api.version>1.0</jsr250.api.version>
+
+		<!-- Spring    4.1.7.RELEASE -->
+		<org.springframework.version>4.0.9.RELEASE</org.springframework.version>
+		<org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
+		<org.spring.modules.validation.version>0.8</org.spring.modules.validation.version>
+
+		<!-- commons -->
+		<commons.io.version>2.2</commons.io.version>
+		<commons.fileupload.version>1.3.1</commons.fileupload.version>
+		<commons.dbcp.version>1.4</commons.dbcp.version>
+
+		<!-- UI -->
+		<apache.tiles-version>3.0.5</apache.tiles-version>
+		
+		<hsqldb.version>2.2.6</hsqldb.version>
+
+		<!-- JUnit for TDD -->
+		<junit.version>4.11</junit.version>
+
+	</properties>
+
+	<repositories>
+	    <repository>
+			<id>local-repository</id>
+			<url>file://${project.basedir}/lib</url>
+		</repository>		
+	</repositories>
+
+	<dependencies>
+
+		<!-- DevOnFrame -->
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-web</artifactId>
+			<scope>system</scope>
+			<version>${devonframe.version}</version>
+			<systemPath>${project.basedir}/lib/devonframe/devon-web/${devonframe.version}/devon-web-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-dataaccess</artifactId>
+			<scope>system</scope>
+			<version>${devonframe.version}</version>
+			<systemPath>${project.basedir}/lib/devonframe/devon-dataaccess/${devonframe.version}/devon-dataaccess-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-paging</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-paging/${devonframe.version}/devon-paging-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-core</artifactId>
+			<scope>system</scope>
+			<version>${devonframe.version}</version>
+			<systemPath>${project.basedir}/lib/devonframe/devon-core/${devonframe.version}/devon-core-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-idgenerator</artifactId>
+			<scope>system</scope>
+			<version>${devonframe.version}</version>
+			<systemPath>${project.basedir}/lib/devonframe/devon-idgenerator/${devonframe.version}/devon-idgenerator-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-excel</artifactId>
+			<scope>system</scope>
+			<version>${devonframe.version}</version>
+			<systemPath>${project.basedir}/lib/devonframe/devon-excel/${devonframe.version}/devon-excel-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-fileupload</artifactId>
+			<scope>system</scope>
+			<version>${devonframe.version}</version>
+			<systemPath>${project.basedir}/lib/devonframe/devon-fileupload/${devonframe.version}/devon-fileupload-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-crypto</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-crypto/${devonframe.version}/devon-crypto-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-mail</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-mail/${devonframe.version}/devon-mail-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-validator</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-validator/${devonframe.version}/devon-validator-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-transaction</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-transaction/${devonframe.version}/devon-transaction-${devonframe.version}.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-log</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-log/${devonframe.version}/devon-log-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-batch-core</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-batch-core/${devonframe.version}/devon-batch-core-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-context</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-context/${devonframe.version}/devon-context-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-dynamicloading-agent</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-dynamicloading-agent/${devonframe.version}/devon-dynamicloading-agent-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-dynamicloading-controller</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-dynamicloading-controller/${devonframe.version}/devon-dynamicloading-controller-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-egovframe</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-egovframe/${devonframe.version}/devon-egovframe-${devonframe.version}.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-iam</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-iam/${devonframe.version}/devon-iam-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-rui</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-rui/${devonframe.version}/devon-rui-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-scheduler</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-scheduler/${devonframe.version}/devon-scheduler-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-servicecontrol</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-servicecontrol/${devonframe.version}/devon-servicecontrol-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-xplatform</artifactId>
+			<version>${devonframe.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/devonframe/devon-xplatform/${devonframe.version}/devon-xplatform-${devonframe.version}.jar</systemPath>
+		</dependency>
+		
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${org.springframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${org.springframework.version}</version>
+			<!-- Exclude Commons Logging in favor of SLF4j -->
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springmodules/spring-modules-validation -->
+		<dependency>
+			<groupId>org.springmodules</groupId>
+			<artifactId>spring-modules-validation</artifactId>
+			<version>0.8</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Spring -->
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.7.4</version>
+		</dependency>
+
+		<!-- javax -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${servlet.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- JSTL -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>${jstl.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>${taglibs.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- Javax (JSR-250) -->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>jsr250-api</artifactId>
+			<version>${jsr250.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
+		</dependency>
+		
+		<!-- Commons -->
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>${commons.dbcp.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+		
+		
+		<!-- https://mvnrepository.com/artifact/commons-configuration/commons-configuration -->
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.10</version>
+		</dependency>
+		
+		
+		<!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		
+		<!--
+			JDBC Drivers
+			주의: Database 서버의 종류 및 버전에 맞추어 적절한 Driver를 의존해야 한다
+		-->
+		<!-- Oracle : Oracle Driver는 정식 Repository가 없으므로 보안을 위해 가급적 공식 사이트에서 다운받은 다음 WEB-INF/lib에 직접 추가한다. -->
+		<!-- <dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>10.2.0.4.0</version>
+		</dependency> -->
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>10.2.0.4.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/3rdparty/ojdbc14-10.2.0.4.0.jar</systemPath>
+			
+		</dependency>
+
+		<!-- HSQL DB -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${hsqldb.version}</version>
+		</dependency>
+		
+		<!-- UI template : Apache Tiles -->
+ 		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-extras</artifactId>
+			<version>${apache.tiles-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-servlet</artifactId>
+			<version>${apache.tiles-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-jsp</artifactId>
+			<version>${apache.tiles-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-core</artifactId>
+			<version>${apache.tiles-version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jcl-over-slf4j</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- for Using json -->
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.13</version>
+		</dependency>
+		
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<!-- Test -->
+		<!-- JUnit for TDD -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- StringUtil common-lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+		
+		<!-- jackson lib -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		
+		<!-- XML Parser -->
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.3</version>
+		</dependency>
+		
+		<!-- LG U+ lib -->
+		<dependency>
+			<groupId>com.lgu.code</groupId>
+			<artifactId>LGUSecurity</artifactId>
+			<version>1.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.lgu.code</groupId>
+			<artifactId>FeelingKUinqueKeyGen</artifactId>
+			<version>1.0</version>
+		</dependency>
+		
+			
+		<!--Add Diff -->
+		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		
+		<!-- Apache httpClient 170905 hJJANG add-->
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.1.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/cglib/cglib -->
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.2.8</version>
+		</dependency>
+		
+		
+		<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.ibatis/ibatis-core -->
+		<!-- <dependency>
+			<groupId>org.apache.ibatis</groupId>
+			<artifactId>ibatis-core</artifactId>
+			<version>3.0</version>
+		</dependency> -->
+		
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.13</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.13</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-validator -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.2.0.Final</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>javax.mail-api</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/stax/stax-api -->
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax-api</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.sf.ehcache/ehcache -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.9.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.10</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.8.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.8.2</version>
+		</dependency>
+				
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j-impl -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.jasypt/jasypt -->
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>1.9.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.jasypt/jasypt-spring3 -->
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt-spring3</artifactId>
+			<version>1.9.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.13</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/stax/stax -->
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.8.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.10</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-digester/commons-digester -->
+		<dependency>
+			<groupId>commons-digester</groupId>
+			<artifactId>commons-digester</artifactId>
+			<version>1.8</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.navercorp.lucy/lucy-xss -->
+		<dependency>
+		    <groupId>com.navercorp.lucy</groupId>
+		    <artifactId>lucy-xss</artifactId>
+		    <version>1.6.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.navercorp.lucy/lucy-xss-servlet -->
+		<dependency>
+		    <groupId>com.navercorp.lucy</groupId>
+		    <artifactId>lucy-xss-servlet</artifactId>
+		    <version>2.0.1</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<defaultGoal>package</defaultGoal>
+		<directory>${basedir}/target</directory>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+							<phase>prepare-package</phase>
+						<!--  <phase>package</phase> -->
+						<!-- <phase>install</phase> -->
+						<!-- <phase>compile</phase> -->
+						<!-- <phase>deploy</phase> -->
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<!-- <includeScope>compile</includeScope> -->
+							<outputDirectory>
+								${project.build.directory}/${project.artifactId}/WEB-INF/lib
+								<!-- ${project.artifactId}/WEB-INF/lib -->
+							</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin> 
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>false</skip>
+					<includes>
+						<include>devonframe/**/*Test.java</include>
+					</includes>
+					<testFailureIgnore>false</testFailureIgnore>
+					<argLine>-Xms256m -Xmx512m -XX:MaxPermSize=128m -ea
+						-Dfile.encoding=UTF-8</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<version>1.0</version>
+</project>

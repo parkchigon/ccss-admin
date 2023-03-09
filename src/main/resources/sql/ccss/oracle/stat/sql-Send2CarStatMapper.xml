@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Send2CarStat">
+	
+	<resultMap type="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO" id="send2CarStatMap">
+		<result property="sendToCarId"     column="SEND_TO_CAR_ID" />
+		<result property="targetNm"        column="TARGET_NM" />
+		<result property="targetAddress"   column="TARGET_ADDRESS" />
+		<result property="targetLonx"      column="TARGET_LONX" />
+		<result property="targetLaty"      column="TARGET_LATY" />
+		<result property="sendStatus"      column="SEND_STATUS" />
+		<result property="useYn"           column="USE_YN" />
+		<result property="arrivHopeTime"   column="ARRIV_HOPE_TIME" />
+		<result property="estTime"         column="EST_TIME" />
+		<result property="regId"           column="REG_ID" />
+		<result property="regDt"           column="REG_DT" />
+		<result property="updId"           column="UPD_ID" />
+		<result property="updDt"           column="UPD_DT" />
+		<result property="membId"          column="MEMB_ID" />
+		<result property="mgrappId"        column="MGRAPP_ID" />
+		<result property="serviceType"     column="SERVICE_TYPE" />
+		<result property="rsvType"         column="RSV_TYPE" />
+		<result property="svrId"           column="SVR_ID" />
+		<result property="hostNm"           column="HOST_NM" />
+		<result property="processDt"       column="PROCESS_DT" />
+		<result property="scheduleId"      column="SCHEDULE_ID" />
+		<result property="mgrappCtn"       column="MGRAPP_CTN" />
+		
+		<result property="mgrappLoginId"       column="MGRAPP_LOGIN_ID" />
+		<result property="deviceCtn"       column="DEVICE_CTN" />
+	</resultMap>
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	
+	<sql id="dynamicWhereTbSend2Car">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(membId) ">
+			AND  TS.MEMB_ID = #{membId}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(sendStatus) and sendStatus !='ALL'">
+			AND  TS.SEND_STATUS = #{sendStatus}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceType) and sendStatus !='ALL'">
+			AND  TS.SERVICE_TYPE = #{serviceType}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useYn) and useYn !='ALL'">
+			AND  TS.USE_YN = #{useYn}	
+		</if>
+		
+		<if test="!@org.springframework.util.StringUtils@isEmpty(deviceCtn) ">
+			AND  TCD.DEVICE_CTN = #{deviceCtn}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(mgrappLoginId) ">
+			AND  TMU.MGRAPP_LOGIN_ID = #{mgrappLoginId}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(mgrappCtn) ">
+			AND  TMU.MGRAPP_CTN = #{mgrappCtn}	
+		</if>
+		
+	</sql>
+	
+
+	<select id="selectSend2CarStatList" parameterType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO" resultType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO">
+		<include refid="pagingHead"/>
+				SELECT 
+					TS.SEND_TO_CAR_ID,	
+					TS.TARGET_NM,	
+					TS.TARGET_ADDRESS,	
+					TS.TARGET_LONX,	
+					TS.TARGET_LATY,	
+					TS.SEND_STATUS,	
+					TS.USE_YN,	
+					TO_CHAR(TS.ARRIV_HOPE_TIME,'YYYY-MM-DD HH24:MI:SS') AS ARRIV_HOPE_TIME, 
+					TS.EST_TIME,
+					TS.REG_ID,
+					<!-- 2018.11.05 파티션테이블 reg_dt컬럼 삭제(process_dt컬럼과 중복) -->
+					<!-- TO_CHAR(TS.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT,  -->
+					TS.UPD_ID,	
+					TO_CHAR(TS.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT, 
+					TS.MEMB_ID,	
+					TS.MGRAPP_ID,	
+					TS.SERVICE_TYPE,	
+					TS.RSV_TYPE,	
+					TS.SVR_ID,	
+					(SELECT HOST_NM FROM TB_SVR_INFO WHERE SVR_ID =  TS.SVR_ID) as HOST_NM,
+					TS.SCHEDULE_ID,
+					TCD.DEVICE_CTN,
+					TMU.MGRAPP_LOGIN_ID,
+					TMU.MGRAPP_CTN
+					FROM  TB_SEND2CAR TS, TB_CONN_DEVICE TCD, TB_MGRAPP_USER TMU
+					WHERE 1=1
+					AND TS.MEMB_ID = TCD.MEMB_ID
+					AND TS.MGRAPP_ID = TMU.MGRAPP_ID
+					<include refid="dynamicWhereTbSend2Car"/> 
+				AND TS.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and TS.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+			ORDER BY TS.PROCESS_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectSend2CarDetailInfo" parameterType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO" resultType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO">
+				SELECT 
+					TS.SEND_TO_CAR_ID,	
+					TS.TARGET_NM,	
+					TS.TARGET_ADDRESS,	
+					TS.TARGET_LONX,	
+					TS.TARGET_LATY,	
+					TS.SEND_STATUS,	
+					TS.USE_YN,	
+					TO_CHAR(TS.ARRIV_HOPE_TIME,'YYYY-MM-DD HH24:MI:SS') AS ARRIV_HOPE_TIME, 
+					TS.EST_TIME,
+					TS.REG_ID,
+					<!-- 2018.11.05 파티션테이블 reg_dt컬럼 삭제(process_dt컬럼과 중복) -->
+					<!-- TO_CHAR(TS.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT,  -->
+					TS.UPD_ID,	
+					TO_CHAR(TS.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT, 
+					TS.MEMB_ID,	
+					TS.MGRAPP_ID,	
+					TS.SERVICE_TYPE,	
+					TS.RSV_TYPE,	
+					TS.SVR_ID,	
+					(SELECT HOST_NM FROM TB_SVR_INFO WHERE SVR_ID =  TS.SVR_ID) as HOST_NM,
+					TS.SCHEDULE_ID,
+					TCD.DEVICE_CTN,
+					TMU.MGRAPP_LOGIN_ID,
+					TMU.MGRAPP_CTN
+					FROM  TB_SEND2CAR TS, TB_CONN_DEVICE TCD, TB_MGRAPP_USER TMU
+					WHERE 1=1
+					AND TS.MEMB_ID = TCD.MEMB_ID
+					AND TS.MGRAPP_ID = TMU.MGRAPP_ID
+					AND TS.SEND_TO_CAR_ID = #{sendToCarId}
+	</select>
+	
+	
+	<select id="selectSend2CarStatListCnt" parameterType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO" resultType="int">
+		SELECT 
+			COUNT(*) 
+		FROM (
+				SELECT 
+					TS.SEND_TO_CAR_ID,	
+					TS.TARGET_NM,	
+					TS.TARGET_ADDRESS,	
+					TS.TARGET_LONX,	
+					TS.TARGET_LATY,	
+					TS.SEND_STATUS,	
+					TS.USE_YN,	
+					TO_CHAR(TS.ARRIV_HOPE_TIME,'YYYY-MM-DD HH24:MI:SS') AS ARRIV_HOPE_TIME, 
+					TS.EST_TIME,
+					TS.REG_ID,
+					<!-- 2018.11.05 파티션테이블 reg_dt컬럼 삭제(process_dt컬럼과 중복) -->
+					<!-- TO_CHAR(TS.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT,  -->
+					TS.UPD_ID,	
+					TO_CHAR(TS.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT, 
+					TS.MEMB_ID,	
+					TS.MGRAPP_ID,	
+					TS.SERVICE_TYPE,	
+					TS.RSV_TYPE,	
+					TS.SVR_ID,	
+					(SELECT HOST_NM FROM TB_SVR_INFO WHERE SVR_ID =  TS.SVR_ID) as HOST_NM,
+					TS.SCHEDULE_ID,
+					TCD.DEVICE_CTN,
+					TMU.MGRAPP_LOGIN_ID,
+					TMU.MGRAPP_CTN
+				FROM  TB_SEND2CAR TS, TB_CONN_DEVICE TCD, TB_MGRAPP_USER TMU
+				WHERE 1=1
+				AND TS.MEMB_ID = TCD.MEMB_ID
+				AND TS.MGRAPP_ID = TMU.MGRAPP_ID
+				<include refid="dynamicWhereTbSend2Car"/> 
+				AND TS.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and TS.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+				ORDER BY TS.PROCESS_DT DESC
+			)
+	</select>
+
+	
+	<select id="selectSend2CarStatListExcel" parameterType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO" resultType="com.lgu.ccss.admin.stat.send2car.domain.Send2CarStatVO">
+			SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			FROM (  
+					SELECT 
+					TS.SEND_TO_CAR_ID,	
+					TS.TARGET_NM,	
+					TS.TARGET_ADDRESS,	
+					TS.TARGET_LONX,	
+					TS.TARGET_LATY,	
+				 	TS.SEND_STATUS,
+					TS.USE_YN,	
+					TO_CHAR(TS.ARRIV_HOPE_TIME,'YYYY-MM-DD HH24:MI:SS') AS ARRIV_HOPE_TIME, 
+					TS.EST_TIME,
+					TS.REG_ID,
+					<!-- 2018.11.05 파티션테이블 reg_dt컬럼 삭제(process_dt컬럼과 중복) -->
+					<!-- TO_CHAR(TS.REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT,  -->
+					TS.UPD_ID,	
+					TO_CHAR(TS.UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT, 
+					TS.MEMB_ID,	
+					TS.MGRAPP_ID,	
+					<!-- TS.SERVICE_TYPE, -->
+					(SELECT  DTL_CD_NM FROM TB_DTL_CD
+					WHERE GRP_CD_ID = (SELECT GRP_CD_ID FROM TB_GROUP_CD WHERE GRP_CD_NM='SEND2CAR_SERVICE_TYPE' )
+					AND CD_VAL= TS.SERVICE_TYPE) as  SERVICE_TYPE,
+					TS.RSV_TYPE,	
+					TS.SVR_ID,	
+					(SELECT HOST_NM FROM TB_SVR_INFO WHERE SVR_ID =  TS.SVR_ID) as HOST_NM,
+					TS.SCHEDULE_ID,
+					TCD.DEVICE_CTN,
+					TMU.MGRAPP_LOGIN_ID,
+					TMU.MGRAPP_CTN
+				FROM  TB_SEND2CAR TS, TB_CONN_DEVICE TCD, TB_MGRAPP_USER TMU
+				WHERE 1=1
+				AND TS.MEMB_ID = TCD.MEMB_ID
+				AND TS.MGRAPP_ID = TMU.MGRAPP_ID
+				<include refid="dynamicWhereTbSend2Car"/> 
+				AND TS.PROCESS_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and TS.PROCESS_DT  <![CDATA[<]]> TO_DATE(#{endDate},'YYYY-MM-DD')
+				ORDER BY TS.PROCESS_DT DESC
+			) ORACLE_PAGING			
+	</select>
+	
+</mapper>

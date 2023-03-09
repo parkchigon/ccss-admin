@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Notice">
+	
+	<resultMap id="noticeVO" type="com.lgu.ccss.admin.notice.domain.NoticeVO">
+			<result property="notiId"			column="NOTI_ID" />
+			<result property="notiTitle"		column="NOTI_TITLE" />
+			<result property="notiImportance"	column="NOTI_IMPORTANCE" />
+			<result property="exposureYn"		column="EXPOSURE_YN" />
+			<result property="pushYn"			column="PUSH_YN" />
+			<result property="serviceCategory"	column="SERVICE_CATEGORY" />
+			<result property="notiStartDt"		column="NOTI_START_DT" />
+			<result property="notiEndDt"		column="NOTI_END_DT" />
+			<result property="notiCont"			column="NOTI_CONT" />
+			<result property="regId"			column="REG_ID" />
+			<result property="regDt"			column="REG_DT" />
+			<result property="updId"			column="UPD_ID" />
+			<result property="updDt"			column="UPD_DT" />
+			<result property="pushStartDt"		column="PUSH_START_DT" />
+			<result property="pushEndDt"		column="PUSH_END_DT" />
+			
+			<result property="serviceExposure"	column="SERVICE_EXPOSURE" />
+			<result property="notiType"			column="NOTI_TYPE" />
+			<result property="contType"			column="CONT_TYPE" />
+			<result property="firmVer"			column="FIRM_VER" />
+			
+	</resultMap>
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+   	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<sql id="dynamicWhereTbNotice">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(exposureYn) and exposureYn !='ALL'">
+			AND EXPOSURE_YN = #{exposureYn}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(notiTitle)">
+			AND NOTI_TITLE LIKE '%'|| #{notiTitle} || '%'
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(notiType) and notiType !='ALL'">
+			AND NOTI_TYPE = #{notiType}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceExposure) and serviceExposure !='ALL'">
+			AND SERVICE_EXPOSURE = #{serviceExposure}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(pushYn) and pushYn !='ALL'">
+			AND  PUSH_YN = #{pushYn}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(notiImportance) and notiImportance !='ALL'">
+			AND  NOTI_IMPORTANCE = #{notiImportance}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(firmVer)">
+			AND  FIRM_VER = #{firmVer}
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(contType) and contType !='ALL'">
+			AND  CONT_TYPE = #{contType}
+		</if>
+	</sql>
+	
+	
+	<select id="selectNoticeList" parameterType="noticeVO" resultType="noticeVO">
+		<include refid="pagingHead"/>
+			SELECT 
+				NOTI_ID,
+				NOTI_TITLE,
+				NOTI_IMPORTANCE,
+				EXPOSURE_YN,
+				PUSH_YN,
+				SERVICE_CATEGORY,
+				TO_CHAR(NOTI_START_DT, 'YYYY-MM-DD') AS NOTI_START_DT,
+				TO_CHAR(NOTI_END_DT, 'YYYY-MM-DD') AS NOTI_END_DT,
+				NOTI_CONT,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT, 'YYYY-MM-DD') AS UPD_DT,
+				TO_CHAR(PUSH_START_DT, 'YYYY-MM-DD') AS PUSH_START_DT,
+				TO_CHAR(PUSH_END_DT, 'YYYY-MM-DD') AS PUSH_END_DT,
+				SERVICE_EXPOSURE,
+				NOTI_TYPE,
+				FIRM_VER,
+				CONT_TYPE
+			FROM TB_NOTICE 
+			WHERE 1=1
+			<include refid="dynamicWhereTbNotice" />
+			ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	<!-- 게시판 리스트 조회 카운트 -->
+	<select id="selectNoticeListCnt" parameterType="noticeVO" resultType="int">
+		SELECT COUNT(NOTI_ID)
+		  FROM TB_NOTICE
+		  WHERE 1=1
+		 <include refid="dynamicWhereTbNotice" />
+	</select>
+	
+	<select id="selectNoticeDetail" parameterType="noticeVO"  resultType="noticeVO">
+		SELECT 
+				NOTI_ID,
+				NOTI_TITLE,
+				NOTI_IMPORTANCE,
+				EXPOSURE_YN,
+				PUSH_YN,
+				SERVICE_CATEGORY,
+				TO_CHAR(NOTI_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS NOTI_START_DT,
+				TO_CHAR(NOTI_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS NOTI_END_DT,
+				NOTI_CONT,
+				REG_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT,
+				TO_CHAR(PUSH_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_START_DT,
+				TO_CHAR(PUSH_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS PUSH_END_DT,
+				SERVICE_EXPOSURE,
+				NOTI_TYPE,
+				FIRM_VER,
+				CONT_TYPE
+	  FROM TB_NOTICE 
+	   WHERE NOTI_ID = #{notiId} 
+	</select>
+	
+	<insert id="insertNotice" parameterType="noticeVO" >
+		INSERT INTO TB_NOTICE
+		(
+			NOTI_ID,
+			NOTI_TITLE,
+			NOTI_IMPORTANCE,
+			EXPOSURE_YN,
+			PUSH_YN,
+			SERVICE_CATEGORY,
+			NOTI_START_DT,
+			NOTI_END_DT,
+			<if test="!@org.springframework.util.StringUtils@isEmpty(spostDate) ">
+			PUSH_START_DT,
+			</if>  
+			<if test="!@org.springframework.util.StringUtils@isEmpty(epostDate) ">
+			PUSH_END_DT,
+			</if>  
+			NOTI_CONT,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT,
+			SERVICE_EXPOSURE,
+			NOTI_TYPE,
+			FIRM_VER,
+			CONT_TYPE,
+			PUSH_STATUS
+		) 
+		VALUES 
+		(
+		  #{notiId},
+		  #{notiTitle},
+		  #{notiImportance},
+		  #{exposureYn},
+		  #{pushYn},
+		  #{serviceCategory},
+		  TO_DATE(#{notiStartDt},'yyyymmddhh24miss'),
+		  TO_DATE(#{notiEndDt},'yyyymmddhh24miss'),
+		<if test="!@org.springframework.util.StringUtils@isEmpty(spostDate) ">
+			TO_DATE(#{pushStartDt},'yyyymmddhh24miss'),
+		</if>  
+		<if test="!@org.springframework.util.StringUtils@isEmpty(epostDate) ">
+			TO_DATE(#{pushEndDt},'yyyymmddhh24miss'),
+		</if>  
+		 
+		  #{notiCont},
+		  #{regId},
+		  SYSDATE,
+		  #{updId},
+		  SYSDATE,
+		  #{serviceExposure},
+		  #{notiType},
+		  #{firmVer,jdbcType=VARCHAR},
+		  #{contType,jdbcType=VARCHAR},
+		  '0000'
+		 )
+	</insert>
+	
+	<update id="updateNotice" parameterType="noticeVO">
+		UPDATE TB_NOTICE
+			SET 
+				EXPOSURE_YN = #{exposureYn}
+				,SERVICE_CATEGORY = #{serviceCategory}
+				,PUSH_YN = #{pushYn}
+				<if test="!@org.springframework.util.StringUtils@isEmpty(spostDate) ">
+					,PUSH_START_DT = TO_DATE(#{pushStartDt},'yyyymmddhh24miss')
+				</if>  
+				<if test="!@org.springframework.util.StringUtils@isEmpty(epostDate) ">
+					,PUSH_END_DT = TO_DATE(#{pushEndDt},'yyyymmddhh24miss')
+				</if> 
+				,NOTI_IMPORTANCE = #{notiImportance}
+				,NOTI_START_DT = TO_DATE(#{notiStartDt},'yyyymmddhh24miss')
+				,NOTI_END_DT = TO_DATE(#{notiEndDt},'yyyymmddhh24miss')
+				,NOTI_TITLE = #{notiTitle}
+				,NOTI_CONT = #{notiCont}
+				,UPD_ID = #{updId}
+				,UPD_DT = SYSDATE
+				,SERVICE_EXPOSURE = #{serviceExposure}
+				,NOTI_TYPE = #{notiType}
+				<if test="!@org.springframework.util.StringUtils@isEmpty(firmVer) ">
+					,FIRM_VER = #{firmVer}
+				</if>
+				<if test="!@org.springframework.util.StringUtils@isEmpty(contType) ">
+					,CONT_TYPE = #{contType}
+				</if>  
+		 WHERE NOTI_ID = #{notiId} 
+	</update>
+	
+	<!-- 게시판 삭제 -->
+	<delete id="deleteNotice" parameterType="noticeVO">
+		DELETE
+		  FROM TB_NOTICE
+		 WHERE NOTI_ID IN
+		<foreach collection="notiIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	
+	<!-- 공지사항 제목  -->
+	<select id="checkTitleDulicate" parameterType="noticeVO" resultType="int">
+		SELECT COUNT(NOTI_TITLE)
+		FROM TB_NOTICE
+		WHERE NOTI_TITLE = #{notiTitle}
+		<if test="!@org.springframework.util.StringUtils@isEmpty(notiId) ">
+		AND NOTI_ID NOT IN ( #{notiId} )
+		</if>  
+	</select>
+	
+	<!-- 체크 펌웨어  -->
+	<select id="checkFirmVerDulicate" parameterType="noticeVO" resultType="int">
+		SELECT COUNT(FIRM_VER)
+		FROM TB_NOTICE
+		WHERE FIRM_VER = #{firmVer}  
+		<if test="!@org.springframework.util.StringUtils@isEmpty(serviceCategory) and serviceCategory !='ALL'">
+			AND SERVICE_CATEGORY = #{serviceCategory}
+		</if>
+		AND NOTI_ID NOT IN ( #{notiId} )
+		
+	</select>
+	
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+ 	
+
+	<!-- ORACLE Jndi -->
+  	<bean id="dataSource-oracle-jndi" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="#{config['Globals.oracle.jndiName']}" />
+		<!-- <property name="jndiName" value="jdbc/oracle" /> -->
+		<property name="resourceRef" value="true" />
+	</bean>
+	
+	<!-- Altibase  Jndi  -->
+	<bean id="dataSource-Altibase-jndi" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="#{config['Globals.altibase.jndiName']}" />
+		<property name="resourceRef" value="true" />
+	</bean>
+
+	
+	
+	<!--자체프레임워크 테스트 HSQL 설정  -->
+	<!-- <jdbc:embedded-database id="dataSource" type="HSQL">
+		<jdbc:script location="classpath:hsqldb/sample/sample_table.sql" />
+		<jdbc:script location="classpath:hsqldb/sample/sample_data.sql" />
+		<jdbc:script location="classpath:hsqldb/sample/idgeneration.sql" />
+	</jdbc:embedded-database> -->
+
+	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+ 		<property name="jndiName" value="java:comp/env/enterprise" /> 
+	</bean> -->
+
+<!--DBCP 설정 영역  -->
+<!-- <context:property-placeholder location="classpath:/config/db.properties"/>  -->
+	
+<!--     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"> -->
+<!-- 		<property name="driverClassName" value="${db.driver}" /> -->
+<!-- 		<property name="url" value="${db.url}" /> -->
+<!-- 		<property name="username" value="${db.username}" /> -->
+<!-- 		<property name="password" value="${db.password}" /> -->
+<!-- 	</bean> -->
+
+</beans>

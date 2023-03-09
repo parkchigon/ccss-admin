@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Admin">
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+   	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<resultMap type="adminVO" id="adminMap">
+		<result property="mngrId" 				column="MNGR_ID" />
+		<result property="passWd" 				column="PASSWD" />
+		<result property="mngrLevel" 			column="MNGR_LEVEL" />
+		<result property="grpNm" 				column="MNGR_LEVEL_NM" />
+		<result property="mngrNm" 				column="MNGR_NM" />
+		<result property="clphNo"				column="CLPH_NO" />
+		<result property="regDt" 				column="REG_DT" />
+		<result property="useYn"	 			column="USE_YN" />
+		<result property="bfrPassWd" 			column="BFR_PASSWD" />
+		<result property="accountStatus" 		column="ACCOUNT_STATUS" />
+		<result property="emailAddr" 			column="EMAIL_ADDR" />
+		<result property="lastLoginDt" 			column="LAST_LOGIN_DT" />
+	</resultMap>
+
+	
+	
+	<!-- <select id="selectAdminList" parameterType="adminVO" resultType="com.lgu.ccss.admin.admin.domain.AdminVO"> -->
+	<!-- <select id="selectAdminList" resultType="adminVO">
+		SELECT 
+			     MNGR_ID 
+			   , PASSWD 
+			   , MNGR_LEVEL
+			   , (SELECT GRP_NM FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = MNGR_LEVEL) AS MNGR_LEVEL_NM
+			   , MNGR_NM 
+			   , CLPH_NO 
+		  	   , TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+		  	   , USE_YN
+		  	   , ACCOUNT_STATUS
+		  	   , EMAIL_ADDR
+		  FROM TB_MNGR
+		<include refid="dynamicWhereAdmin" />
+	</select> -->
+	
+	<select id="selectSuperAdmin" parameterType="adminVO" resultType="adminVO">
+		SELECT 
+			MNGR_ID
+			,(select MAX(LOGIN_DT) from TB_MNGR_LOGIN_HIS B where B.MNGR_ID= A.MNGR_ID) as LAST_LOGIN_DT
+			<!-- ,PASSWD -->
+			,MNGR_LEVEL
+			,(SELECT GRP_NM FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = MNGR_LEVEL) AS MNGR_LEVEL_NM
+			,MNGR_NM
+			,CLPH_NO
+			,EMAIL_ADDR
+			,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+			,USE_YN
+			,ACCOUNT_STATUS
+		FROM TB_MNGR A
+		WHERE 1=1
+		AND MNGR_LEVEL ='TOP'
+	</select>
+ 	<select id="selectAdminList" parameterType="adminVO" resultType="adminVO">
+		/* com.lgu.admin.admin.mapper.AdminMapper.selectAdminList */
+		<include refid="pagingHead"/>
+		SELECT 
+				MNGR_ID
+				,(select MAX(LOGIN_DT) from TB_MNGR_LOGIN_HIS B where B.MNGR_ID= A.MNGR_ID) as LAST_LOGIN_DT
+			<!-- ,PASSWD -->
+			,MNGR_LEVEL
+			,(SELECT GRP_NM FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = MNGR_LEVEL) AS MNGR_LEVEL_NM
+			,MNGR_NM
+			,CLPH_NO
+			,EMAIL_ADDR
+			,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+			,USE_YN
+			,ACCOUNT_STATUS
+		FROM TB_MNGR A
+		WHERE 1=1
+			AND MNGR_LEVEL !='TOP'	
+			<if test="!@org.springframework.util.StringUtils@isEmpty(searchType) and searchType !='' ">
+				<choose>
+					<when test="searchType == 'ID'">/*ID 검색*/
+					<!-- 	AND MNGR_ID LIKE '%${searchValue}%'	 -->
+					AND MNGR_ID LIKE '%'|| #{searchValue} || '%'
+					</when>
+					<when test="searchType == 'NAME'">/*회원명 검색*/
+					<!-- 	AND MNGR_NM LIKE '%${searchValue}%'	 -->
+					AND MNGR_NM LIKE '%'|| #{searchValue} || '%'
+					</when>
+					<when test="searchType == 'CTN'">/*회원명 검색*/
+						AND CLPH_NO = #{searchValue}	
+					</when>
+				</choose>
+			</if>
+		 <!-- ORDER BY REG_DT DESC -->
+		ORDER BY MNGR_LEVEL,REG_DT
+		<include refid="pagingBody"/>
+	</select>
+
+	<select id="selectAdminListCnt" parameterType="adminVO" resultType="int">
+		/* com.lgu.admin.admin.mapper.AdminMapper.selectAdminListCnt */
+		SELECT COUNT(MNGR_ID)
+		  FROM TB_MNGR
+		  WHERE MNGR_LEVEL !='TOP'	
+		<!-- <include refid="dynamicWhereAdmin" /> -->
+		<if test="!@org.springframework.util.StringUtils@isEmpty(searchType) and searchType !='' ">
+				<choose>
+					<when test="searchType == 'ID'">/*ID 검색*/
+					<!-- 	AND MNGR_ID LIKE '%${searchValue}%'	 -->
+						AND MNGR_ID LIKE '%'|| #{searchValue} || '%'
+					</when>
+					<when test="searchType == 'NAME'">/*회원명 검색*/
+						<!-- AND MNGR_NM LIKE '%${searchValue}%'	 -->
+						AND MNGR_NM LIKE '%'|| #{searchValue} || '%'
+					</when>
+					<when test="searchType == 'CTN'">/*회원명 검색*/
+						AND CLPH_NO = #{searchValue}	
+					</when>
+				</choose>
+			</if>
+	</select>
+
+	<insert id="insertAdmin" parameterType="adminVO" >
+		/* com.lgu.admin.admin.rmapper.AdminMapper.insertAdmin */
+		INSERT INTO TB_MNGR 
+		(
+			 MNGR_ID, 
+			 PASSWD,
+			 MNGR_NM, 
+			 CLPH_NO,
+			 MNGR_LEVEL,
+			 USE_YN,
+			 <if test="!@org.springframework.util.StringUtils@isEmpty(ipAddr) and searchType !='' ">
+			 IP_ADDR,
+			 </if> 
+			 ACCOUNT_STATUS,
+			 EMAIL_ADDR,
+			 REG_ID, 
+			 REG_DT,
+			 UPD_ID, 
+			 UPD_DT,
+			 PW_CHG_DT,
+			 PW_MOD_DISP_YN,
+			 LOGIN_FAIL_CNT,
+			 BFR_PASSWD
+		 )
+		VALUES 
+		( 
+			#{mngrId}, 
+			#{passWd}, 
+			#{mngrNm}, 
+			#{clphNo}, 
+			#{mngrLevel}, 
+			#{useYn},
+			 <if test="!@org.springframework.util.StringUtils@isEmpty(ipAddr) and searchType !='' ">
+			 #{ipAddr},
+			 </if>  
+			#{accountStatus},
+			#{emailAddr},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE,
+			SYSDATE,
+			'N',
+			0,
+			#{bfrPassWd}
+		)
+	</insert>
+	
+	
+	
+	
+	
+	<update id="updateAdmin" parameterType="adminVO" >
+		/* com.lgu.admin.admin.mapper.AdminMapper.updateAdmin */
+		UPDATE TB_MNGR
+		<set>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(passWd)">
+				PASSWD = #{passWd},
+				PW_CHG_DT = SYSDATE,
+				<!-- LOGIN_FAIL_CNT = 0, -->
+				BFR_PASSWD = #{bfrPassWd},
+			</if>
+			MNGR_LEVEL = #{mngrLevel}
+			, MNGR_NM = #{mngrNm}
+			, CLPH_NO = #{clphNo}
+			, USE_YN = #{useYn}
+			, UPD_DT = SYSDATE
+			, UPD_ID =#{updId}
+			, EMAIL_ADDR =#{emailAddr}
+			<if test="!@org.springframework.util.StringUtils@isEmpty(accountStatus)">
+			,ACCOUNT_STATUS = #{accountStatus}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(loginFailCount)">
+				,LOGIN_FAIL_CNT = #{loginFailCount}
+			</if>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(ipAddr)">
+				,IP_ADDR = #{ipAddr}
+			</if>
+			
+		
+		 </set>
+		 WHERE MNGR_ID =#{mngrId}
+	</update>
+	
+	<select id="selectAdminDetail" parameterType="adminVO" resultMap="adminMap">
+		/* com.lgu.admin.admin.mapper.AdminMapper.selectAdminDetail */
+		SELECT 
+			 MNGR_ID, 
+			 PASSWD,
+			 MNGR_NM, 
+			 CLPH_NO,
+			 MNGR_LEVEL,
+			 USE_YN,
+			 IP_ADDR,
+			 ACCOUNT_STATUS,
+			 EMAIL_ADDR,
+			 REG_ID, 
+			 TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+			 UPD_ID, 
+			 TO_CHAR(UPD_DT, 'YYYY-MM-DD') AS UPD_DT,
+			 TO_CHAR(PW_CHG_DT, 'YYYY-MM-DD') AS PW_CHG_DT,
+			 PW_MOD_DISP_YN,
+			 LOGIN_FAIL_CNT,
+			 BFR_PASSWD
+		  FROM TB_MNGR
+		 WHERE MNGR_ID = #{mngrId}
+	</select>
+	
+	
+	<select id="checkAdminId" parameterType="adminVO" resultType="int" >
+		SELECT COUNT(MNGR_ID)
+		  FROM TB_MNGR
+		 WHERE MNGR_ID = #{mngrId}
+	</select>
+	
+	<delete id="deleteAdmin" parameterType="adminVO" >
+		DELETE
+		  FROM TB_MNGR
+		 WHERE MNGR_ID IN
+		<foreach collection="mngrIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteAdminMpng" parameterType="adminVO" >
+		DELETE
+		  FROM TB_MNGR_GROUP_MPNG
+		 WHERE MNGR_ID IN
+		<foreach collection="mngrIdArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	
+	<select id="checkAdminRole" parameterType="adminVO" resultType="adminVO" >
+		SELECT
+			MNGR_GRP_ID,
+			GRP_NM
+		  FROM TB_MNGR_GROUP
+		 WHERE GRP_NM IN ('관리자')
+	</select>
+	
+	<select id="checkAdminRoleId" parameterType="adminVO" resultType="adminVO" >
+		SELECT MNGR_ID,MNGR_GRP_ID
+		FROM TB_MNGR A, TB_MNGR_GROUP B
+		WHERE 1=1 
+		AND B.MNGR_GRP_ID IN ('TOP','26113903274360832')
+		AND A.MNGR_LEVEL = B.MNGR_GRP_ID
+		AND A.MNGR_LEVEL = #{mngrLevel}
+		AND A.MNGR_ID =#{mngrId}
+	</select>
+	
+	<select id="selectMngrLevel" parameterType="String" resultType="String" >
+		SELECT MNGR_LEVEL
+		FROM TB_MNGR
+		WHERE 1=1 
+		AND MNGR_ID =#{mngrId}
+	</select>
+	
+	
+	<insert id="insertMngrUseHstr" parameterType="adminVO" >
+	
+		INSERT INTO TB_MNGR_USE_HIS 
+		(
+			MNGR_USE_HIS_SEQ,
+			MNGR_ID,
+			LOGIN_DT,
+			LOGIN_IP,
+			PROCESS_DT,
+			REQ_URL,
+			MENU_NM, 
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		 )
+		VALUES 
+		( 
+			SEQ_MNGR_USE_HIS_01.NEXTVAL,
+			#{mngrId},
+			TO_DATE(#{loginDt},'yyyy-mm-dd hh24:mi:ss'),
+			#{loginIp},
+			TO_CHAR(SYSDATE,'yyyymmdd'),
+			#{reqUrl},
+			#{menuNm},
+			'SYSTEM',
+			SYSDATE,
+			'SYSTEM',
+			SYSDATE
+		)
+	</insert> 
+	
+</mapper>

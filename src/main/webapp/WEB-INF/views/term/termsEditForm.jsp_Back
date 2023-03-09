@@ -1,0 +1,155 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/views/common/include/taglib.jsp" %>
+<script type="text/javaScript">
+
+$(document).ready(function(){
+	
+	
+	$("#termsDiv").change(function() { 
+		var termsDivVal = $("#termsDiv").val();
+		if(termsDivVal =='1'){
+			$("#termsTitle").val("서비스이용약관");
+		}else if(termsDivVal =='2'){
+			$("#termsTitle").val("위치기반 서비스 이용약관");
+		}else{
+			$("#termsTitle").val("개인정보 처리방침");
+		}
+	});
+	
+	
+	//$("input:radio[name='termsId']:radio[value='${termsVO.termsId}']").attr("checked",true);
+	$("#termsCont").val(safeTagToHtmlTag($("#termsCont").val()));
+	
+	if(isEmpty($("#termsNo").val())) { // 등록
+		
+	} else {	// 약관종류 수정 못함
+		$("input:radio[name='termsDiv']").attr("disabled",true);
+	}
+	
+});
+
+// 약관 등록/수정
+function termsEdit() {
+	
+	var url = "<c:url value='/term/termsEditForm.do' />";
+	var termsContent = $("#termsContent").val()
+	var description = $("#description").val();
+	var postDate = $("#postDate").val();
+	
+	
+	if(termsContent == '' || termsContent == null) {
+		alert("입력되지 않은 항목이 있습니다.\n필수입력 항목을 모두 작성해주세요.");
+		return;
+	}
+	if(description == '' || description == null) {
+		alert("입력되지 않은 항목이 있습니다.\n필수입력 항목을 모두 작성해주세요.");
+		return;
+	}
+	
+	
+	$.ajax({
+		url : url
+		,data : $('#termsEditForm').serialize()
+		,dataType : 'json'
+		,type : "POST"
+	}).done(function(data) {
+		var result = data.result;
+		if(result == 'Y') {
+			location.href="/admin/servicemng/termsList.do";
+		} else {
+			alert("수정에 실패하였습니다.");
+		}
+	}).error(function(data) {
+		alert("수정에 실패하였습니다.");
+	});
+}
+
+function openTermsHistPopup(termsId) {
+	var url="/admin/servicemng/termsHistListPopup.do?termsId="+termsId+"&termsTitle=${termsVO.termsTitle}"; 
+	commonPopup(url,'termsHistListPopup','width=1162,height=836,scrollbars=yes');
+}
+
+</script>
+<!-- 내용-->
+<div class="contents_wrap">
+	<form id="termsEditForm" name="termsEditForm">
+	<input type="hidden" id="seqTerms" name="seqTerms" value="${termsVO.seqTerms}" />
+	<input type="hidden" id="termsTitle" name="termsTitle" value="${termsVO.termsTitle}" />
+		<div class="main_top">
+			<h2>
+			 약관   <c:if test="${not empty termsVO.seqTerms }">수정</c:if><c:if test="${empty termsVO.seqTerms }">등록</c:if></h2>
+		</div>
+		
+		<!-- s: table top-->
+		<div class="thead_wrap cboth">
+			<div class="ltr">
+				<div class="tit_table">기본정보</div>
+			</div>
+			<div class="rtl">
+				<div class="table_info01">* 필수입력</div>
+			</div>
+		</div>
+		<!-- e: table top-->
+			
+		<!-- s: table wrap-->
+		<div class="table_wrap">
+			<table class="table simple table_write_type">
+				<colgroup>
+					<col width="16%"/>
+					<col width="34%"/>
+					<col width="16%"/>
+					<col width="34%"/>
+				</colgroup>
+				<tbody>
+					<tr>
+						<th>약관 구분 <span class="imp">*</span></th>
+						<td colspan="3" class="last">
+							<input type="radio" name="termsDiv" id="termsDiv" class="" checked="checked" value="1" /> <label for="exposureYn">서비스 이용약관</label>&nbsp;&nbsp;
+							<input type="radio" name="termsDiv" id="termsDiv" class="" value="3" /> <label for="exposureYn">위치기반 서비스 이용약관</label>
+							<input type="radio" name="termsDiv" id="termsDiv" class="" value="2" /> <label for="exposureYn">개인정보 처리방침</label>
+						</td>
+					</tr>
+					<tr>
+						<th>상태<span class="imp">*</span></th>
+						<td colspan="3" class="last">
+							<input type="radio" name="exposureYn" id="exposureYn" class="" checked="checked" value="Y" /> <label for="exposureYn">사용</label>&nbsp;&nbsp;
+							<input type="radio" name="exposureYn" id="exposureYn" class="" value="N" /> <label for="exposureYn">미사용</label>
+						</td>
+					</tr>
+					<tr>
+						<th>제목 <span class="imp">*</span></th>
+						<td colspan="3" class="last">
+							<input type="text" autocomplete="off" id="termsTitle" name="termsTitle" class="input w01" readOnly"/>
+						</td>
+					</tr>
+					<tr>
+						<th>버전 <span class="imp">*</span></th>
+						<td colspan="3" class="last">
+							<input type="text" autocomplete="off" id="termsVer" name="termsVer" class="input w01" readOnly"/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="3" class="last">
+							<textarea id="termsCont" name="termsContent" class="input textareabox" style="height:400px"><c:out value="${termsVO.termsCont}" /></textarea>
+						</td>
+					</tr>	
+				</tbody>
+			</table>
+		</div>
+		<!-- e: table wrap-->
+		
+		
+		<!-- s: 버튼-->
+		<div class="btn_wrap02">
+			<a href="javascript:termsEdit();">
+				<span class="btn large focus">
+					<c:if test="${not empty termsVO.termsNo }">수정</c:if>
+					<c:if test="${empty termsVO.termsNo }">저장</c:if>
+				</span>
+			</a>
+			<a href="javascript:preView();"><span class="btn large">미리보기</span></a>
+			<a href="javascript:history.back();"><span class="btn large">목록</span></a>
+		</div>
+		<!-- e: 버튼-->
+	</form>
+</div>

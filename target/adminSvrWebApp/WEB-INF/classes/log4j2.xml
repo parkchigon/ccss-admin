@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="6" packages="devonframe.log.log4j">
+<!-- <Configuration status="error" monitorInterval="6" packages="devonframe.log.log4j"> -->
+	<properties>
+		<property name="LOGS_ABSOLUTE_PATH" value="/logs/ccsp/admin" />
+		<property name="HANG_LOG_DIR" value="/logs/ccsp/admin/hang" />
+	</properties>
+  
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5p] [%t] [%logger{0}.%method] %line - %msg%n"/>
+    </Console>
+    
+     <RollingFile name="adminRolling" fileName="c:/${LOGS_ABSOLUTE_PATH}/admin.log"
+			filePattern="${LOGS_ABSOLUTE_PATH}/admin.%d{yyyyMMdd-HH}.log">
+	<PatternLayout>
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5p] [%t] [%logger{0}.%method] %line - %msg%n</pattern>
+	</PatternLayout>
+	<Policies>
+		<TimeBasedTriggeringPolicy /><!-- Rotated everyday -->
+	</Policies>
+	</RollingFile>
+	
+	
+	 <RollingFile name="hangRolling" fileName="c:/${HANG_LOG_DIR}/admin.log"
+			filePattern="${HANG_LOG_DIR}/admin.%d{yyyyMMdd}.log">
+	<PatternLayout>
+			<pattern>%d{yyyy:MM:dd HH:mm:ss} %msg%n</pattern>
+	</PatternLayout>
+	<Policies>
+		<TimeBasedTriggeringPolicy /><!-- Rotated everyday -->
+	</Policies>
+	</RollingFile>
+    
+  </Appenders>
+  
+  <Loggers>
+    <Logger name="org.springframework" level="debug" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+    </Logger>
+    
+    <!-- TraceLog -->
+    <Logger name="devonframe.log.trace.aspect" level="trace" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+    </Logger>
+    
+    <Logger name="com.lgu.ccss" level="debug" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+    	<AppenderRef ref="adminRolling"/>
+    </Logger>
+    
+    <Logger name="HANGLogger" level="trace" additivity="false">
+		<AppenderRef ref="STDOUT"/>
+		<Appender-Ref ref="hangRolling" />
+	</Logger>
+    <Root level="error">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+    
+  </Loggers>
+</Configuration>
+
+

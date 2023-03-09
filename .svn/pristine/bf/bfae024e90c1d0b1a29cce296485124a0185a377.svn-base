@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Term">
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+   	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<resultMap type="termsVO" id="termsMap">
+		<result property="termsNo" 					column="TERMS_NO" />
+		<result property="termsVer" 				column="TERMS_VER" />
+		<result property="termsTitle" 				column="TERMS_TITLE" />
+		<result property="termsCont" 				column="TERMS_CONT" />
+		<result property="termsDiv" 				column="TERMS_DIV" />
+		<result property="exposureYn"				column="EXPOSURE_YN" />
+		<result property="exposureStartDt" 			column="EXPOSURE_START_DT" />
+		<result property="exposureEndDt"	 		column="EXPOSURE_END_DT" />
+		<result property="regId" 					column="REG_ID" />
+		<result property="regDt" 					column="REG_DT" />
+		<result property="updId" 					column="UPD_ID" />
+		<result property="updDt" 					column="UPD_DT" />
+	</resultMap>
+
+<!-- 	<sql id="dynamicWhereAdmin">
+		<where>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(mngrNm)">
+				AND ADMIN_NAME LIKE '%${mngrNm}%'	
+			</if>
+		</where>
+	</sql> -->
+	
+	<select id="selectCurrentTermsList" parameterType="termsVO" resultType="termsVO">
+		SELECT 
+				TERMS_NO
+				,TERMS_TITLE
+				,EXPOSURE_YN
+				,TO_CHAR(EXPOSURE_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS EXPOSURE_START_DT
+				,TO_CHAR(EXPOSURE_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS EXPOSURE_END_DT
+				,TERMS_VER
+				,TERMS_DIV
+				,TERMS_CONT
+				,REG_ID
+				,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+				,UPD_ID
+				,TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_TERMS 
+		WHERE 1=1
+			AND EXPOSURE_YN ='Y'
+		 ORDER BY REG_DT,TERMS_DIV,TERMS_VER DESC
+	</select>
+	
+	
+	
+	<select id="selectTermsList" parameterType="termsVO" resultType="termsVO">
+		<include refid="pagingHead"/>
+		SELECT 
+				TERMS_NO
+				,TERMS_TITLE
+				,EXPOSURE_YN
+				,TO_CHAR(EXPOSURE_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS EXPOSURE_START_DT
+				,TO_CHAR(EXPOSURE_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS EXPOSURE_END_DT
+				,TERMS_VER
+				,TERMS_DIV
+				,TERMS_CONT
+				,REG_ID
+				,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+				,UPD_ID
+				,TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_TERMS 
+		WHERE 1=1
+			<!-- AND MNGR_LEVEL !='TOP'	 -->
+		 ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	<select id="selectTermsDetail" parameterType="termsVO" resultType="termsVO">
+		SELECT 
+				TERMS_NO
+				,TERMS_TITLE
+				,EXPOSURE_YN
+				,TO_CHAR(EXPOSURE_START_DT, 'YYYY-MM-DD HH24:MI:SS') AS EXPOSURE_START_DT
+				,TO_CHAR(EXPOSURE_END_DT, 'YYYY-MM-DD HH24:MI:SS') AS EXPOSURE_END_DT
+				,TERMS_VER
+				,TERMS_DIV
+				,TERMS_CONT
+				,REG_ID
+				,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+				,UPD_ID
+				,TO_CHAR(UPD_DT, 'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+		FROM TB_TERMS 
+		WHERE 1=1
+			AND TERMS_NO =#{termsNo}
+	</select>
+	
+	<select id="selectTermsListCnt" parameterType="termsVO" resultType="int">
+		SELECT COUNT(TERMS_NO)
+		  FROM TB_TERMS
+	</select>
+	
+	<delete id="deleteTermsAjax" parameterType="termsVO" >
+		DELETE
+		  FROM TB_TERMS
+		 WHERE TERMS_NO IN
+		<foreach collection="termsSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<select id="checkExistTerms" parameterType="termsVO" resultType="int">
+		SELECT COUNT(TERMS_NO)
+		  FROM TB_TERMS
+		  WHERE EXPOSURE_YN='Y'
+		  AND TERMS_DIV =#{termsDiv}
+		  AND TERMS_NO NOT IN (#{termsNo})
+	</select>
+	
+	
+	<insert id ="insertNewTerms" parameterType="termsVO" >
+		INSERT INTO TB_TERMS 
+		(
+			TERMS_NO,
+			TERMS_TITLE,
+			EXPOSURE_YN,
+			EXPOSURE_START_DT,
+			EXPOSURE_END_DT,
+			TERMS_VER,
+			TERMS_DIV,
+			TERMS_CONT,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		) 
+		VALUES 
+		(
+			#{termsNo},
+			#{termsTitle},
+			#{exposureYn},
+			TO_DATE(#{exposureStartDt},'yyyymmddhh24miss'),
+			TO_DATE(#{exposureEndDt},'yyyymmddhh24miss'),
+			#{termsVer},
+			#{termsDiv},
+			#{termsCont},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE
+		) 
+		
+	</insert>
+	
+	<update id="updateTerms" parameterType="termsVO" >
+		UPDATE TB_TERMS
+		SET 
+			TERMS_TITLE = #{termsTitle},
+			EXPOSURE_YN = #{exposureYn},
+			EXPOSURE_START_DT = TO_DATE(#{exposureStartDt},'yyyymmddhh24miss'),
+			EXPOSURE_END_DT = TO_DATE(#{exposureEndDt},'yyyymmddhh24miss'),
+			TERMS_VER = #{termsVer},
+			TERMS_DIV = #{termsDiv},
+			TERMS_CONT = #{termsCont},
+			UPD_ID = #{updId},
+			UPD_DT = SYSDATE
+			WHERE TERMS_NO = #{termsNo}
+	</update>
+	
+</mapper>

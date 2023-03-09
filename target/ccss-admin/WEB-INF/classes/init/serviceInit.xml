@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<init>
+	<service>
+		<title>CCSS Admin</title>
+		<loginPage>/Login.do</loginPage>
+		<adminLoginPage>/login/loginView.do</adminLoginPage>
+		<mainPage>/index.do</mainPage>
+	</service>
+	
+
+	<defaultSetting>
+		<emialCertCheckYn>Y</emialCertCheckYn>
+		<authSessionUseYn>Y</authSessionUseYn>
+	</defaultSetting>
+		
+	<format>
+		<date>yyyy.MM.dd</date>
+		<datetime>yyyy.MM.dd HH:mm:ss</datetime>
+	</format>
+		
+	<list>
+		<blockSize>10</blockSize>
+		<listSize>10</listSize>
+	</list>
+	
+	<session>
+		<userId>userId</userId>
+		<userName>userNm</userName>
+	</session>
+	
+	<paging type="default">
+		<body>
+			<![CDATA[
+			<a href="javascript:util.pagingSubmit(::startPage::, document.::formName::, '::pagingName::');" class="start" title="처음페이지"><img src="/asset/images/btn_start01.png" width="17" height="17" alt="맨앞" /></a>
+			<a href="javascript:util.pagingSubmit(::preBlock::, document.::formName::, '::pagingName::');" class="prev" title="이전페이지" ><img src="/asset/images/btn_prev01.png" width="17" height="17" alt="이전" /></a>
+			::pagingNumber::
+            <a href="javascript:util.pagingSubmit(::nextBlock::, document.::formName::, '::pagingName::');" class="next" title="다음페이지"><img src="/asset/images/btn_next01.png" width="17" height="17" alt="다음" /></a>
+            <a href="javascript:util.pagingSubmit(::endPage::, document.::formName::, '::pagingName::');" class="end" title="마지막페이지"><img src="/asset/images/btn_end01.png" width="17" height="17" alt="맨뒤" /></a>
+			]]>
+		</body>
+		<num>
+			<![CDATA[
+			<a href="javascript:util.pagingSubmit(::Num::, document.::formName::, '::pagingName::');">::pageNum::</a>
+			]]>
+		</num>
+		<select-num>
+			<![CDATA[
+			<strong>::pageNum::</strong>
+			]]>
+		</select-num>
+		<division>
+			<![CDATA[
+			]]>
+		</division>
+	</paging>
+	
+	<paging type="admin">
+		<body>
+			<![CDATA[
+			<a href="javascript:util.pagingSubmit(::startPage::, document.::formName::, '::pagingName::');" class="start" title="처음페이지"><img src="/asset/images/btn_start01.png" width="17" height="17" alt="맨앞" /></a>
+			<a href="javascript:util.pagingSubmit(::preBlock::, document.::formName::, '::pagingName::');" class="prev" title="이전페이지" ><img src="/asset/images/btn_prev01.png" width="17" height="17" alt="이전" /></a>
+			::pagingNumber::
+            <a href="javascript:util.pagingSubmit(::nextBlock::, document.::formName::, '::pagingName::');" class="next" title="다음페이지"><img src="/asset/images/btn_next01.png" width="17" height="17" alt="다음" /></a>
+            <a href="javascript:util.pagingSubmit(::endPage::, document.::formName::, '::pagingName::');" class="end" title="마지막페이지"><img src="/asset/images/btn_end01.png" width="17" height="17" alt="맨뒤" /></a>		
+			]]>
+		</body>
+		<num>
+			<![CDATA[
+			<a href="javascript:util.pagingSubmit(::Num::, document.::formName::, '::pagingName::');">::pageNum::</a>
+			]]>
+		</num>
+		<select-num>
+			<![CDATA[
+			<strong>::pageNum::</strong>
+			]]>
+		</select-num>
+		<division>
+			<![CDATA[
+			]]>
+		</division>
+	</paging>
+	
+	<paging-script>
+		<![CDATA[
+		<script type="text/javascript">
+			<!--
+			function _pagingSubmit( pnum, f, pname)
+			{
+				var ele;					       
+				var ele = document.getElementById(pname);
+				if( ele == undefined )
+				{
+					ele = document.createElement( "input" );
+					ele.type = "text";
+					ele.id = pname;
+					ele.name = pname;
+					ele.value = pnum;
+		
+					f.appendChild( ele );
+				}
+				else
+				{
+					ele.value = pnum;
+				}
+		
+				f.submit();
+			}					  				    
+			//-->
+		</script>		
+		]]>	
+	</paging-script>
+	
+</init>

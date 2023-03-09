@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+	
+    <aop:aspectj-autoproxy />
+    <bean id="commonApiAspect" class="com.lgu.ccss.common.aop.CommonAdminAspect" />
+    	
+ 	
+	<!-- Default Setting Session -->
+ 	<bean id="adviceDefaultSession" class="com.lgu.ccss.common.aop.DefaultSession" />
+	<aop:config>
+		<aop:pointcut expression="execution(* com.lgu.ccss..*Controller.*( .. ))"
+			id="defaultSessionTargetMethod" />
+		<aop:aspect ref="adviceDefaultSession" order="1">
+			<!-- <aop:around pointcut-ref="defaultSessionTargetMethod" -->
+			<aop:before pointcut-ref="defaultSessionTargetMethod"
+				method="defaultSession" />
+		</aop:aspect>		
+	</aop:config>
+	
+	
+	<!-- adminUseHisAspect Session -->
+	<!-- <bean id="adviceAdminUseHis" class="com.lgu.ccss.common.aop.AdminUseHisAspect" />
+	<aop:config>
+	<aop:pointcut expression="execution(* com.lgu.ccss..*Controller.*( .. ))"
+			id="adviceAdminUseHisTargetMethod" />
+		<aop:aspect ref="adviceAdminUseHis" order="1">
+			<aop:around pointcut-ref="adviceAdminUseHisTargetMethod"
+				method="adminUseHisAspect" />
+		</aop:aspect>
+	</aop:config> -->
+</beans>

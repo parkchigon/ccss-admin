@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+		
+<!-- 	<bean id="beanRefreshManager" class="devonframe.refresh.BeanRefreshManager" />    -->
+	
+	<bean id="svcLog" class="devonframe.log.trace.aspect.SvcTraceLogAspect">
+		<property name="limitedCount" value="100"/>
+		<property name="enabled" value="true"/>
+<!-- 		<property name="prefix" value="ServiceLog"/> -->
+	</bean> 
+	
+	<bean id="perLog" class="devonframe.log.trace.aspect.PerTraceLogAspect">
+		<property name="enabled" value="false"/>
+	</bean>
+	
+	<bean id="devonConnectionFactory" class="devonframe.log.log4j.appender.db.DevOnConnectionFactory">
+	    <property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- Oracle -->
+	<bean id="devonConnectionFactory_oracle" class="devonframe.log.log4j.appender.db.DevOnConnectionFactory">
+	    <property name="dataSource" ref="dataSource-oracle-jndi" />
+	</bean>
+	<!-- Altibase  -->
+<!-- 	
+	<bean id="devonConnectionFactory_altibase" class="devonframe.log.log4j.appender.db.DevOnConnectionFactory">
+	    <property name="dataSource" ref="dataSource-Altibase-jndi" />
+	</bean>
+ -->	
+</beans>

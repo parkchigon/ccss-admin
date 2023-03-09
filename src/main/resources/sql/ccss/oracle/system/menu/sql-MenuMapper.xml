@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Menu">
+
+	<resultMap id="Role" 		type="com.lgu.ccss.admin.system.role.domain.RoleVO">
+		<!-- <result property="roleId"			column="ROLE_ID"		javaType="string"/>
+		<result property="roleNm"			column="ROLE_NM"    	javaType="string"/> -->
+		<result property="mngrGrpId"		column="MNGR_GRP_ID"	javaType="string"/>
+		<result property="grpNm"			column="GRP_NM"    	javaType="string"/>
+		<result property="regId"			column="REG_ID"     	javaType="string"/>
+		<result property="regDt"			column="REG_DT"   		javaType="string"/>
+		<result property="updId"			column="UPD_ID"    		javaType="string"/>
+		<result property="updDt"			column="UPD_DT"  		javaType="string"/>
+		<result property="useYn"			column="USE_YN"     	javaType="string"/>
+		<result property="orderNo"			column="ORDER_NO"   	javaType="string"/>
+		<result property="menuOrder"		column="MENU_ORDER"   	javaType="string"/>
+		<result property="grpExplan"		column="GRP_EXPLAN"		javaType="string"/>
+	</resultMap>
+	
+	
+	<resultMap id="Menu" 		type="com.lgu.ccss.admin.system.menu.domain.MenuVO">
+		<result property="menuId"		column="MENU_ID"		javaType="string"/>
+		<result property="menuNm"		column="MENU_NM"		javaType="string"/>
+		<result property="parentmenuId"	column="PARENTMENU_ID"	javaType="string"/>
+		<result property="menuDepth"	column="MENU_DEPTH"     javaType="string"/>
+		<result property="orderNo"		column="ORDER_NO"       javaType="string"/>
+		<result property="menuOrder"		column="MENU_ORDER"   	javaType="string"/>
+		<result property="regId"		column="REG_ID"     	javaType="string"/>
+		<result property="regDt"		column="REG_DT"   		javaType="string"/>
+		<result property="updId"		column="UPD_ID"    		javaType="string"/>
+		<result property="updDt"		column="UPD_DT"  		javaType="string"/>
+		<result property="useYn"		column="USE_YN"         javaType="string"/>
+		<result property="urlTp"		column="URL_TP"         javaType="string"/>
+		<result property="loginUrl"		column="LOGIN_URL"      javaType="string"/>
+	</resultMap>
+	
+	
+	
+	<resultMap id="RoleMenu" 	type="com.lgu.ccss.admin.system.role.domain.RoleMenuVO">
+		<result property="menuId"			column="MENU_ID"		javaType="string"/>
+		<result property="menuNm"			column="MENU_NM"		javaType="string"/>
+		<result property="parentmenuId"		column="PARENTMENU_ID"	javaType="string"/>
+		<result property="menuDepth"		column="MENU_DEPTH"     javaType="string"/>
+		<result property="orderNo"			column="ORDER_NO"       javaType="string"/>
+		<result property="menuOrder"		column="MENU_ORDER"   	javaType="string"/>
+		<result property="regId"		column="REG_ID"     	javaType="string"/>
+		<result property="regDt"		column="REG_DT"   		javaType="string"/>
+		<result property="updId"		column="UPD_ID"    		javaType="string"/>
+		<result property="updDt"		column="UPD_DT"  		javaType="string"/>
+		<result property="useYn"			column="USE_YN"         javaType="string"/>
+		<result property="urlTp"			column="URL_TP"         javaType="string"/>
+		<result property="loginUrl"			column="LOGIN_URL"      javaType="string"/>
+		<!-- <result property="roleId"			column="ROLE_ID"		javaType="string"/>
+		<result property="roleNm"			column="ROLE_NM"		javaType="string"/> -->
+		<result property="mngrGrpId"		column="MNGR_GRP_ID"	javaType="string"/>
+		<result property="grpNm"			column="GRP_NM"    	javaType="string"/>
+		<result property="roleMenuId"		column="ROLE_MENU_ID"	javaType="string"/>
+		<result property="level"			column="LEVEL"			javaType="int"/>
+		<result property="programNm"   		column="PROGRAM_NM"		javaType="string"/>
+		<result property="programUrl"  		column="PROGRAM_URL"	javaType="string"/>
+		<result property="path"		  		column="PATH"			javaType="string"/>
+	</resultMap>
+	
+	
+	
+	
+	
+	
+	
+	<resultMap id="RoleProgram" 	type="com.lgu.ccss.admin.system.role.domain.RoleProgramVO">
+		<!-- <result property="roleId"			column="ROLE_ID"     	javaType="string"/>
+		<result property="roleNm"			column="ROLE_NM"       	javaType="string"/> -->
+		<result property="mngrGrpId"		column="MNGR_GRP_ID"	javaType="string"/>
+		<result property="grpNm"			column="GRP_NM"    	javaType="string"/>
+		<result property="regId"			column="REG_ID"     	javaType="string"/>
+		<result property="regDt"			column="REG_DT"   		javaType="string"/>
+		<result property="updId"			column="UPD_ID"    		javaType="string"/>
+		<result property="updDt"			column="UPD_DT"  		javaType="string"/>
+		<result property="useYn"			column="USE_YN"         javaType="string"/>
+		<result property="orderNo"			column="ORDER_NO"       javaType="string"/>
+		<result property="menuOrder"		column="MENU_ORDER"   	javaType="string"/>
+		<result property="programId"   		column="PROGRAM_ID"   	javaType="string"/>
+		<result property="programNm"   		column="PROGRAM_NM"		javaType="string"/>
+		<result property="programUrl"  		column="PROGRAM_URL"	javaType="string"/>
+		<result property="stProgramYn"		column="ST_PROGRAM_YN"	javaType="string"/>
+		<result property="menuId"      		column="MENU_ID"		javaType="string"/>
+	</resultMap>
+
+
+	<!-- 전체 권한 조회 -->
+	<select id="selectRoleList" resultType="flkMap">
+		SELECT MNGR_GRP_ID 
+	         , GRP_NM
+	         , REG_ID
+	         , REG_DT
+	         , UPD_ID
+	         , UPD_DT
+		  FROM TB_MNGR_GROUP
+	</select>
+
+	<select id="selectMenuList" parameterType="RoleMenu" resultType="flkMap">
+		SELECT 
+		  A.MENU_ID AS MENU_ID,
+		  A.PARENTMENU_ID,
+		  A.MENU_NM,
+		 <!--  A.ORDER_NO, -->
+		  A.MENU_ORDER,
+		  A.USE_YN,
+		  B.PROGRAM_URL,
+		  B.PROGRAM_NM,
+		  SYS_CONNECT_BY_PATH( A.MENU_ID, '>' ) AS PATH,
+		  LEVEL     
+		FROM
+		  ( 
+		    SELECT DISTINCT MENU_ID,
+		      PARENTMENU_ID,
+		      MENU_NM,
+		     <!--  ORDER_NO, -->
+		      MENU_ORDER,
+		      USE_YN
+		    FROM TB_MENU
+		      START WITH MENU_ID IN
+		      (
+		        SELECT DISTINCT B.MENU_ID
+		        FROM TB_ROLE_PROGRAM A
+		        INNER JOIN TB_PROGRAM B
+		        ON A.PROGRAM_ID = B.PROGRAM_ID
+		        AND A.MNGR_GRP_ID   = #{mngrGrpId}
+		      )
+		      CONNECT BY PRIOR PARENTMENU_ID = MENU_ID
+		  ) A LEFT OUTER JOIN TB_PROGRAM B ON A.MENU_ID = B.MENU_ID AND B.ST_PROGRAM_YN = 'Y'
+		  START WITH A.PARENTMENU_ID = (SELECT MENU_ID FROM TB_MENU WHERE PARENTMENU_ID = 'TOP')
+		  CONNECT BY PRIOR A.MENU_ID = A.PARENTMENU_ID
+		ORDER SIBLINGS BY <!--  A.ORDER_NO --> A.MENU_ORDER
+	</select>
+
+
+	<select id="selectSiteProgramList" parameterType="RoleMenu" resultType="flkMap">
+		SELECT
+			TP.MENU_ID AS MENU_ID
+			, TP.PROGRAM_URL
+			, TP.PROGRAM_NM
+			, TP.ST_PROGRAM_YN
+		FROM
+			TB_ROLE_PROGRAM TRP INNER JOIN TB_PROGRAM TP			
+			ON TRP.PROGRAM_ID = TP.PROGRAM_ID AND TRP.MNGR_GRP_ID = #{mngrGrpId}
+	</select>
+
+
+	<select id="roleMenuList" parameterType="RoleMenu" resultMap="RoleMenu">
+		SELECT
+				 A.MENU_ID
+				,A.MENU_NM
+				<!-- ,A.ORDER_NO -->
+				,A.MENU_ORDER
+				,A.PARENTMENU_ID
+			,	B.MENU_ID AS ROLE_MENU_ID
+		FROM
+			(
+				SELECT
+						MENU_ID AS MENU_ID  
+					  , MENU_NM
+					  <!-- , ORDER_NO -->
+					  , MENU_ORDER
+					  , PARENTMENU_ID
+				FROM
+					TB_MENU
+				START WITH PARENTMENU_ID = 'TOP'
+				CONNECT BY PRIOR MENU_ID = PARENTMENU_ID
+				ORDER SIBLINGS BY <!-- ORDER_NO --> MENU_ORDER
+			) A LEFT OUTER JOIN TB_ROLE_MENU B 
+				ON A.MENU_ID = B.MENU_ID AND B.MNGR_GRP_ID = #{mngrGrpId}
+	</select>
+
+
+	<select id="siteList" parameterType="RoleMenu" resultType="flkMap">
+		SELECT URL_TP
+			 , LOGIN_URL
+			 , MENU_ID AS MENU_ID
+		FROM
+		  ( SELECT DISTINCT MENU_ID
+			     , PARENTMENU_ID
+		    	 , URL_TP
+		    	 , LOGIN_URL
+		  	  FROM TB_MENU
+		    START WITH MENU_ID IN
+		    ( 
+		      SELECT DISTINCT B.MENU_ID
+		      FROM TB_ROLE_PROGRAM A
+		      INNER JOIN TB_PROGRAM B
+		      ON A.PROGRAM_ID = B.PROGRAM_ID
+		      AND A.MNGR_GRP_ID   = #{mngrGrpId}
+		    )
+		    CONNECT BY PRIOR PARENTMENU_ID = MENU_ID
+		  )
+		WHERE
+		  PARENTMENU_ID = 'TOP'
+	</select>
+	
+	
+	
+	<select id="selectMenuListAll" resultType="flkMap">
+		SELECT MENU_ID AS MENU_ID
+			 , MENU_NM
+			 , PARENTMENU_ID
+			 , MENU_DEPTH
+			<!--  , ORDER_NO -->
+			 , MENU_ORDER
+			 , REG_ID
+			 , REG_DT
+			 , UPD_ID
+			 , UPD_DT
+			 , USE_YN
+			 , LEVEL
+		  FROM TB_MENU 
+		 START WITH PARENTMENU_ID = 'TOP'
+		CONNECT BY PRIOR MENU_ID = PARENTMENU_ID
+		ORDER SIBLINGS BY <!-- ORDER_NO --> MENU_ORDER
+	</select>
+	
+	
+	<!-- 메뉴 등록 -->
+	<insert id="insertMenu" parameterType="Menu">
+		INSERT INTO TB_MENU (
+				MENU_ID
+			  , MENU_NM
+			  , PARENTMENU_ID
+			  , MENU_DEPTH
+			  <!-- , ORDER_NO -->
+			  , MENU_ORDER
+			  , REG_ID
+			  , REG_DT
+			  , UPD_ID
+			  , UPD_DT
+			  , USE_YN
+			  , MNGR_GRP_ID
+			  
+		) VALUES (
+				#{menuId}
+			  , #{menuNm}
+			  , #{parentmenuId}		
+			  , #{menuDepth}		
+			 <!--  , #{orderNo} -->
+				,#{menuOrder}  
+			  , #{regId}
+			  , SYSDATE
+			  , #{updId}
+			  , SYSDATE
+			  , #{useYn}
+			  ,'NOTUSED'
+		)
+	</insert>
+	
+	<!-- 메뉴 수정 -->
+	<update id="updateMenu" parameterType="Menu">
+		UPDATE TB_MENU
+		   SET MENU_NM 			= #{menuNm}
+		     , PARENTMENU_ID 	= #{parentmenuId}
+		     , UPD_ID			= #{updId}
+		     , UPD_DT			= SYSDATE
+		    <!--  , ORDER_NO			= #{orderNo} -->
+		  	, MENU_ORDER			= #{menuOrder}  
+		     , MENU_DEPTH		= #{menuDepth}
+		     , USE_YN			= #{useYn}
+		 WHERE MENU_ID			= #{menuId}
+	</update>
+	
+	
+	<update id="updateMenuOrder" parameterType="Menu">
+		UPDATE TB_MENU
+		  <!--  SET ORDER_NO			= #{orderNo}		/* 정렬 번호 */ -->
+		   SET MENU_ORDER			= #{menuOrder}		/* 정렬 번호 */
+		<if test="parentmenuId != null and parentmenuId != ''">
+			 , PARENTMENU_ID	= #{parentmenuId}	/* 부모메뉴 아이디 */
+		</if>
+			 , UPD_ID       	= #{updId}		/* 수정 아이디 */
+			 , UPD_DT     		= SYSDATE			/* 수정 일시 */
+		 WHERE MENU_ID     		= #{menuId}	
+	</update>
+	
+	
+	<delete id="deleteMenu" parameterType="Menu">
+		DELETE
+		  FROM TB_MENU
+		 WHERE MENU_ID IN
+		<foreach item="item" index="index" collection="menuIds" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteMenuProgramByMenuId" parameterType="Menu">
+		DELETE
+		  FROM TB_PROGRAM
+		 WHERE MENU_ID IN
+		<foreach item="item" index="index" collection="menuIds" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateMenuOrderAuto" parameterType="Menu">
+		MERGE INTO TB_MENU A
+		USING (
+		        SELECT MENU_ID TMP_M_ID, 
+		        	   RANK() OVER(ORDER BY <!-- ORDER_NO --> MENU_ORDER, UPD_DT DESC) RANK 
+				  FROM TB_MENU B 
+				 WHERE PARENTMENU_ID = #{parentmenuId}
+			  )
+			ON
+		 	(
+		 		A.MENU_ID = TMP_M_ID
+		 	)
+		 WHEN MATCHED THEN 
+		 UPDATE SET <!-- A.ORDER_NO  -->  A.MENU_ORDER= RANK
+	</update>
+</mapper>

@@ -1,0 +1,141 @@
+package com.lgu.ccss.admin.login.service;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import lguplus.security.vulner.SecurityModule;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.lgu.ccss.admin.admin.domain.AdminVO;
+import com.lgu.ccss.common.domain.Constants;
+import com.lgu.ccss.common.utility.AES128Cipher;
+import com.lgu.ccss.common.utility.MessageAccessUtil;
+
+import devonframe.dataaccess.CommonDao;
+
+
+@Service("loginService")
+public class LoginServiceImpl implements LoginService {
+
+    @Resource(name = "commonDao")
+    private CommonDao commonDao;
+	
+	@Resource(name="messageUtil")
+	private MessageAccessUtil messageUtil;
+	
+
+	/**
+	 * Admin password 확인
+	 * @param adminVO
+	 * @return
+	 * @throws Exception 
+	 */
+	public AdminVO checkAdminPwd(AdminVO adminVO) throws Exception {
+		
+		if(StringUtils.isNotEmpty(adminVO.getAdminPw())) {
+			//웹에서 암호화 한 비밀번호 복호화
+			String decPw = AES128Cipher.AES_Decode(adminVO.getAdminPw(), "abcdefghijklmnop");
+			
+			//LGU에서 제공받은 암화 모듈로 암화화 진행
+			adminVO.setAdminPw(SecurityModule.SHA512_Encrypt(decPw));
+		}
+		
+		AdminVO resultLogin = commonDao.select("Login.checkAdminPwd",adminVO);
+		String masterAccounts = messageUtil.getMessage("admin.hipass.account");
+		 
+		
+		if(resultLogin != null) {
+				
+			if(resultLogin.getAdminPw().equals(adminVO.getAdminPw())) {
+				//ID, PW 일치함
+				
+				
+				//마스터 계정은 체크 하지 않음
+				if(!masterAccounts.contains(resultLogin.getAdminId())) {
+				
+					if(resultLogin.getLoginFailCount() >= 5) {
+						//로그인 실패!! 마스터에게 연락해야함
+						resultLogin.setResultType(Constants.FAIL_COUNT_OVER);
+						//로그인 실패!! 마스터에게 연락해야함
+						return resultLogin;
+					}
+					if(StringUtils.isNotBlank(resultLogin.getLatestPasswordUpdateDate())) {
+						
+						String day = messageUtil.getMessage("admin.password.change.day");
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+						Date latestDate = sdf.parse(resultLogin.getLatestPasswordUpdateDate());
+						Date currendDate = new Date();
+						
+						long diff = currendDate.getTime() - latestDate.getTime();
+					    long diffDays = diff / (24 * 60 * 60 * 1000);
+					 
+					    if(diffDays >= Long.parseLong(day)) {
+					    	//비번 바꾸기 권고
+					    	resultLogin.setResultType(Constants.PASSWORD_EXPIRED);
+					    	return resultLogin;
+					    }
+					}
+				}
+				
+			} else {
+				//패스워드 오류
+				//로그인 실패 횟수 증가 처리
+				//마스터 계정은 체크 하지 않음
+				if(!masterAccounts.contains(resultLogin.getAdminId())) {
+					if(resultLogin.getLoginFailCount() >= 5) {
+						//로그인 실패!! 마스터에게 연락해야함
+						resultLogin.setResultType(Constants.FAIL_COUNT_OVER);
+						//로그인 실패!! 마스터에게 연락해야함
+						return resultLogin;
+					}
+				}
+				
+				adminVO.setLoginFailCount(resultLogin.getLoginFailCount()+1);
+				commonDao.update("Login.updateLoginFailCount",adminVO);
+				return null;
+			}
+		} else {
+			//아이디가 존재하지 않는 경우
+			
+		}
+		
+		//로그인 성공시 실패카운트 초기화
+		adminVO.setLoginFailCount(0);
+		commonDao.update("Login.updateLoginFailCount",adminVO);
+		
+		return resultLogin;
+	}
+
+	public String getMenuUrl(HashMap menuMap, Object[] programList) {
+
+		String programUrl = "";
+		ArrayList subMenuList = (ArrayList) menuMap.get("subNodeList");
+		HashMap subMenuMap = new HashMap();
+		if (subMenuList.size() > 0) {
+			subMenuMap = (HashMap) subMenuList.get(0);
+			String menuId = (String) subMenuMap.get("menuId");
+			for (int i = 0; i < programList.length; i++) {
+				Map programMap = (Map) programList[i];
+				String programMenuId = (String) programMap.get("menuId");
+				if (menuId.equals(programMenuId) && "Y".equals((String) programMap.get("stProgramYn"))) {
+					programUrl = (String) programMap.get("programUrl");
+					break;
+				}
+			}
+		} else {
+			programUrl = (String) menuMap.get("programUrl");
+		}
+
+		if (programUrl == null || "".equals(programUrl))
+			programUrl = getMenuUrl(subMenuMap, programList);
+
+		return programUrl;
+	}
+}

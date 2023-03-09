@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+  http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+
+    <bean id="tableIdGenerator" class="devonframe.idgen.generator.TableIdGenerator">
+      <property name="transactionManager" ref="txManager"/>
+      <property name="dataSource" ref="dataSource"/>
+      <property name="decimalEnabled" value="false"/>
+	  <property name="idTable" value="TDO_IDGEN"/>
+	  <property name="keyColumn" value="ID_KEY"/>
+	  <property name="sequenceColumn" value="ID_SEQ"/>
+	  <property name="keyName" value="AA-01"/>
+	  <property name="retryCount" value="2"/>
+	  <property name="blockSize"  value="5"/>
+      <property name="globalFormatter" ref="common"/>
+	  <property name="formatterMap">
+	  	<map>
+	  		<entry key="Account" value-ref="Account"/>
+	  		<entry key="employee" value-ref="employee"/>
+	  	</map>
+	  </property>
+    </bean>
+
+    <bean id="sequenceIdGenerator" class="devonframe.idgen.generator.SequenceIdGenerator">
+	  <property name="standardDateFormat" value="yyyyMMddHHmmssSSS"/>
+	  <property name="sequenceSize" value="5"/>
+	  <property name="globIdTypeCode" value="ON"/>
+	  <property name="instanceNumber" value="instanceNumber"/>
+	  <property name="systemName" value="systemName"/>
+      <property name="globalFormatter" ref="common"/>
+	  <property name="formatterMap">
+	  	<map>
+	  		<entry key="Account" value-ref="Account"/>
+	  		<entry key="employee" value-ref="employee"/>
+	  	</map>
+	  </property>
+    </bean>
+
+    <bean id="dBSequenceIdGenerator" class="devonframe.idgen.generator.DBSequenceIdGenerator">
+      <property name="globalFormatter" ref="common"/>
+	  <property name="query" value="SELECT NEXT VALUE FOR idsequence FROM DUAL"/>
+	  <!-- Oracle 일 경우 아래의 쿼리 사용 -->
+	  <!--
+	  <property name="query" value="SELECT idsequence.nextval FROM DUAL;"/>
+	  -->
+	  <property name="dataSource" ref="dataSource"/> <!--dataSource 별  변경 필요-->
+	  <property name="decimalEnabled" value="true"/>
+	  <property name="formatterMap">
+	  	<map>
+	  		<entry key="Account" value-ref="Account"/>
+	  		<entry key="employee" value-ref="employee"/>
+	  	</map>
+	  </property>
+    </bean>
+
+     <bean id="common" class="devonframe.idgen.formatter.DefaultIdGeneratorFormatter">
+  	  <property name="preFix" value="common" />
+      <property name="seperator" value="-" />
+      <property name="fillCharacter" value="*"/>
+      <property name="sequenceSize" value="20"/>
+    </bean>
+
+    <bean id="Account" class="devonframe.idgen.formatter.DefaultIdGeneratorFormatter">
+  	  <property name="preFix" value="Account" />
+      <property name="seperator" value="-" />
+      <property name="fillCharacter" value="+"/>
+      <property name="sequenceSize" value="15"/>
+    </bean>
+
+    <bean id="employee" class="devonframe.idgen.formatter.DefaultIdGeneratorFormatter">
+  	  <property name="preFix" value="employee" />
+      <property name="seperator" value="-" />
+      <property name="fillCharacter" value="*"/>
+      <property name="sequenceSize" value="17"/>
+    </bean>
+
+</beans>

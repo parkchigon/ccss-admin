@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BusinessCategory">
+
+
+	<!-- 업종/카테고리 리스트 조회 -->	
+	<select id="selectBusinessCateList" resultType="flkMap">
+		SELECT	SEQ_BUSINESS_CATEGORY,
+				PARENT_SEQ_BUSINESS_CATEGORY,
+				ORDER_NO,
+				BUSINESS_CATEGORY_NAME,
+				BUSINESS_CATEGORY_DEPTH,
+				LEGACY_LEVEL_CODE,
+				ICON_FILE_NAME,
+				ICON_FILE_SEQ,
+				INSERT_ID,
+				INSERT_DATE,
+				USE_YN,
+				TARGET_ALLIANCE,
+				DESCRIPTION,
+				CONCAT(BUSINESS_CATEGORY_DEPTH, '_', USE_YN) AS TYPE,
+				(SELECT GROUP_CONCAT(CATEGORY_KEYWORD_NAME) FROM TB_CATEGORY_KEYWORD WHERE CATEGORY_CODE = SEQ_BUSINESS_CATEGORY GROUP BY CATEGORY_CODE) AS KEYWORDS
+ 		  FROM (
+					SELECT 	tb_business_category_connect_by() AS id , 
+							@level AS level,
+							@ROWNUM := @ROWNUM + 1 AS ROWNUM
+					  FROM (
+					  		SELECT @start_with:='TOP', @id:=@start_with, @level:=0 , @ROWNUM:=0 ) vars join TB_BUSINESS_CATEGORY
+					  WHERE @id IS NOT NULL
+				) func JOIN TB_BUSINESS_CATEGORY A ON func.id = A.SEQ_BUSINESS_CATEGORY
+			ORDER BY ROWNUM ASC
+	</select>
+	
+	<!-- 업종 등록 -->
+	<insert id="insertBusiness" parameterType="BusinessCateTree">
+		INSERT 
+		INTO TB_BUSINESS_CATEGORY (
+				SEQ_BUSINESS_CATEGORY,
+				PARENT_SEQ_BUSINESS_CATEGORY,
+				ORDER_NO,
+				BUSINESS_CATEGORY_NAME,
+				BUSINESS_CATEGORY_DEPTH,
+				INSERT_ID,
+				INSERT_DATE,
+				USE_YN,
+				UPDATE_ID,
+				UPDATE_DATE
+			) VALUES (
+				#{seqBusinessCategory},
+				#{parentSeqBusinessCategory},
+				#{orderNo},
+				#{businessCategoryName},
+				'2',
+				#{insertId},
+				NOW(),
+				#{useYn},
+				#{updateId},
+				NOW()
+			)
+	</insert>
+	
+	<!-- 업종 수정 -->
+	<update id="updateBusiness" parameterType="BusinessCateTree">
+		UPDATE	TB_BUSINESS_CATEGORY
+		   SET	BUSINESS_CATEGORY_NAME = #{businessCategoryName},
+		   		USE_YN = #{useYn}, 
+				UPDATE_ID = #{updateId},
+				UPDATE_DATE = NOW()
+		 WHERE	SEQ_BUSINESS_CATEGORY = #{seqBusinessCategory}
+	</update>
+	
+	<!-- 업종/카테고리 정렬순서 자동 업데이트 -->
+	<update id="updateBusinessOrderAuto" parameterType="BusinessCateTree">
+		<!-- 
+		UPDATE	TB_BUSINESS_CATEGORY A INNER JOIN
+		(
+			SELECT	SEQ_BUSINESS_CATEGORY
+			  FROM	TB_BUSINESS_CATEGORY A, ( SELECT @RANK := 0 ) B
+			 WHERE	PARENT_SEQ_BUSINESS_CATEGORY = #{parentSeqBusinessCategory}
+			 ORDER	BY ORDER_NO	
+		) B ON A.SEQ_BUSINESS_CATEGORY = B.SEQ_BUSINESS_CATEGORY
+		SET A.ORDER_NO = @RANK := @RANK + 1
+		 -->
+		UPDATE	TB_BUSINESS_CATEGORY A INNER JOIN
+		(
+			SELECT	SEQ_BUSINESS_CATEGORY, @RANK := @RANK+1 AS RANK
+			  FROM	TB_BUSINESS_CATEGORY A
+ 			  		,(SELECT @RANK := 0 FROM DUAL) TMP
+			 WHERE	PARENT_SEQ_BUSINESS_CATEGORY = #{parentSeqBusinessCategory}
+			 ORDER	BY ORDER_NO
+		) B ON A.SEQ_BUSINESS_CATEGORY = B.SEQ_BUSINESS_CATEGORY
+		SET A.ORDER_NO = RANK
+	</update>
+	
+	<!-- 업종/카테고리 삭제 -->
+	<delete id="deleteBusinessCategory" parameterType="BusinessCateTree">
+		DELETE
+		  FROM TB_BUSINESS_CATEGORY
+		 WHERE SEQ_BUSINESS_CATEGORY = #{seqBusinessCategory}
+	</delete>
+	
+	<!-- 업종/카테고리 순서 변경 -->
+	<update id="updateBusinessCategoryOrder" parameterType="BusinessCateTree">
+		UPDATE	TB_BUSINESS_CATEGORY
+		   SET	ORDER_NO = #{orderNo},
+		   		UPDATE_ID = #{updateId},
+		   		UPDATE_DATE = NOW()
+		 WHERE	SEQ_BUSINESS_CATEGORY = #{seqBusinessCategory}
+		   AND	BUSINESS_CATEGORY_DEPTH = #{businessCategoryDepth}
+	</update>
+	
+	<select id="selectBusinessCategoryDetail" parameterType="BusinessCateTree" resultType="BusinessCateTree">
+		SELECT	SEQ_BUSINESS_CATEGORY,
+				PARENT_SEQ_BUSINESS_CATEGORY,
+				ORDER_NO,
+				BUSINESS_CATEGORY_NAME,
+				BUSINESS_CATEGORY_DEPTH,
+				LEGACY_LEVEL_CODE,
+				ICON_FILE_NAME,
+				ICON_FILE_SEQ,
+				INSERT_ID,
+				INSERT_DATE,
+				UPDATE_ID,
+				UPDATE_DATE,
+				USE_YN,
+				TARGET_ALLIANCE,
+				DESCRIPTION,
+				DEFAULT_YN
+		  FROM	TB_BUSINESS_CATEGORY
+		 WHERE	SEQ_BUSINESS_CATEGORY = #{seqBusinessCategory}
+			
+	</select>
+	
+	<!-- 카테고리 등록 -->
+	<insert id="insertCategory" parameterType="BusinessCateTree">
+		INSERT 
+		INTO TB_BUSINESS_CATEGORY (
+				SEQ_BUSINESS_CATEGORY,
+				PARENT_SEQ_BUSINESS_CATEGORY,
+				ORDER_NO,
+				BUSINESS_CATEGORY_NAME,
+				BUSINESS_CATEGORY_DEPTH,
+				ICON_FILE_NAME,
+				ICON_FILE_SEQ,
+				INSERT_ID,
+				INSERT_DATE,
+				USE_YN,
+				DEFAULT_YN,
+				TARGET_ALLIANCE,
+				DESCRIPTION,
+				UPDATE_ID,
+				UPDATE_DATE
+			) VALUES (
+				#{seqBusinessCategory},
+				#{parentSeqBusinessCategory},
+				#{orderNo},
+				#{businessCategoryName},
+				'3',
+				#{iconFileName},
+				#{iconFileSeq},
+				#{insertId},
+				NOW(),
+				#{useYn},
+				'N',
+				#{targetAlliance},
+				#{description},
+				#{updateId},
+				NOW()
+			)
+	</insert>
+	
+	<!-- 카테고리 수정 -->
+	<update id="updateCategory" parameterType="BusinessCateTree">
+		UPDATE	TB_BUSINESS_CATEGORY
+		   SET	BUSINESS_CATEGORY_NAME 	= #{businessCategoryName},
+		   		TARGET_ALLIANCE			= #{targetAlliance},
+		   		USE_YN 					= #{useYn}, 
+				ICON_FILE_NAME			= #{iconFileName},
+				ICON_FILE_SEQ			= #{iconFileSeq},
+				DESCRIPTION				= #{description},
+				UPDATE_ID 				= #{updateId},
+				UPDATE_DATE 			= NOW()
+		 WHERE	SEQ_BUSINESS_CATEGORY = #{seqBusinessCategory}
+	</update>	
+	
+	<!-- 특정 카테고리에 포함되어 있던 키워드 삭제 -->
+	<delete id="deleteKeywordInCategory" parameterType="BusinessCateTree">
+		DELETE
+		  FROM	TB_CATEGORY_KEYWORD
+		 WHERE	CATEGORY_CODE = #{seqBusinessCategory}
+	</delete>
+	
+	<!-- 키워드 등록 멀티 -->
+	<insert id="insertCategoryKeywordMulti" parameterType="BusinessCateTree">
+		INSERT
+		INTO TB_CATEGORY_KEYWORD (
+				SEQ_CATEGORY_KEYWORD,
+				CATEGORY_KEYWORD_NAME,
+				BUSINESS_CODE,
+				BUSINESS_NAME,
+				CATEGORY_CODE,
+				CATEGORY_NAME,
+				USE_YN,
+				INSERT_ID,
+				INSERT_DATE,
+				UPDATE_ID,
+				UPDATE_DATE
+			) VALUES
+		<foreach collection="cateKeywordList" item="item" separator=",">
+			(
+				#{item.seqCategoryKeyword},
+				#{item.categoryKeywordName},
+				#{item.businessCode},
+				#{item.businessName},
+				#{item.categoryCode},
+				#{item.categoryName},
+				#{useYn},
+				#{insertId},
+				NOW(),
+				#{updateId},
+				NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<!-- 카테고리 아이콘 파일 정보 등록 -->
+	<insert id="insertCategoryFileInfo" parameterType="FileInfoVO">
+		INSERT
+		INTO	TB_FILE_INFO (
+					SEQ_FILE,
+					BIZ_CLASSIFY_CODE,
+					UPLOAD_ID,
+					UPLOAD_DTIME,
+					ORIGIN_FILE_NAME,
+					SAVE_FILE_NAME
+				) VALUES (
+					#{fileSeq},
+					#{bizClassifyCode},
+					#{uploadId},
+					NOW(),
+					#{originFileName},
+					#{saveFileName}
+				)
+	</insert>
+	
+	<!-- 카테고리 아이콘 파일 정보 삭제 -->
+	<insert id="deleteCategoryFileInfo" parameterType="FileInfoVO">
+		DELETE
+		  FROM	TB_FILE_INFO
+		 WHERE	SAVE_FILE_NAME = #{saveFileName}
+	</insert>	
+</mapper>

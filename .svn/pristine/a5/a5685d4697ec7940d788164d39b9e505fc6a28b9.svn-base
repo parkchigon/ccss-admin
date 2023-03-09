@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Admin">
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+   	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	<resultMap type="adminVO" id="adminMap">
+		<result property="mngrId" 				column="MNGR_ID" />
+		<result property="passWd" 				column="PASSWD" />
+		<result property="mngrLevel" 			column="MNGR_LEVEL" />
+		<result property="grpName" 				column="MNGR_LEVEL_NM" />
+		<result property="mngrNm" 				column="MNGR_NM" />
+		<result property="clphNo"				column="CLPH_NO" />
+		<result property="regDt" 				column="REG_DT" />
+		<result property="useYn"	 			column="USE_YN" />
+		<result property="bfrPassWd" 			column="BFR_PASSWD" />
+		<result property="accountStatus" 		column="ACCOUNT_STATUS" />
+		<result property="emailAddr" 			column="EMAIL_ADDR" />
+		<result property="lastLoginDt" 			column="LAST_LOGIN_DT" />
+	</resultMap>
+
+	<sql id="dynamicWhereAdmin">
+		<where>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(mngrNm)">
+				AND ADMIN_NAME LIKE '%${mngrNm}%'	
+			</if>
+		</where>
+	</sql>
+	
+	<!-- <select id="selectAdminList" parameterType="adminVO" resultType="com.lgu.ccss.admin.admin.domain.AdminVO"> -->
+	<!-- <select id="selectAdminList" resultType="adminVO">
+		SELECT 
+			     MNGR_ID 
+			   , PASSWD 
+			   , MNGR_LEVEL
+			   , (SELECT GRP_NAME FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = MNGR_LEVEL) AS MNGR_LEVEL_NM
+			   , MNGR_NM 
+			   , CLPH_NO 
+		  	   , TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+		  	   , USE_YN
+		  	   , ACCOUNT_STATUS
+		  	   , EMAIL_ADDR
+		  FROM TB_MNGR
+		<include refid="dynamicWhereAdmin" />
+	</select> -->
+	
+	<select id="selectSuperAdmin" parameterType="adminVO" resultType="adminVO">
+		SELECT 
+			MNGR_ID
+			,(select MAX(LOGIN_DT) from TB_MNGR_LOGIN_HSTR B where B.MNGR_ID= A.MNGR_ID) as LAST_LOGIN_DT
+			,PASSWD
+			,MNGR_LEVEL
+			,(SELECT GRP_NAME FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = MNGR_LEVEL) AS MNGR_LEVEL_NM
+			,MNGR_NM
+			,CLPH_NO
+			,EMAIL_ADDR
+			,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+			,USE_YN
+			,ACCOUNT_STATUS
+		FROM TB_MNGR A
+		WHERE 1=1
+		AND MNGR_LEVEL ='TOP'
+	</select>
+ 	<select id="selectAdminList" parameterType="adminVO" resultType="adminVO">
+		/* com.lgu.admin.admin.mapper.AdminMapper.selectAdminList */
+		<include refid="pagingHead"/>
+		SELECT 
+				MNGR_ID
+				,(select MAX(LOGIN_DT) from TB_MNGR_LOGIN_HSTR B where B.MNGR_ID= A.MNGR_ID) as LAST_LOGIN_DT
+			,PASSWD
+			,MNGR_LEVEL
+			,(SELECT GRP_NAME FROM TB_MNGR_GROUP WHERE MNGR_GRP_ID = MNGR_LEVEL) AS MNGR_LEVEL_NM
+			,MNGR_NM
+			,CLPH_NO
+			,EMAIL_ADDR
+			,TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+			,USE_YN
+			,ACCOUNT_STATUS
+		FROM TB_MNGR A
+		WHERE 1=1
+			AND MNGR_LEVEL !='TOP'	
+			<if test="!@org.springframework.util.StringUtils@isEmpty(searchType) and searchType !='' ">
+				<choose>
+					<when test="searchType == 'ID'">/*ID 검색*/
+						AND MNGR_ID LIKE '%${searchValue}%'	
+					</when>
+					<when test="searchType == 'NAME'">/*회원명 검색*/
+						AND MNGR_NM LIKE '%${searchValue}%'	
+					</when>
+					<when test="searchType == 'CTN'">/*회원명 검색*/
+						AND CLPH_NO = ${searchValue}	
+					</when>
+				</choose>
+			</if>
+		 ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+
+	<select id="selectAdminListCnt" parameterType="adminVO" resultType="int">
+		/* com.lgu.admin.admin.mapper.AdminMapper.selectAdminListCnt */
+		SELECT COUNT(MNGR_ID)
+		  FROM TB_MNGR
+		  WHERE MNGR_LEVEL !='TOP'	
+		<include refid="dynamicWhereAdmin" />
+	</select>
+
+	<insert id="insertAdmin" parameterType="adminVO" >
+		/* com.lgu.admin.admin.rmapper.AdminMapper.insertAdmin */
+		INSERT INTO TB_MNGR 
+		(
+			 MNGR_ID, 
+			 PASSWD,
+			 MNGR_NM, 
+			 CLPH_NO,
+			 MNGR_LEVEL,
+			 USE_YN,
+			 <if test="!@org.springframework.util.StringUtils@isEmpty(ipAddr) and searchType !='' ">
+			 IP_ADDR,
+			 </if> 
+			 ACCOUNT_STATUS,
+			 EMAIL_ADDR,
+			 REG_ID, 
+			 REG_DT,
+			 UPD_ID, 
+			 UPD_DT,
+			 PW_CHG_DT,
+			 PW_MOD_DISP_YN,
+			 LOGIN_FAIL_CNT
+		 )
+		VALUES 
+		( 
+			#{mngrId}, 
+			#{passWd}, 
+			#{mngrNm}, 
+			#{clphNo}, 
+			#{mngrLevel}, 
+			#{useYn},
+			 <if test="!@org.springframework.util.StringUtils@isEmpty(ipAddr) and searchType !='' ">
+			 #{ipAddr},
+			 </if>  
+			#{accountStatus},
+			#{emailAddr},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE,
+			SYSDATE,
+			'N',
+			0
+		)
+	</insert>
+	
+	<update id="updateAdmin" parameterType="adminVO" >
+		/* com.lgu.admin.admin.mapper.AdminMapper.updateAdmin */
+		UPDATE TB_ADMIN
+		<set>
+			<if test="!@org.springframework.util.StringUtils@isEmpty(adminPw)">
+				ADMIN_PW = #{adminPw},
+				LATEST_PASSWORD_UPDATE_DATE = SYSDATE,
+				LOGIN_FAIL_COUNT = 0,
+				ADMIN_PW_HIST = #{adminPwHist},
+			</if>
+			MNGR_LEVEL = #{mngrLevel}
+			, ADMIN_NAME = #{adminName}
+			, ADMIN_MOBILE_NUM = #{adminMobileNum}
+			, USE_YN = #{useYn}
+		 </set>
+		 WHERE SEQ_ADMIN = ${adminSeq}
+	</update>
+	
+	<select id="selectAdminDetail" parameterType="adminVO" resultMap="adminMap">
+		/* com.lgu.admin.admin.mapper.AdminMapper.selectAdminDetail */
+		SELECT SEQ_ADMIN AS ADMIN_SEQ
+			   , ADMIN_ID
+			   , ADMIN_PW
+			   , MNGR_LEVEL
+			   , ADMIN_NAME
+			   , ADMIN_MOBILE_NUM
+		  	   , TO_CHAR(JOIN_DATE, 'YYYY-MM-DD') AS JOIN_DATE
+		  	   , USE_YN
+		  	   , ADMIN_PW_HIST
+		  FROM TB_ADMIN
+		 WHERE SEQ_ADMIN = ${adminSeq}
+	</select>
+	
+	
+	<select id="checkAdminId" parameterType="adminVO" resultType="int" >
+		SELECT COUNT(MNGR_ID)
+		  FROM TB_MNGR
+		 WHERE MNGR_ID = #{mngrId}
+	</select>
+	
+	<delete id="deleteAdmin" parameterType="adminVO" >
+		DELETE
+		  FROM TB_ADMIN
+		 WHERE SEQ_ADMIN IN
+		<foreach collection="adminSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

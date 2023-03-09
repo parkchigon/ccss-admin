@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+	
+	<resultMap type="userVO" id="userMap">
+		<result property="useYn"				column="USE_YN" />
+		<result property="loginFailCnt"			column="USE_YN" />
+		<result property="regDt"				column="USE_YN" />
+		<result property="regId"				column="USE_YN" />
+		<result property="updDt"				column="UPD_DT" />
+		<result property="updId"				column="UPD_DT" />
+		<result property="membId"				column="MEMB_ID" />
+		<result property="joinDt"				column="JOIN_DT" />
+		<result property="securityKey"			column="SECURITY_KEY" />
+		<result property="membNo"				column="MEMB_NO" />
+		<result property="latestLoginDt"		column="LATEST_LOGIN_DT" />
+		<result property="serverId"				column="SERVER_ID" />
+		<result property="deviceEsn"			column="DEVICE_ESN" />
+		<result property="usimModel"			column="DEVICE_ESN" />
+		<result property="usimSn"				column="USIM_SN" />
+		<result property="devicePushClientId"	column="DEVICE_PUSH_CLIENT_ID" />
+		<result property="deviceLoginDt"		column="DEVICE_LOGIN_DT" />
+		<result property="devicePushConnDt"		column="DEVICE_PUSH_CONN_DT" />
+		<result property="devicePushConStatus"	column="DEVICE_PUSH_CON_STATUS" />
+		<result property="vehicleModelId"		column="VEHICLE_MODEL_ID" />
+		<result property="connDeviceId"			column="CONN_DEVICE_ID" />
+		<result property="deviceModelId"		column="DEVICE_MODEL_ID" />
+		<result property="firmwareInfo"			column="FIRMWARE_INFO" />
+		<result property="jsonSetInfo"			column="JSON_SET_INFO" />
+		<result property="uiccid"				column="UICCID" />
+		<result property="deviceType"			column="DEVICE_TYPE" />
+		<result property="startDate"			column="START_DATE" />
+		<result property="endDate"				column="END_DATE" />
+		<result property="deviceCtn"			column="DEVICE_CTN" />
+		<result property="productNm"			column="PRODUCT_NM" />
+		<result property="productExplain"		column="PRODUCT_EXPLAIN" />
+		<result property="newRejoinYn"			column="NEW_REJOIN_YN" />
+		<result property="useStatus"			column="USE_STATUS" />
+	<!-- 	<result property="pushConnectionYn"		column="PUSH_CONNECTION_YN" /> -->
+		
+		<result property="membCtn"				column="MEMB_CTN" />
+		<result property="transToken"			column="TRANS_TOKEN" />
+		<result property="payResvYn"			column="PAY_RESV_YN" />
+		<result property="payResvDt"			column="PAY_RESV_DT" />
+		<result property="marketType"			column="MARKET_TYPE" />
+
+	</resultMap>
+	
+	
+	<resultMap type="commAgrVO" id="commAgrMap">
+		<result property="commAgrSeq" 		column="COMM_AGR_SEQ" />
+		<result property="deviceCtn" 		column="DEVICE_CTN" />
+		<result property="uiccid"			column="UICCID" />
+		<result property="termsNo"			column="TERMS_NO" />
+		<result property="termsAuthNo"		column="TERMS_AUTH_NO" />
+		<result property="agrYn"			column="AGR_YN" />
+		<result property="validStartDt"		column="VALID_START_DT" />
+		<result property="validEndDt"		column="VALID_END_DT" />
+		
+		<result property="itemSn"			column="ITEM_SN" />
+		<result property="usimModelNm"		column="USIM_MODEL_NM" />
+		<result property="naviSn"			column="NAVI_SN" />
+		
+		<result property="regDt"			column="REG_ID" />
+		<result property="regId"			column="REG_DT" />
+		<result property="updDt"			column="UPD_ID" />
+		<result property="updId"			column="UPD_DT" />
+	</resultMap>
+	
+	
+	<sql id="pagingHead">
+		SELECT PAGING.*  FROM (      
+			   SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			   FROM (   
+	</sql>
+	
+	<sql id="pagingBody">
+		 ) ORACLE_PAGING WHERE ROWNUM <![CDATA[<=]]> #{endCount}
+	) PAGING WHERE RNUM <![CDATA[>=]]> #{startCount}
+	</sql>
+	
+	
+	<sql id="dynamicWhereFeeType">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(feeType) and feeType !='ALL'">
+			AND C.PRODUCT_EXPLAIN = #{feeType}
+		</if>
+	</sql>
+	
+	<sql id="dynamicWhereTbMemb">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(newRejoinYn) and newRejoinYn!='ALL' ">
+			AND A.NEW_REJOIN_YN = #{newRejoinYn}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useStatus) and useStatus !='ALL' ">
+			AND A.USE_STATUS = #{useStatus}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useStatus) and membId !='' ">
+			AND A.MEMB_ID = #{membId}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(useStatus) and membNo !='' ">
+			AND A.MEMB_NO = #{membNo}	
+		</if>
+	</sql>
+	
+	<sql id="dynamicWhereTbConnDevice">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(deviceCtn) ">
+			AND D.DEVICE_CTN = #{deviceCtn}	
+		</if>
+	</sql>
+	
+	<sql id="dynamicWhereTbMembCommAgr">
+		<if test="!@org.springframework.util.StringUtils@isEmpty(deviceCtn) ">
+			AND DEVICE_CTN = #{deviceCtn}	
+		</if>
+		<if test="!@org.springframework.util.StringUtils@isEmpty(uiccid) ">
+			AND UICCID = #{uiccid}	
+		</if>
+	</sql>
+	
+	
+
+	
+	<select id="selectDetailUserInfo" parameterType="userVO" resultType="userVO">
+		SELECT 
+		<!-- C.*,  -->
+		C.MEMB_ID,
+		C.MEMB_NO,
+		C.JOIN_DT,
+		C.LATEST_LOGIN_DT,
+		C.PRODUCT_NM,
+		C.PRODUCT_EXPLAIN,
+		C.USE_STATUS,
+		C.USE_YN,
+		C.NEW_REJOIN_YN,
+		C.MARKET_TYPE,
+		C.LOGIN_FAIL_CNT,
+		C.PAY_RESV_YN,
+		C.PAY_RESV_DT,
+		C.SERVER_ID,
+		D.DEVICE_CTN, D.CONN_DEVICE_ID,D.DEVICE_PUSH_CON_STATUS
+		FROM (
+			SELECT
+				A.MEMB_ID,
+				A.MEMB_NO,
+				TO_CHAR(A.JOIN_DT,'YYYY-MM-DD') AS JOIN_DT,
+				TO_CHAR(A.LATEST_LOGIN_DT,'YYYY-MM-DD HH24:MI:SS') AS LATEST_LOGIN_DT,
+				A.PRODUCT_NM,
+				(
+					CASE WHEN  A.JOIN_DT <![CDATA[<]]> (SYSDATE -365) AND A.PAY_RESV_YN ='Y' THEN '01'  <!--정액 -->
+					WHEN  A.JOIN_DT <![CDATA[>=]]> (SYSDATE -365) AND A.PAY_RESV_YN ='N'  THEN '02' ELSE NULL END <!--쿠폰  -->
+				) as PRODUCT_EXPLAIN,
+				CASE A.USE_YN WHEN 'Y' THEN '사용' ELSE '미사용' END AS USE_YN,
+				NVL(CASE A.USE_STATUS WHEN '01' THEN '정상' WHEN '02' THEN '일시정지' WHEN '09' THEN '해지' ELSE '' END,'') AS USE_STATUS,
+				NVL(CASE A.NEW_REJOIN_YN WHEN 'Y' THEN '재가입' WHEN 'N' THEN '신규가입' END,'NONE') AS NEW_REJOIN_YN,
+				
+				A.MEMB_CTN,
+				A.TRANS_TOKEN,
+				NVL(A.LOGIN_FAIL_CNT,0) as LOGIN_FAIL_CNT,
+				A.PAY_RESV_YN,
+				TO_CHAR(A.PAY_RESV_DT,'YYYY-MM-DD HH24:MI:SS') AS PAY_RESV_DT,
+				A.MARKET_TYPE,
+				A.SERVER_ID
+			FROM  TB_MEMB A 
+				WHERE 1=1
+				AND A.MEMB_ID = #{membId}
+			) C LEFT OUTER JOIN TB_CONN_DEVICE D ON 
+			C.MEMB_ID = D.MEMB_ID
+	</select>
+	
+	
+	<select id="selectUserList" parameterType="userVO" resultType="userVO">
+		<include refid="pagingHead"/>
+			SELECT 
+			<!-- C.*,  -->
+			C.MEMB_ID,
+			C.MEMB_NO,
+			C.JOIN_DT,
+			C.LATEST_LOGIN_DT,
+			C.PRODUCT_NM,
+			C.PRODUCT_EXPLAIN,
+			C.USE_YN,
+			C.USE_STATUS,
+			C.NEW_REJOIN_YN,
+			D.DEVICE_CTN, D.CONN_DEVICE_ID,D.DEVICE_PUSH_CON_STATUS
+			FROM (
+				SELECT
+				A.MEMB_ID,
+				A.MEMB_NO,
+				TO_CHAR(A.JOIN_DT,'YYYY-MM-DD') AS JOIN_DT,
+				TO_CHAR(A.LATEST_LOGIN_DT,'YYYY-MM-DD HH24:MI:SS') AS LATEST_LOGIN_DT,
+				A.PRODUCT_NM,
+				(
+					CASE WHEN  A.JOIN_DT <![CDATA[<]]> (SYSDATE -365) AND A.PAY_RESV_YN ='Y' THEN '01'  <!--정액 -->
+					WHEN  A.JOIN_DT <![CDATA[>=]]> (SYSDATE -365) AND A.PAY_RESV_YN ='N'  THEN '02' ELSE NULL END <!--쿠폰  -->
+				) as PRODUCT_EXPLAIN,
+				CASE A.USE_YN WHEN 'Y' THEN '사용' ELSE '미사용' END AS USE_YN,
+				NVL(CASE A.USE_STATUS WHEN '01' THEN '정상' WHEN '02' THEN '일시정지' WHEN '09' THEN '해지' ELSE '' END,'') AS USE_STATUS,
+				NVL(CASE A.NEW_REJOIN_YN WHEN 'Y' THEN '재가입' WHEN 'N' THEN '신규가입' END,'NONE') AS NEW_REJOIN_YN 
+				FROM  TB_MEMB A 
+				WHERE 1=1
+				AND A.JOIN_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.JOIN_DT  <![CDATA[<=]]>  TO_DATE(#{endDate},'YYYY-MM-DD')
+				<include refid="dynamicWhereTbMemb"/> 
+				) C LEFT OUTER JOIN TB_CONN_DEVICE D ON 
+				C.MEMB_ID = D.MEMB_ID
+				WHERE 1=1
+				<include refid="dynamicWhereFeeType"/> 
+				<include refid="dynamicWhereTbConnDevice"/> 
+				AND D.DEVICE_CTN IS NOT NULL
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectUserListCnt" parameterType="userVO" resultType="int">
+		SELECT count(*) 
+		FROM (
+			SELECT /*+ index(d IX_CONN_DEVICE_02) */ C.*, D.DEVICE_CTN 
+				FROM (
+					SELECT  /*+ index(a IX_MEMB_03) */
+					A.MEMB_ID,
+					A.MEMB_NO,
+					TO_CHAR(A.JOIN_DT,'YYYY-MM-DD') AS JOIN_DT,
+					TO_CHAR(A.LATEST_LOGIN_DT,'YYYY-MM-DD HH24:MI:SS') AS LATEST_LOGIN_DT,
+					A.PRODUCT_NM,
+					(
+						CASE WHEN  A.JOIN_DT <![CDATA[<]]> (SYSDATE -365) AND A.PAY_RESV_YN ='Y' THEN '01'  <!-- 정액 --> 
+						WHEN  A.JOIN_DT <![CDATA[>=]]> (SYSDATE -365) AND A.PAY_RESV_YN ='N'  THEN '02' ELSE NULL END <!--쿠폰  -->
+					) as PRODUCT_EXPLAIN,
+					CASE A.USE_YN WHEN 'Y' THEN '사용' ELSE '미사용' END AS USE_YN,
+					CASE A.USE_STATUS WHEN '01' THEN '정상' WHEN '02' THEN '일시정지' WHEN '09' THEN '해지' ELSE '' END  AS USE_STATUS,
+					CASE A.NEW_REJOIN_YN WHEN 'Y' THEN '재가입' WHEN 'N' THEN '신규가입' END AS NEW_REJOIN_YN 
+					FROM  TB_MEMB A
+					WHERE 1=1
+					AND A.JOIN_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.JOIN_DT  <![CDATA[<=]]>  TO_DATE(#{endDate},'YYYY-MM-DD')
+					<include refid="dynamicWhereTbMemb"/> 
+					) C LEFT OUTER JOIN TB_CONN_DEVICE D ON 
+					C.MEMB_ID = D.MEMB_ID
+					WHERE 1=1
+					<include refid="dynamicWhereFeeType"/> 
+					<include refid="dynamicWhereTbConnDevice"/> 
+					AND D.DEVICE_CTN IS NOT NULL
+		)
+	</select>
+	
+	<select id="selectUserListExcel" parameterType="userVO" resultType="userVO">
+		SELECT ORACLE_PAGING.* , ROWNUM AS RNUM
+			FROM (   
+				SELECT /*+ index(d IX_CONN_DEVICE_02) */ 
+					<!-- C.*,  -->
+					C.MEMB_ID,
+					C.MEMB_NO,
+					C.JOIN_DT,
+					C.LATEST_LOGIN_DT,
+					C.PRODUCT_NM,
+					C.PRODUCT_EXPLAIN,
+					C.USE_YN,
+					C.USE_STATUS,
+					C.NEW_REJOIN_YN,
+					D.DEVICE_CTN, D.CONN_DEVICE_ID,D.DEVICE_PUSH_CON_STATUS
+				FROM (
+					SELECT /*+ index(a IX_MEMB_03) */
+					A.MEMB_ID,
+					A.MEMB_NO,
+					TO_CHAR(A.JOIN_DT,'YYYY-MM-DD') AS JOIN_DT,
+					TO_CHAR(A.LATEST_LOGIN_DT,'YYYY-MM-DD HH24:MI:SS') AS LATEST_LOGIN_DT,
+					A.PRODUCT_NM,
+					(
+						CASE WHEN  A.JOIN_DT <![CDATA[<]]> (SYSDATE -365) AND A.PAY_RESV_YN ='Y' THEN '01'<!-- 정액 --> 
+						WHEN  A.JOIN_DT <![CDATA[>=]]> (SYSDATE -365) AND A.PAY_RESV_YN ='N'  THEN '02' ELSE NULL END <!--쿠폰  -->
+					) as PRODUCT_EXPLAIN,
+					CASE A.USE_YN WHEN 'Y' THEN '사용' ELSE '미사용' END AS USE_YN,
+					NVL(CASE A.USE_STATUS WHEN '01' THEN '정상' WHEN '02' THEN '일시정지' WHEN '09' THEN '해지' ELSE '' END,'') AS USE_STATUS,
+					NVL(CASE A.NEW_REJOIN_YN WHEN 'Y' THEN '재가입' WHEN 'N' THEN '신규가입' END,'') AS NEW_REJOIN_YN 
+					FROM  TB_MEMB A 
+					WHERE 1=1
+					AND A.JOIN_DT <![CDATA[>=]]> TO_DATE(#{startDate},'YYYY-MM-DD') and A.JOIN_DT  <![CDATA[<=]]>  TO_DATE(#{endDate},'YYYY-MM-DD')
+					<include refid="dynamicWhereTbMemb"/> 
+					) C LEFT OUTER JOIN TB_CONN_DEVICE D ON 
+					C.MEMB_ID = D.MEMB_ID
+					WHERE 1=1
+					<include refid="dynamicWhereFeeType"/> 
+					<include refid="dynamicWhereTbConnDevice"/>
+					AND D.DEVICE_CTN IS NOT NULL
+			) ORACLE_PAGING
+	</select>
+	
+	
+
+	
+	<!--  Comm Agr  -->
+	<select id="selectcommAgrList" parameterType="commAgrVO" resultType="commAgrVO">
+		<include refid="pagingHead"/>
+			SELECT 
+				COMM_AGR_SEQ,
+				DEVICE_CTN,
+				UICCID,
+				TERMS_NO,
+				TERMS_AUTH_NO,
+				AGR_YN,
+				TO_CHAR(VALID_START_DT,'YYYY-MM-DD') AS VALID_START_DT,
+				TO_CHAR(VALID_END_DT,'YYYY-MM-DD') AS VALID_END_DT,
+				ITEM_SN,
+				USIM_MODEL_NM,
+				NAVI_SN,
+				REG_ID,
+				TO_CHAR(REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+			FROM TB_MEMB_COMM_AGR
+			WHERE 1=1
+			<include refid="dynamicWhereTbMembCommAgr"/> 
+			ORDER BY REG_DT DESC
+		<include refid="pagingBody"/>
+	</select>
+	
+	
+	<select id="selectcommAgrListCnt" parameterType="commAgrVO" resultType="int">
+		SELECT COUNT(COMM_AGR_SEQ)
+		  FROM TB_MEMB_COMM_AGR
+		  WHERE 1=1
+		<include refid="dynamicWhereTbMembCommAgr"/> 
+	</select>
+	
+	
+	<delete id="deleteCommAgr" parameterType="commAgrVO" >
+		DELETE
+		  FROM TB_MEMB_COMM_AGR
+		 WHERE COMM_AGR_SEQ IN
+		<foreach collection="commAgrSeqArray" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<insert id ="insertCommAgr" parameterType="commAgrVO" >
+		INSERT INTO TB_MEMB_COMM_AGR 
+		(
+			COMM_AGR_SEQ,
+			DEVICE_CTN,
+			UICCID,
+			TERMS_NO,
+			TERMS_AUTH_NO,
+			AGR_YN,
+			VALID_START_DT,
+			VALID_END_DT,
+			ITEM_SN,
+			USIM_MODEL_NM,
+			NAVI_SN,	
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT
+		) 
+		VALUES 
+		(
+			SEQ_MEMB_COMM_AGR_01.NEXTVAL,
+			#{deviceCtn},
+			#{uiccid},
+			#{termsNo},
+			#{termsAuthNo},
+			#{agrYn},
+			TO_DATE(#{validStartDt},'yyyymmdd'),
+			TO_DATE(#{validEndDt},'yyyymmdd'),
+			#{itemSn},
+			#{usimModelNm},
+			#{naviSn},
+			#{regId},
+			SYSDATE,
+			#{updId},
+			SYSDATE
+		) 
+	</insert>
+	
+	
+	<select id="selectcommAgrDetail" parameterType="commAgrVO" resultType="commAgrVO">
+			SELECT 
+				COMM_AGR_SEQ,
+				DEVICE_CTN,
+				UICCID,
+				TERMS_NO,
+				TERMS_AUTH_NO,
+				AGR_YN,
+				TO_CHAR(VALID_START_DT,'YYYY-MM-DD') AS VALID_START_DT,
+				TO_CHAR(VALID_END_DT,'YYYY-MM-DD') AS VALID_END_DT,
+				ITEM_SN,
+				USIM_MODEL_NM,
+				NAVI_SN,
+				REG_ID,
+				TO_CHAR(REG_DT,'YYYY-MM-DD HH24:MI:SS') AS REG_DT,
+				UPD_ID,
+				TO_CHAR(UPD_DT,'YYYY-MM-DD HH24:MI:SS') AS UPD_DT
+			FROM TB_MEMB_COMM_AGR
+			WHERE 1=1
+			AND  COMM_AGR_SEQ = #{commAgrSeq}
+			ORDER BY REG_DT DESC
+	</select>
+	
+	
+	<update id="updateCommAgr" parameterType="commAgrVO" >
+	UPDATE TB_MEMB_COMM_AGR
+		SET 
+			DEVICE_CTN			=  #{deviceCtn},
+			UICCID				=  #{uiccid},
+			TERMS_NO			=  #{termsNo},
+			TERMS_AUTH_NO		=  #{termsAuthNo},
+			AGR_YN				=  #{agrYn},
+			VALID_START_DT	 	= TO_DATE(#{validStartDt},'yyyymmdd'),
+			VALID_END_DT	 	= TO_DATE(#{validEndDt},'yyyymmdd'),
+			ITEM_SN				=  #{itemSn},
+			USIM_MODEL_NM		=  #{usimModelNm},
+			NAVI_SN				=  #{naviSn},
+			UPD_ID 				=  #{updId},
+			UPD_DT 				=  SYSDATE
+		WHERE COMM_AGR_SEQ = #{commAgrSeq}
+	</update>
+	
+	<select id="checkExistCommAgr" parameterType="commAgrVO" resultType="int">
+		SELECT COUNT(COMM_AGR_SEQ)
+		  FROM TB_MEMB_COMM_AGR
+		  WHERE 1=1 
+		  AND DEVICE_CTN =  #{deviceCtn}
+		  AND UICCID =  #{uiccid}
+		  AND AGR_YN ='Y'
+	</select>
+	
+</mapper>

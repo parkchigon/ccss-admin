@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>devonframe</groupId>
+    <artifactId>devon-framework</artifactId>
+    <version>1.6.1</version>
+  </parent>
+  <artifactId>devon-xplatform</artifactId>
+  <name>devon-xplatform</name>
+
+  <dependencies>
+
+		<!-- devonframe -->
+		<dependency>
+			<groupId>devonframe</groupId>
+			<artifactId>devon-web</artifactId>
+			<version>${devonframe.version}</version>
+		</dependency>
+
+		<!-- xplatform -->
+		<dependency>
+			<groupId>xplatform</groupId>
+			<artifactId>xplatform-xapi</artifactId>
+			<version>${xplatform.xapi.version}</version>
+		</dependency>
+		
+		<!-- javax -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+			<version>${servlet.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>${jsp.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+  </dependencies>
+
+</project>

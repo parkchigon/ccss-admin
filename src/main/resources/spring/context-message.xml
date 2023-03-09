@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- Message File을 이용한 메세지 관리 -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>classpath:/message/message-common</value>
+			</list>
+		</property>
+		<property name="cacheSeconds" value="60" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+
+	<bean id="messageSourceAccessor" class="org.springframework.context.support.MessageSourceAccessor">
+		<constructor-arg ref="messageSource" />
+	</bean>
+	
+	<bean id="message" class="com.lgu.ccss.common.utility.MessageAccessUtil">
+        <property name="messageSourceAccessor" ref="messageSourceAccessor"/>
+    </bean>
+    
+    <!-- Message DB을 이용한 메세지 관리 -->
+	<!-- <bean id="databaseMessageSource" class="devonframe.message.database.DatabaseMessageSource">
+		<property name="dataSource" ref="dataSource" />
+		<property name="defaultQuery" value="SELECT MESSAGE, LOCALE, CODE FROM SAM_MESSAGES"/>
+	</bean> -->
+	
+</beans>

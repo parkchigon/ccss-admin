@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- component scan (@Controller) -->
+	<context:component-scan base-package="com.lgu">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+	</context:component-scan>
+	
+	<!-- @MVC & binding convert -->
+	<!-- Annotation으로 Controller를 구현해서 사용하고자 할때 필요한 Class들을 자동으로 Bean으로 등록 -->
+	<mvc:annotation-driven conversion-service="conversionService" />
+	
+	<!-- convert bind -->
+	<!-- 맵핑 정보 중에서 스프링이 처리할 수 없는 요청은 서블릿 컨테이너가 제공하는 디폴트 서블릿에게 위임 -->	
+	<mvc:default-servlet-handler/>
+	
+	<!-- convert bind -->
+	<bean id="conversionService"
+		class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<list>
+				<bean class="com.lgu.ccss.common.utility.StringTrimConvert" />
+				<bean class="com.lgu.ccss.common.utility.StringToIntegerConvert" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- @Controller 실행 전후에 기록되는 Log를 출력 -->
+	<bean id="ctrLog" class="devonframe.log.trace.aspect.CtlTraceLogAspect">
+		<property name="limitedCount" value="1"/>
+		<property name="enabled" value="false"/>
+	</bean> 
+	
+	
+	<!-- component scan (Controller) -->
+	<!-- @Controller 어노테이션이 붙어 있는 클래스를 빈으로 등록 -->
+	<context:component-scan base-package="com.lgu" />
+	
+	<!-- 텍시트 메시지 처리 -->
+	<!-- <bean name="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		
+		<property name="fallbackToSystemLocale" value="false" />
+	    
+	    <property name="basenames">
+	        <list>
+	            <value>/WEB-INF/message/api</value>
+	        </list>
+	    </property>
+	    <property name="cacheSeconds" value="5"/>
+	    <property name="defaultEncoding">
+			<value>UTF-8</value>
+		</property>
+	</bean>	
+	<bean id="messageSourceAccessor" class="org.springframework.context.support.MessageSourceAccessor">
+		<constructor-arg ref="messageSource" />
+	</bean>	
+	<bean id="message" class="com.lgu.common.utility.StringUtil">
+		<property name="messageSourceAccessor" ref="messageSourceAccessor" />
+	</bean> -->
+	 
+	<mvc:interceptors>
+			
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
+			p:paramName="lang" />
+		
+		<mvc:interceptor>
+			<mvc:mapping path="/**/*.do"/>
+			<mvc:mapping path="/**/**/*.do"/>
+			<bean class="com.lgu.ccss.common.interceptor.RequestInterceptor" />
+		</mvc:interceptor>
+		<!--OSE  -->	    	
+        <mvc:interceptor>
+            <mvc:mapping path="/**/*.do" />
+            <mvc:exclude-mapping path="/login/*.do" />
+            <mvc:exclude-mapping path="/check/*.do" />
+            <bean class="com.lgu.ccss.common.interceptor.LoginCheckInterceptor" />
+        </mvc:interceptor>
+         
+	</mvc:interceptors>
+ 	
+ 	<bean id="urlBasedViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView" />
+        <property name="order" value="0" />
+    </bean>
+    
+	<!-- Tiles -->
+ 	<bean id="tilesviewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver" />
+	<bean id="tilesConfigurer"
+		class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>classpath:/tiles/*.xml</value>
+			</list>
+		</property>
+	</bean>
+     	
+	<!-- mapping url & view -->
+	<bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator" />
+
+	<!-- view resolver ordering -->
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver"	p:order="1" />	
+
+	<!-- ContentNegotiatingViewResolver: 뷰 리졸버를 결정해주는 리졸버 -->
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver" p:order="2" >
+		<!-- 1. 사용자의 요청정보로부터 사용자가 요청한 미디어 타입정보 추출 (URL 확장자 사용)-->
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="xml" value="application/xml" />				
+			</map>
+		</property>
+		<!-- 2. 뷰 리졸버 위임을 통한 후보 뷰 선정 -->		
+		<property name="viewResolvers">
+			<list>
+				<!-- 뷰 이름에 해당하는 실제 파일을 찾는 방법으로 뷰를 찾는다. 
+		               이때 뷰 이름 앞과 뒤에 공통적으로 사용할 문자열이 있다면 prefix와 suffix 옵션을 사용 -->
+				<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+					<property name="prefix" value="/WEB-INF/views/" />
+					<property name="suffix" value=".jsp" />
+				</bean>
+			</list>
+		</property>
+		<!-- 디폴트 뷰는 뷰 리졸버의 조회 결과에 상관없이 무조건 후보 뷰 목록에 추가 -->
+		<property name="defaultViews">
+			<list>
+				 <!--Json 처리할 뷰-->
+   					<bean id="jsonView"  class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
+				   <!--Xml 처리할 뷰-->
+				   <bean id="xmlView"  class="org.springframework.web.servlet.view.xml.MarshallingView">
+    			   <property name="marshaller">
+                       <bean class="org.springframework.oxm.xstream.XStreamMarshaller"/>
+				    </property>  
+				   </bean>
+			</list>
+		</property>
+	</bean>
+	
+   <!-- locale scope -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+	 
+	<!-- max 15mb -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+
+		<!-- one of the properties available; the maximum file size in bytes -->
+		<property name="maxUploadSize" value="15000000" />
+	</bean>
+
+	<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+		<property name="autodetectAnnotations" value="true" />
+	</bean>
+	<bean id="marshallingConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+    	<constructor-arg ref="xstreamMarshaller" />
+    	<property name="supportedMediaTypes" value="application/xml; charset=UTF-8" />
+	</bean>
+
+	<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+    	<property name="contentType" value="application/json;charset=UTF-8" />
+    </bean>
+    
+     <bean id="xmlView" class="org.springframework.web.servlet.view.xml.MarshallingView">
+		<property name="marshaller" ref="xstreamMarshaller" />
+		<property name="contentType" value="application/xml; charset=UTF-8" />
+	</bean>
+	
+	<bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes" value="application/json; charset=UTF-8" />
+	</bean>
+	
+	<bean id="stringConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+			 	<value>text/plain; charset=UTF-8</value>
+			 	<value>text/xml; charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="stringConverter"/>
+				<ref bean="jsonConverter" />
+				<ref bean="marshallingConverter"/>
+			</list>
+		</property>
+	</bean>
+    
+    <!-- Exception handler -->	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver" p:order="2" />
+	
+	<bean class="com.lgu.ccss.common.WebHandlerExceptionResolver" p:order="1" />
+
+
+
+	<!-- validator -->
+	<bean id="localValidator"
+	    class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />	
+	
+	
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+		<property name="messageConverters">
+			<list>
+				<ref bean="stringConverter" />
+				<ref bean="jsonConverter" />
+				<ref bean="marshallingConverter" />
+			</list>
+		</property>
+	</bean>
+	    
+
+	<!-- <bean id="maintenanceScheduler" class="com.lgu.admin.scheduler.task.MaintenanceTask" />
+	<task:scheduler id="maintenanceTask" pool-size="10" />
+	<task:executor id="maintenanceExec" pool-size="10" />
+	<task:annotation-driven executor="maintenanceExec" scheduler="maintenanceTask" /> -->
+	<!-- <bean class="org.springframework.mock.web.MockServletContext"/> -->
+	
+	<!-- 빈 설정에서 사용하고 있는 일부 문자열을 프로퍼티스 파일을 사용해서 설정 파일 밖으로 빼낼 수 있는 기능을 제공 -->
+	<!-- <context:property-placeholder location="classpath*:*.properties"/>  -->
+	    
+</beans>

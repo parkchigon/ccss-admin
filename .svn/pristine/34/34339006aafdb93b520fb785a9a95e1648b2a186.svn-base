@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean name="aesCrypto" class="devonframe.security.crypto.CryptoManager">
+		<property name="algorithm" ref="aesAlgorithm" />
+		<property name="key" value="lbXZHKhUoNPMxQAKde6yqA==" />
+	</bean>
+
+	<bean name="desCrypto" class="devonframe.security.crypto.CryptoManager">
+		<property name="algorithm" ref="desAlgorithm" />
+		<property name="key" value="mBqJcK73g16w6ahR1agHf2jWDizxXTiA" />
+	</bean>
+
+	<bean name="ariaCrypto" class="devonframe.security.crypto.CryptoManager">
+		<property name="algorithm" ref="ariaAlgorithm" />
+		<property name="key" value="ImtdrJ3KwJMGcTsMQ7dBiA=="/>
+	</bean>
+
+	<bean name="aesAlgorithm" class="devonframe.security.crypto.algorithm.AESAlgorithm" />
+
+	<bean name="desAlgorithm" class="devonframe.security.crypto.algorithm.TripleDESAlgorithm" />
+
+	<bean name="ariaAlgorithm" class="devonframe.security.crypto.algorithm.ARIAAlgorithm" />
+
+</beans>

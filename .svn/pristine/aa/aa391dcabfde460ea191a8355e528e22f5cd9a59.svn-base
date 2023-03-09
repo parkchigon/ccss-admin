@@ -1,0 +1,14 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<body>
+<table width="624" border="0" cellspacing="0" cellpadding="0" height="550">
+    <tr>
+        <td valign="top">
+           <span>$ID}</span> 회원님의 커넥티드카 임시비밀 번호는 ${TEMP_PWD} 입니다.<br>
+           <br>
+           개인정보 보호를 위해 로그인 하신 뒤 비밀번호를 꼭 변경해 주세요.
+        </td>
+    </tr>
+</table>
+</body>
+</html>
